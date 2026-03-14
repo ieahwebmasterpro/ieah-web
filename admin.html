@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - IEAH-APP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilos específicos para la página de login */
+        .login-body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--verde-principal), #0d3d1e);
+        }
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-card img { height: 80px; margin-bottom: 20px; }
+        .login-card h2 { color: var(--verde-principal); margin-bottom: 10px; font-family: 'Montserrat'; }
+        .login-card p { font-size: 0.9rem; color: #666; margin-bottom: 30px; }
+        .back-link { display: block; margin-top: 20px; color: var(--verde-principal); text-decoration: none; font-size: 0.8rem; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="login-body">
+
+    <div class="login-card">
+        <img src="logo.png" alt="Logo Colegio">
+        <h2>IEAH-APP</h2>
+        <p>Plataforma de Gestión Académica</p>
+        
+        <form action="#">
+            <div class="grupo-input" style="text-align: left;">
+                <label>Usuario / Documento</label>
+                <input type="text" placeholder="Ingresa tu usuario" required>
+            </div>
+            <div class="grupo-input" style="text-align: left;">
+                <label>Contraseña</label>
+                <input type="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="boton-primario" style="width: 100%; margin-top: 10px;">Ingresar</button>
+        </form>
+        
+        <a href="index.html" class="back-link">← Volver al sitio principal</a>
+    </div>
+
+</body>
+</html>
