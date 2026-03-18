@@ -82,9 +82,9 @@
         <nav class="header-bottom">
             <ul class="menu-enlaces">
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="index.html#nosotros">Misión y Visión</a></li>
-                <li><a href="index.html#docentes">Docentes</a></li>
-                <li><a href="index.html#contacto">Contacto</a></li>
+                <li><a href="#simbolos">simbolos</a></li>
+                <li><a href="#documentos">Documentos institucionales</a></li>
+                <li><a href="#contacto">Contacto</a></li>
             </ul>
         </nav>
     </header>
@@ -109,9 +109,10 @@
                 amor por el campo, la ciencia y la sana convivencia.</p>
         </section>
 
-        <section class="seccion-nosotros" style="background-color: var(--gris-suave);">
+        <section class="seccion-nosotros" style="background-color: var(--gris-suave);" id="simbolos">
             <h2
                 style="color: var(--verde-principal); text-align: center; margin-bottom: 40px; font-family: 'Montserrat';">
+                
                 Símbolos que nos Unen</h2>
 
             <div class="grid-simbolos">
@@ -140,6 +141,36 @@
                         esperanza te vemos crecer..."</p>
                     <button class="boton-primario" style="margin-top: 10px; padding: 5px 15px;">Ver letra
                         completa</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="documentos" id="documentos">
+            <h2>Documentos institucionales</h2>
+            <div class="contenedor-documentos">
+                <div class="foto-item"> <img src="img/1.jpg" alt="PEI">
+                    <a href="PEI.html"><div class="overlay">PEI</div></a>
+                </div>
+                <div class="foto-item"><img src="img/2.jpg" alt="SIEE">
+                   <a href="SIEE.html"><div class="overlay">SIEE</div></a>
+                </div>
+                <div class="foto-item"><img src="img/3.jpg" alt="Pacto convivencia">
+                    <a href="pacto.html"><div class="overlay">PACTO DE CONVIVENCIA</div></a>
+                </div>
+                <div class="foto-item"><img src="img/1.jpg" alt="doc 4">
+                    <a href="nosotros.html"><div class="overlay">doc 4</div></a>
+                </div>
+                <div class="foto-item"><img src="img/2.jpg" alt="doc 5">
+                    <div class="overlay">doc5</div>
+                </div>
+                <div class="foto-item"><img src="img/3.jpg" alt="doc 6">
+                    <div class="overlay">doc 6</div>
+                </div>
+                 <div class="foto-item"><img src="foto6.jpg" alt="doc 7">
+                    <div class="overlay">doc 7</div>
+                </div>
+                 <div class="foto-item"><img src="foto6.jpg" alt="doc 8">
+                    <div class="overlay">doc 8</div>
                 </div>
             </div>
         </section>
@@ -245,6 +276,40 @@
                         <h3 style="color: var(--verde-principal);">Tiempo libre</h3>
                         <p style="font-size: 0.9rem; color: #555;">Aprovecha el tiempo libre para explorar, observar, experimentar y jugar, desarrollando habilidades cognitivas,
                                lingüísticas, matemáticas y socioemocionales, fortaleciendo la curiosidad, creatividad y aprendizaje activo dentro del proyecto transversal..</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="contacto" id="contacto">
+            <h2>Contáctanos</h2>
+            <div class="contacto-contenedor">
+                <div class="contacto-formulario">
+                    <form action="https://formspree.io/f/TU_CORREO@email.com" method="POST">
+                        <div class="grupo-input">
+                            <label>Nombre</label>
+                            <input type="text" name="nombre" placeholder="Tu nombre" required>
+                        </div>
+                        <div class="grupo-input">
+                            <label>Correo</label>
+                            <input type="email" name="email" placeholder="Tu correo" required>
+                        </div>
+                        <div class="grupo-input">
+                            <label>Mensaje</label>
+                            <textarea name="mensaje" rows="5" placeholder="Tu mensaje" required></textarea>
+                        </div>
+                        <button type="submit" class="boton-primario">Enviar Mensaje</button>
+                    </form>
+                </div>
+                <div class="contacto-info">
+                    <div class="info-item"><strong>📍 Dirección:</strong> Vereda Alto Horizonte, Suaza, Huila.</div>
+                    <div class="info-item"><strong>⏰ Horario:</strong> Lunes a Viernes (8:00 AM – 3:00 PM)</div>
+                    <div class="mapa">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3986.9944640103734!2d-75.76341472594611!3d1.840670098150242!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e5c8e3c1a3b3e0b%3A0x67a3f3a8f1e5828e!2sInstituci%C3%B3n%20Educativa%20Alto%20Horizonte!5e0!3m2!1ses!2sco!4v1741915000000!5m2!1ses!2sco"
+                            width="100%" height="300" style="border:0; border-radius: 15px;" allowfullscreen=""
+                            loading="lazy">
+                        </iframe>
                     </div>
                 </div>
             </div>
