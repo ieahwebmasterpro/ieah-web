@@ -117,8 +117,11 @@ body {
 .contenedor-documentos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; max-width: 1200px; margin: 0 auto;}
 .foto-item { position: relative; overflow: hidden; border-radius: 10px; height: 250px; }
 .foto-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+.foto-item2 { position: relative; overflow: hidden; border-radius: 10px; height: 500px; }
+.foto-item2 img { width: 80%; height: 100%; object-fit: cover; transition: 0.5s; }
 .overlay { position: absolute; bottom: 0; background: rgba(27, 113, 57, 0.8); color: white; width: 100%; padding: 10px; transform: translateY(100%); transition: 0.3s; font-weight: bold;}
 .foto-item:hover .overlay { transform: translateY(0); }
+
 
 /* PASARELA DE DOCENTES */
 .docentes { padding: 60px 0; background-color: var(--blanco); overflow: hidden; }
