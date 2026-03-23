@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Buzón de Mensajes - IEAH</title>
+    <style>
+        :root {
+            --verde: #1a5c2e;
+        }
+
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: var(--verde);
+            border-bottom: 2px solid var(--verde);
+            padding-bottom: 10px;
+        }
+
+        .stats {
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        #contador {
+            color: var(--verde);
+            font-size: 1.3rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: var(--verde);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .btn-act {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .btn-act:hover {
+            background: #34495e;
+        }
+
+        .btn-del {
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 1.2rem;
+            border: none;
+            background: none;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // VIGILANTE DE SEGURIDAD
+        if (localStorage.getItem('sesionIniciada') !== 'true') {
+            alert("⚠️ Acceso denegado. Por favor inicia sesión.");
+            window.location.href = "admin.html"; // Lo manda al login
+        }
+
+        // FUNCIÓN PARA CERRAR SESIÓN (Quitar la llave)
+        function cerrarSesion() {
+            localStorage.removeItem('sesionIniciada');
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <div class="panel">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <a href="index.html"
+                style="text-decoration: none; color: #1a5c2e; font-weight: bold; display: flex; align-items: center;">
+                🏠 Volver al Inicio
+            </a>
+
+            <button onclick="cerrarSesion()"
+                style="background: #c0392b; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+                Cerrar Sesión Segura
+            </button>
+        </div>
+        <h2>Panel de Mensajes - IEAH</h2>
+
+        <div class="stats">
+            Mensajes recibidos: <span id="contador">0</span>
+        </div>
+
+        <button class="btn-act" onclick="cargarMensajes()">🔄 Actualizar Lista</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Remitente</th>
+                    <th>Correo</th>
+                    <th>Mensaje</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function cargarMensajes() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/ver-mensajes');
+                const mensajes = await response.json();
+
+                // Actualizar contador
+                document.getElementById('contador').innerText = mensajes.length;
+
+                const tabla = document.getElementById('cuerpoTabla');
+                tabla.innerHTML = "";
+
+                if (mensajes.length === 0) {
+                    tabla.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay mensajes en la base de datos.</td></tr>";
+                } else {
+                    mensajes.forEach(m => {
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${m.nombre}</td>
+                                <td>${m.correo}</td>
+                                <td>${m.contenido}</td>
+                                <td style="text-align:center;">
+                                    <button class="btn-del" onclick="eliminar(${m.id})">🗑️</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("No se pudo conectar con el servidor.");
+            }
+        }
+
+        async function eliminar(id) {
+            if (confirm("¿Eliminar este mensaje permanentemente?")) {
+                const response = await fetch(`http://127.0.0.1:8000/eliminar-mensaje/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    cargarMensajes(); // Recarga automáticamente la lista y el contador
+                }
+            }
+        }
+
+        // Carga inicial al abrir la página
+        window.onload = cargarMensajes;
+    </script>
+</body>
+
+</html>

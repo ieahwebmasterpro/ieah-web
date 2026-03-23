@@ -206,3 +206,73 @@ body {
 .info-item {
     margin-bottom: 10px;
 }
+
+/* Estilos para mejorar la sección de contacto */
+.seccion-contacto {
+    padding: 60px 20px;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+}
+
+.contenedor-formulario {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+.contenedor-formulario h2 {
+    color: #1a5c2e; /* Verde institucional */
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.grupo-input {
+    margin-bottom: 20px;
+}
+
+.grupo-input label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.grupo-input input, 
+.grupo-input textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    box-sizing: border-box; /* Evita que el input se salga del contenedor */
+}
+
+.grupo-input input:focus, 
+.grupo-input textarea:focus {
+    border-color: #1a5c2e;
+    outline: none;
+    box-shadow: 0 0 5px rgba(26, 92, 46, 0.2);
+}
+
+.boton-enviar {
+    background-color: #1a5c2e;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.boton-enviar:hover {
+    background-color: #0d3d1e;
+}

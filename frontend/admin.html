@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - IEAH-APP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --verde-principal: #1a5c2e;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+        }
+
+        .login-body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--verde-principal), #0d3d1e);
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-card img {
+            height: 80px;
+            margin-bottom: 20px;
+        }
+
+        .login-card h2 {
+            color: var(--verde-principal);
+            margin-bottom: 10px;
+            font-family: 'Montserrat';
+        }
+
+        .grupo-input {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .grupo-input label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .grupo-input input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .boton-primario {
+            background: var(--verde-principal);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        .boton-primario:hover {
+            background: #247a3d;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: var(--verde-principal);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body class="login-body">
+
+    <div class="login-card">
+        <img src="img/logo.png" alt="Logo Colegio">
+        <h2>IEAH-APP</h2>
+        <p>Plataforma de Gestión Académica</p>
+
+        <form id="loginForm">
+            <div class="grupo-input">
+                <label>Usuario / Documento</label>
+                <input type="text" id="username" placeholder="Ingresa tu usuario" required>
+            </div>
+            <div class="grupo-input">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="boton-primario">Ingresar</button>
+        </form>
+
+        <a href="index.html" class="back-link">← Volver al sitio principal</a>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Usamos FormData porque el backend espera OAuth2 (form-data)
+            const formData = new FormData();
+            formData.append('username', document.getElementById('username').value);
+            formData.append('password', document.getElementById('password').value);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/login', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // GUARDAMOS LA LLAVE DE ACCESO
+                    localStorage.setItem('sesionIniciada', 'true');
+                    alert("¡Bienvenido, " + data.user + "!");
+                    window.location.href = "buzon.html";
+                } else {
+                    alert("Error: " + (data.detail || "Credenciales incorrectas"));
+                }
+            } catch (error) {
+                alert("No se pudo conectar con el servidor backend.");
+            }
+        });
+    </script>
+</body>
+
+</html>
