@@ -134,7 +134,7 @@
     <script>
         async function cargarMensajes() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/ver-mensajes');
+                const response = await fetch('https://ieah-backend.onrender.com/ver-mensajes');
                 const mensajes = await response.json();
 
                 // Actualizar contador
@@ -167,7 +167,7 @@
 
         async function eliminar(id) {
             if (confirm("¿Eliminar este mensaje permanentemente?")) {
-                const response = await fetch(`http://127.0.0.1:8000/eliminar-mensaje/${id}`, { method: 'DELETE' });
+                const response = await fetch(`https://ieah-backend.onrender.com/eliminar-mensaje/${id}`, { method: 'DELETE' });
                 if (response.ok) {
                     cargarMensajes(); // Recarga automáticamente la lista y el contador
                 }
