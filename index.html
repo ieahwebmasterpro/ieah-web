@@ -21,19 +21,23 @@
             </div>
         </div>
         <nav class="header-bottom">
-            <ul class="menu-enlaces">
-                <li><a href="#">Inicio</a></li>
-                <li><a href="#nosotros">Nosotros</a></li>
-                <li><a href="#galeria">Galería</a></li>
-                <li><a href="#sedes">Nuestras Sedes</a></li>
-                <li><a href="#docentes">Docentes</a></li>
-                <li><a href="#noticias">Noticias</a></li>
-                <li><a href="#contacto">Contacto</a></li>
-                <li><a href="#ubicación">Ubicación</a></li>
-                <li><a href="#redes">Redes Sociales</a></li>
-                <li><a href="admin.html" class="enlace-admin">IEAH-APP</a></li>
-            </ul>
-        </nav>
+    <!-- Checkbox y Label para activar/desactivar el menú en móviles -->
+    <input type="checkbox" id="menu-check">
+    <label for="menu-check" class="btn-menu">☰ Menú</label>
+
+    <ul class="menu-enlaces">
+        <li><a href="#" onclick="document.getElementById('menu-check').checked = false;">Inicio</a></li>
+        <li><a href="#nosotros" onclick="document.getElementById('menu-check').checked = false;">Nosotros</a></li>
+        <li><a href="#galeria" onclick="document.getElementById('menu-check').checked = false;">Galería</a></li>
+        <li><a href="#sedes" onclick="document.getElementById('menu-check').checked = false;">Nuestras Sedes</a></li>
+        <li><a href="#docentes" onclick="document.getElementById('menu-check').checked = false;">Docentes</a></li>
+        <li><a href="#noticias" onclick="document.getElementById('menu-check').checked = false;">Noticias</a></li>
+        <li><a href="#contacto" onclick="document.getElementById('menu-check').checked = false;">Contacto</a></li>
+        <li><a href="#ubicación" onclick="document.getElementById('menu-check').checked = false;">Ubicación</a></li>
+        <li><a href="#redes" onclick="document.getElementById('menu-check').checked = false;">Redes Sociales</a></li>
+        <li><a href="admin.html" class="enlace-admin" onclick="document.getElementById('menu-check').checked = false;">IEAH-APP</a></li>
+    </ul>
+</nav>
     </header>
 
     <main>

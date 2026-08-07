@@ -59,7 +59,7 @@ body {
 
 .nombre-colegio {
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.3rem;
+    font-size: 2rem;
     font-weight: bold;
     color: var(--verde-principal);
     text-shadow: -1px -1px 0 var(--dorado-institucional), 1px -1px 0 var(--dorado-institucional), -1px 1px 0 var(--dorado-institucional), 1px 1px 0 var(--dorado-institucional);
@@ -71,6 +71,11 @@ body {
     display: flex;
     justify-content: flex-end;
     border-bottom: 3px solid var(--dorado-institucional);
+}
+
+#menu-check,
+.btn-menu {
+    display: none;
 }
 
 .menu-enlaces {
@@ -481,13 +486,34 @@ body {
     }
 
     .header-bottom {
-        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .btn-menu {
+        display: block;
+        color: var(--blanco);
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 8px 15px;
+        background-color: var(--dorado-institucional);
+        border-radius: 5px;
+        font-weight: bold;
+        user-select: none;
     }
 
     .menu-enlaces {
+        display: none;
         flex-direction: column;
         gap: 10px;
-        padding: 10px 0;
+        padding: 15px 0 5px 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    #menu-check:checked ~ .menu-enlaces {
+        display: flex;
     }
 
     .mision-vision-container {
