@@ -96,7 +96,7 @@
 <body class="login-body">
 
     <div class="login-card">
-        <img src="img/logo.png" alt="Logo Colegio">
+        <img src="../img/logo.png" alt="Logo Colegio">
         <h2>IEAH-APP</h2>
         <p>Plataforma de Gestión Académica</p>
 
@@ -112,7 +112,7 @@
             <button type="submit" class="boton-primario">Ingresar</button>
         </form>
 
-        <a href="index.html" class="back-link">← Volver al sitio principal</a>
+        <a href="../index.html" class="back-link">← Volver al sitio principal</a>
     </div>
 
     <script>
@@ -136,7 +136,7 @@
                     // GUARDAMOS LA LLAVE DE ACCESO
                     localStorage.setItem('sesionIniciada', 'true');
                     alert("¡Bienvenido, " + data.user + "!");
-                    window.location.href = "buzon.html";
+                    window.location.href = "panel.html";
                 } else {
                     alert("Error: " + (data.detail || "Credenciales incorrectas"));
                 }
