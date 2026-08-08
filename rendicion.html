@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nosotros - Institución Educativa Alto Horizonte</title>
+    <title>rendicion_cuentas</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
@@ -75,37 +75,66 @@
     <header class="header-fijo">
         <div class="header-top">
             <div class="logo-container">
-                <img src="img/logo.png" alt="Logo IE Alto Horizonte" class="logo-img">
-                <h1 class="nombre-colegio">Institución Educativa Alto Horizonte</h1>
+                <img src="../img/logo.png" alt="Logo IE Alto Horizonte" class="logo-img">
+                <h1 class="titulo-principal-paginas">Institución Educativa<strong class="siglas">Alto Horizonte</strong></h1>
+                </h1>
             </div>
         </div>
+        </div>
         <nav class="header-bottom">
+            <!-- Checkbox y Label para activar/desactivar el menú en móviles -->
+            <input type="checkbox" id="menu-check">
+            <label for="menu-check" class="btn-menu">☰ Menú</label>
+
             <ul class="menu-enlaces">
-                <li><a href="nosotros.html#documentos">Inicio</a></li>
-                <li><a href="#contacto">Contacto</a></li>
+                <li><a href="nosotros.html#documentos" onclick="document.getElementById('menu-check').checked = false;">página
+                        principal</a>
+                </li>
+                <li><a href="#inicio" onclick="document.getElementById('menu-check').checked = false;">inicio</a>
+                </li>
+                
+                <li><a href="#contacto" onclick="document.getElementById('menu-check').checked = false;">Contacto</a>
+                </li>
+                <li><a href="#ubicación" onclick="document.getElementById('menu-check').checked = false;">Ubicación</a>
+                </li>
+                <li><a href="#redes" onclick="document.getElementById('menu-check').checked = false;">Redes Sociales</a>
+                </li>
+                <li><a href="admin.html" class="enlace-admin"
+                        onclick="document.getElementById('menu-check').checked = false;">IEAH-APP</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
 
-        <section
-            style="background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://images.unsplash.com/photo-1513258496099-48168024adb0?q=80&w=2070'); background-size: cover; padding: 80px 5%; text-align: center;">
+        <section class="seccion-nosotros">
+            <div class="encabezado-institucional">
+                <!-- Escudo del Colegio (Izquierda) -->
+                <div class="lado-escudo">
+                    <img src="img/escudo.png" alt="Escudo I.E. Alto Horizonte" class="escudo-img">
+                </div>
 
-            <p style="font-size: 25 rem; max-width: 900px; margin: 10px auto;">
-                GOBERNACIÓN DEL HUILA <br>
-                SECRETARIA DE EDUCACIÓN DEPARTAMENTAL DEL HUILA <br>
-                INSTITUCIÓN EDUCATIVA ALTO HORIZONTE <br>
-                Reglamentado por el Decreto 0347 del 13 de diciembre de 2019 de Educación Media <br>
-                Aprobado por Resolución 1888 de 21 de marzo de 2023 <br>
-                Nit. 900058894-2 DANE: 241770000642 <br>
-                SUAZA HUILA
-            </p>
-            <h1
-                style="font-family: 'Montserrat', sans-serif; font-size: 2.8rem; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9); color: rgba(27, 113, 57, 0.9);">
-                Rendicion de cuentas</h1>
-        </section>
-        <center>
+                <!-- Texto Central Centrado -->
+                <div class="texto-central">
+                    <h2 id="inicio">GOBERNACIÓN DEL HUILA</h2>
+                    <h3>SECRETARÍA DE EDUCACIÓN DEPARTAMENTAL DEL HUILA</h3>
+                    <h1>INSTITUCIÓN EDUCATIVA ALTO HORIZONTE</h1>
+                    <p>Reglamentado por el Decreto 0347 del 13 de diciembre de 2019 de Educación Media</p>
+                    <p>Aprobado por Resolución 1888 de 21 de marzo de 2023</p>
+                    <p class="nit-dane">Nit. 900058894-2 &nbsp;|&nbsp; DANE: 241770000642</p>
+                    <p class="ubicacion">SUAZA - HUILA</p>
+                </div>
+
+                <!-- Escudo del Huila (Derecha) -->
+                <div class="lado-escudo">
+                    <img src="img/Escudo_del_Huila.svg.webp" alt="Escudo Gobernación del Huila" class="escudo-img">
+                </div>
+            </div><br>
+
+
+            <h1 class="titulo-documentos">Rendicion de cuentas<strong class="siglas">(--)</strong></h1>
+            
+           <center>
             <div class="foto-item2"><img src="img/rendicion_cuentas/1.png" alt="doc 5">
         </center><br>
         <center>
@@ -138,78 +167,92 @@
         <center>
             <div class="foto-item2"><img src="img/rendicion_cuentas/11.png" alt="doc 5">
         </center><br>
-        <section class="contacto" id="contacto">
-            <h2>Contáctanos</h2>
-            <div class="contacto-contenedor">
-                <div class="contacto-formulario">
-                    <form action="https://formspree.io/f/TU_CORREO@email.com" method="POST">
-                        <div class="grupo-input">
-                            <label>Nombre</label>
-                            <input type="text" name="nombre" placeholder="Tu nombre" required>
-                        </div>
-                        <div class="grupo-input">
-                            <label>Correo</label>
-                            <input type="email" name="email" placeholder="Tu correo" required>
-                        </div>
-                        <div class="grupo-input">
-                            <label>Mensaje</label>
-                            <textarea name="mensaje" rows="5" placeholder="Tu mensaje" required></textarea>
-                        </div>
-                        <button type="submit" class="boton-primario">Enviar Mensaje</button>
-                    </form>
+        </section>
+
+
+
+        <section class="seccion-contacto">
+            <div class="contenedor-formulario">
+                <h2 id="contacto" class="titulo-contacto">Contáctanos</h2>
+                <form id="formContacto">
+                    <div class="grupo-input">
+                        <label for="nombre">Nombre Completo</label>
+                        <input type="text" id="nombre" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    <div class="grupo-input">
+                        <label for="correo">Correo Electrónico</label>
+                        <input type="email" id="correo" placeholder="ejemplo@correo.com" required>
+                    </div>
+                    <div class="grupo-input">
+                        <label for="mensaje">Tu Mensaje</label>
+                        <textarea id="mensaje" rows="5" placeholder="Escribe aquí tu duda o sugerencia..."
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="boton-enviar">Enviar Mensaje</button>
+                </form>
+            </div>
+        </section>
+        <script>
+            document.getElementById('formContacto').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const datos = {
+                    nombre: document.getElementById('nombre').value,
+                    correo: document.getElementById('correo').value,
+                    contenido: document.getElementById('mensaje').value
+                };
+
+                try {
+                    const response = await fetch('https://ieah-backend.onrender.com/contacto', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(datos)
+                    });
+
+                    if (response.ok) {
+                        alert("✅ ¡Éxito! Tu mensaje ha sido enviado a la institución.");
+                        document.getElementById('formContacto').reset(); // Limpia el formulario
+                    } else {
+                        alert("❌ Hubo un error al enviar el mensaje. Intenta más tarde.");
+                    }
+                } catch (error) {
+                    alert("📡 No se pudo conectar con el servidor. Verifica que el backend esté encendido.");
+                }
+            });
+        </script>
+        </div>
+        <div class="contacto-info">
+            <h2 class="titulo-ubicacion" id="ubicación">Nuestra Ubicación</h2>
+            <div class="mapa">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3986.9944640103734!2d-75.76341472594611!3d1.840670098150242!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e5c8e3c1a3b3e0b%3A0x67a3f3a8f1e5828e!2sInstituci%C3%B3n%20Educativa%20Alto%20Horizonte!5e0!3m2!1ses!2sco!4v1741915000000!5m2!1ses!2sco"
+                    width="100%" height="300" style="border:0; border-radius: 15px;" allowfullscreen="" loading="lazy">
+                </iframe>
+                <div class="info-item"><strong>📍 Dirección:</strong> Vereda Alto Horizonte, Suaza, Huila.</div>
+                <div class="info-item"><strong>⏰ Horario:</strong> Lunes a Viernes (7:00 AM – 4:00 PM)</div>
+            </div>
+        </div>
+        </div>
+        </section>
+
+        <footer class="footer-principal">
+            <div class="footer-contenedor">
+                <div class="footer-col">
+                    <img src="img/logo.png" alt="Logo" class="footer-logo">
+                    <p>Formando para la vida desde el corazón del Huila.</p>
                 </div>
-                <div class="contacto-info">
-                    <div class="info-item"><strong>📍 Dirección:</strong> Vereda Alto Horizonte, Suaza, Huila.</div>
-                    <div class="info-item"><strong>⏰ Horario:</strong> Lunes a Viernes (8:00 AM – 3:00 PM)</div>
-                    <div class="mapa">
-                        <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3986.9944640103734!2d-75.76341472594611!3d1.840670098150242!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e5c8e3c1a3b3e0b%3A0x67a3f3a8f1e5828e!2sInstituci%C3%B3n%20Educativa%20Alto%20Horizonte!5e0!3m2!1ses!2sco!4v1741915000000!5m2!1ses!2sco"
-                            width="100%" height="300" style="border:0; border-radius: 15px;" allowfullscreen=""
-                            loading="lazy">
-                        </iframe>
+                <div class="footer-col">
+                    <h3>Nuestras Redes Sociales</h3>
+                    <div class="redes-sociales">
+                        <a href="#" class="red-icon">Facebook</a><a href="#" class="red-icon">WhatsApp</a>
                     </div>
                 </div>
             </div>
-        </section>
-
-        <section class="seccion-nosotros" style="background-color: var(--verde-principal); color: white;">
-            <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: center;">
-                <div style="flex: 1; min-width: 300px;">
-                    <h2 style="color: var(--amarillo-brillante); margin-bottom: 20px;">Filosofía de Vida</h2>
-                    <p>En la Institución Educativa Alto Horizonte, creemos que la educación no solo se trata de libros,
-                        sino de la conexión con la tierra y la comunidad. Formamos seres humanos respetuosos,
-                        innovadores y orgullosos de sus raíces rurales.</p>
-                </div>
-                <div
-                    style="flex: 1; min-width: 300px; border-left: 2px solid var(--dorado-institucional); padding-left: 20px;">
-                    <h3 style="color: var(--amarillo-brillante);">Valores Clave</h3>
-                    <ul style="list-style: none; margin-top: 15px;">
-                        <li>✓ Integridad y Honestidad</li>
-                        <li>✓ Liderazgo Comunitario</li>
-                        <li>✓ Respeto por el Medio Ambiente</li>
-                        <li>✓ Solidaridad Rural</li>
-                    </ul>
-                </div>
+            <div class="footer-copy">
+                <p>I.E. Alto Horizonte. <br>© CEMLED CORP <br> 2026 <br>Todos los derechos reservados.</p>
             </div>
-        </section>
-    </main>
-
-    <footer class="footer-principal">
-        <div class="footer-contenedor">
-            <div class="footer-col">
-                <img src="img/logo.png" alt="Logo" class="footer-logo">
-                <p>Formando para la vida desde el corazón del Huila.</p>
-            </div>
-            <div class="footer-col">
-                <h3>Nuestra Red</h3>
-                <div class="redes-sociales"><a href="#" class="red-icon">Facebook</a><a href="#"
-                        class="red-icon">WhatsApp</a></div>
-            </div>
-        </div>
-        <div class="footer-copy">
-            <p>© 2026 I.E. Alto Horizonte. Todos los derechos reservados.</p>
-        </div>
-    </footer>
+            <div id="redes"></div>
+        </footer>
 
 </body>
 

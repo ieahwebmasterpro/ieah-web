@@ -1,4 +1,6 @@
-/* 1. VARIABLES INSTITUCIONALES */
+/* ==========================================
+   1. VARIABLES Y CONFIGURACIÓN GLOBAL
+   ========================================== */
 :root {
     --verde-principal: #1B7139;
     --dorado-institucional: #B18C4D;
@@ -8,7 +10,6 @@
     --texto-oscuro: #222222;
 }
 
-/* 2. AJUSTES GLOBALES */
 html {
     scroll-behavior: smooth;
     scroll-padding-top: 140px;
@@ -28,7 +29,30 @@ body {
 }
 
 
-/* 3. ENCABEZADO FIJO */
+/* ==========================================
+   2. COMPONENTES Y BOTONES REUTILIZABLES
+   ========================================== */
+.boton-primario {
+    background-color: var(--dorado-institucional);
+    color: var(--blanco);
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.boton-primario:hover {
+    background-color: var(--verde-principal);
+}
+
+
+/* ==========================================
+   3. CABECERA Y NAVEGACIÓN (HEADER & NAV)
+   ========================================== */
 .header-fijo {
     position: sticky;
     top: 0;
@@ -106,7 +130,12 @@ body {
     color: var(--blanco) !important;
 }
 
-/* 4. SECCIONES */
+
+/* ==========================================
+   4. SECCIONES DEL INICIO (INDEX.HTML)
+   ========================================== */
+
+/* --- Hero --- */
 .hero {
     height: 80vh;
     display: flex;
@@ -124,6 +153,7 @@ body {
     padding: 0 20px;
 }
 
+/* --- Misión y Visión --- */
 .mision-vision {
     padding: 80px 5%;
     background-color: var(--gris-suave);
@@ -153,10 +183,7 @@ body {
     border-top: 5px solid var(--verde-principal);
 }
 
-
-/* SECCION NUESTRA INSTITUCION EN IMAGENES */
-
-
+/* --- Galería, Sedes y Documentos --- */
 .galeria {
     padding: 80px 5%;
     text-align: center;
@@ -239,7 +266,8 @@ body {
     text-transform: uppercase;
     margin-bottom: 12px;
 }
-/* PASARELA DE DOCENTES */
+
+/* --- Pasarela de Docentes --- */
 .docentes {
     padding: 60px 0;
     background-color: var(--blanco);
@@ -313,7 +341,6 @@ body {
     color: var(--verde-principal);
     text-transform: uppercase;
     margin-bottom: 12px;
-
 }
 
 .cargo {
@@ -327,10 +354,9 @@ body {
     text-transform: uppercase;
     margin-top: 15px;
     font-size: 13.5px;
-    
 }
 
-/* NOTICIAS, CONTACTO Y FOOTER */
+/* --- Noticias --- */
 .noticias {
     padding: 80px 5%;
     text-align: center;
@@ -356,6 +382,7 @@ body {
     text-align: left;
 }
 
+/* --- Contacto y Ubicación --- */
 .contacto {
     padding: 80px 5%;
 }
@@ -367,16 +394,18 @@ body {
     margin-bottom: 12px;
 }
 
-.contacto-info{
+.contacto-info {
     margin-bottom: 80px;
 }
-.titulo-ubicacion { 
+
+.titulo-ubicacion {
     font-size: 2rem;
     color: var(--verde-principal);
     text-transform: uppercase;
     margin-bottom: 12px;
     text-align: center;
 }
+
 .contacto-contenedor {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -391,18 +420,244 @@ body {
     border-radius: 15px;
 }
 
+.seccion-contacto {
+    padding: 60px 20px;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+}
+
+.contenedor-formulario {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+.contenedor-formulario h2 {
+    color: #1a5c2e;
+    /* Verde institucional */
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+}
+
 .grupo-input {
     margin-bottom: 20px;
+}
+
+.grupo-input label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--verde-principal);
 }
 
 .grupo-input input,
 .grupo-input textarea {
     width: 100%;
     padding: 12px;
-    border-radius: 8px;
     border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+    /* Evita que el input se salga del contenedor */
 }
 
+.grupo-input input:focus,
+.grupo-input textarea:focus {
+    border-color: #1a5c2e;
+    outline: none;
+    box-shadow: 0 0 5px rgba(26, 92, 46, 0.2);
+}
+
+.boton-enviar {
+    background-color: #1a5c2e;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.boton-enviar:hover {
+    background-color: #0d3d1e;
+}
+
+.info-item {
+    margin-bottom: 10px;
+}
+
+
+/* ==========================================
+   5. ESTILOS DE PÁGINAS ADICIONALES (NOSOTROS, DETALLES, ETC.)
+   ========================================== */
+/* Agrega en esta sección las clases exclusivas de las páginas a las que dirija el botón "Saber más" */
+
+.titulos-nosotros {
+    font-size: 2rem;
+    color: var(--verde-principal);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.subtitulo-identidad {
+    font-weight: 900;
+    color: black;
+    font-size: 1.5rem;
+}
+
+.prueba {
+    color: var(--dorado-institucional);
+    font-weight: 900;
+    font-size: 3rem;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.contenedor-identidad {
+    margin-top: 20px;
+}
+
+.texto-reseña {
+    text-align: justify;
+}
+
+/* ==========================================
+   ESTILO PAGINA PEI)
+   ========================================== */
+/* Agrega en esta sección las clases exclusivas de las páginas a las que dirija el botón "Saber más" */
+.titulo-documentos {
+    color: var(--verde-principal);
+    border-left: 5px solid var(--dorado-institucional);
+    padding-left: 85px;
+    margin-bottom: 20px;
+    font-size: 2rem;
+
+}
+
+.titulo-principal-paginas {
+    color: var(--verde-principal);
+    padding-left: 85px;
+    margin-bottom: 20px;
+    font-size: 2rem;
+
+}
+
+.siglas {
+    color: var(--dorado-institucional);
+    margin-left: 10px;
+}
+
+/* ==========================================
+   ESTILO PAGINAS PROYECTOS TRANSVERSALES )
+   ========================================== */
+.texto-proyectos {
+    text-align: justify;
+}
+
+/* ==========================================
+   ENCABEZADO INSTITUCIONAL CON ESCUDOS
+   ========================================== */
+.encabezado-institucional {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 5%;
+    background-color: var(--blanco);
+    border-bottom: 2px solid var(--dorado-institucional);
+    gap: 20px;
+}
+
+.lado-escudo {
+    flex: 0 0 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.escudo-img {
+    width: 100%;
+    max-width: 110px;
+    height: auto;
+    object-fit: contain;
+}
+
+.texto-central {
+    flex: 1;
+    text-align: center;
+    color: var(--texto-oscuro);
+}
+
+.texto-central h2 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 2px;
+}
+
+.texto-central h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.texto-central h1 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--verde-principal);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.texto-central p {
+    font-size: 0.8rem;
+    line-height: 1.3;
+    color: #333;
+}
+
+.texto-central .nit-dane {
+    font-weight: 600;
+    margin-top: 3px;
+}
+
+.texto-central .ubicacion {
+    font-weight: 700;
+    color: var(--dorado-institucional);
+    margin-top: 3px;
+    text-transform: uppercase;
+}
+
+/* Ajuste responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+    .encabezado-institucional {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .lado-escudo {
+        flex: 0 0 auto;
+    }
+
+    .escudo-img {
+        max-width: 80px;
+    }
+}
+
+
+/* ==========================================
+   6. PIE DE PÁGINA (FOOTER)
+   ========================================== */
 .footer-principal {
     background-color: var(--verde-principal);
     color: white;
@@ -462,23 +717,10 @@ body {
     font-size: 0.8rem;
 }
 
-.boton-primario {
-    background-color: var(--dorado-institucional);
-    color: var(--blanco);
-    padding: 12px 30px;
-    border: none;
-    border-radius: 5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-    display: inline-block;
-}
 
-.boton-primario:hover {
-    background-color: var(--verde-principal);
-}
-
-/* RESPONSIVIDAD */
+/* ==========================================
+   7. ADAPTACIÓN MÓVIL (MEDIA QUERIES)
+   ========================================== */
 @media (max-width: 768px) {
     .header-top {
         flex-direction: column;
@@ -491,8 +733,9 @@ body {
         padding: 10px;
     }
 
+    /* Garantizar que el botón siempre permanezca visible */
     .btn-menu {
-        display: block;
+        display: block !important;
         color: var(--blanco);
         font-size: 1.2rem;
         cursor: pointer;
@@ -501,6 +744,11 @@ body {
         border-radius: 5px;
         font-weight: bold;
         user-select: none;
+    }
+
+    /* Ocultar la casilla del checkbox */
+    #menu-check {
+        display: none !important;
     }
 
     .menu-enlaces {
@@ -512,7 +760,8 @@ body {
         text-align: center;
     }
 
-    #menu-check:checked ~ .menu-enlaces {
+    /* Mostrar menú únicamente cuando el checkbox está activo */
+    #menu-check:checked~.menu-enlaces {
         display: flex;
     }
 
@@ -523,88 +772,4 @@ body {
     .tarjeta-docente {
         flex: 0 0 250px;
     }
-}
-
-/* NUEVOS ESTILOS PARA FORMULARIO (Agregados al final para no dañar nada) */
-.grupo-input label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: var(--verde-principal);
-}
-
-.info-item {
-    margin-bottom: 10px;
-}
-
-/* Estilos para mejorar la sección de contacto */
-.seccion-contacto {
-    padding: 60px 20px;
-    background-color: #f9f9f9;
-    display: flex;
-    justify-content: center;
-}
-
-.contenedor-formulario {
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 600px;
-}
-
-.contenedor-formulario h2 {
-    color: #1a5c2e;
-    /* Verde institucional */
-    margin-bottom: 20px;
-    text-align: center;
-    font-family: 'Montserrat', sans-serif;
-}
-
-.grupo-input {
-    margin-bottom: 20px;
-}
-
-.grupo-input label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #333;
-}
-
-.grupo-input input,
-.grupo-input textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s;
-    box-sizing: border-box;
-    /* Evita que el input se salga del contenedor */
-}
-
-.grupo-input input:focus,
-.grupo-input textarea:focus {
-    border-color: #1a5c2e;
-    outline: none;
-    box-shadow: 0 0 5px rgba(26, 92, 46, 0.2);
-}
-
-.boton-enviar {
-    background-color: #1a5c2e;
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: bold;
-    width: 100%;
-    transition: background 0.3s;
-}
-
-.boton-enviar:hover {
-    background-color: #0d3d1e;
 }
