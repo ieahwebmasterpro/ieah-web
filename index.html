@@ -14,41 +14,67 @@
 <body>
 
     <header class="header-fijo">
-        <div class="header-top">
-            <div class="logo-container">
-                <img src="img/logo.png" alt="Logo IE Alto Horizonte" class="logo-img">
-                <h1 class="titulo-principal-paginas">Institución Educativa<strong class="siglas">Alto Horizonte</strong>
-                </h1>
-                </h1>
-            </div>
+    <div class="header-top">
+        <div class="logo-container">
+            <img src="img/logo.png" alt="Logo IE Alto Horizonte" class="logo-img">
+            <h1 class="titulo-principal-paginas">Institución Educativa <strong class="siglas">Alto Horizonte</strong></h1>
         </div>
-        <nav class="header-bottom">
-            <!-- Checkbox y Label para activar/desactivar el menú en móviles -->
-            <input type="checkbox" id="menu-check">
-            <label for="menu-check" class="btn-menu">☰ Menú</label>
+    </div>
+    
+    <nav class="header-bottom">
+        <input type="checkbox" id="menu-check">
+        <label for="menu-check" class="btn-menu">☰ Menú</label>
 
-            <ul class="menu-enlaces">
-                <li><a href="#" onclick="document.getElementById('menu-check').checked = false;">Inicio</a></li>
-                <li><a href="#nosotros" onclick="document.getElementById('menu-check').checked = false;">Nosotros</a>
-                </li>
-                <li><a href="#galeria" onclick="document.getElementById('menu-check').checked = false;">Galería</a></li>
-                <li><a href="#sedes" onclick="document.getElementById('menu-check').checked = false;">Nuestras Sedes</a>
-                </li>
-                <li><a href="#docentes" onclick="document.getElementById('menu-check').checked = false;">Docentes</a>
-                </li>
-                <li><a href="#noticias" onclick="document.getElementById('menu-check').checked = false;">Noticias</a>
-                </li>
-                <li><a href="#contacto" onclick="document.getElementById('menu-check').checked = false;">Contacto</a>
-                </li>
-                <li><a href="#ubicación" onclick="document.getElementById('menu-check').checked = false;">Ubicación</a>
-                </li>
-                <li><a href="#redes" onclick="document.getElementById('menu-check').checked = false;">Redes Sociales</a>
-                </li>
-                <li><a href="administracion/admin.html" class="enlace-admin"
-                        onclick="document.getElementById('menu-check').checked = false;">IEAH-APP</a></li>
-            </ul>
-        </nav>
-    </header>
+        <ul class="menu-enlaces">
+            <li><a href="index.html" onclick="document.getElementById('menu-check').checked = false;">Inicio</a></li>
+            
+            <!-- SUBMENÚ 1: INSTITUCIÓN -->
+            <li class="dropdown">
+                <a href="#nosotros" class="drop-btn">Institución ▾</a>
+                <ul class="submenu">
+                    <li><a href="index.html#nosotros" onclick="document.getElementById('menu-check').checked = false;">Nosotros</a></li>
+                    <li><a href="/administracion/saber-mas.html#identidad" onclick="document.getElementById('menu-check').checked = false;">Identidad</a></li>
+                    <li><a href="/administracion/saber-mas.html#simbolos" onclick="document.getElementById('menu-check').checked = false;">Símbolos Patrios</a></li>
+                    <li><a href="/administracion/saber-mas.html#documentos" onclick="document.getElementById('menu-check').checked = false;">Documentos Institucionales</a></li>
+                </ul>
+            </li>
+
+            <!-- SUBMENÚ 2: COMUNIDAD Y SEDES -->
+            <li class="dropdown">
+                <a href="#sedes" class="drop-btn">Comunidad & Sedes ▾</a>
+                <ul class="submenu">
+                    <li><a href="/index.html#sedes" onclick="document.getElementById('menu-check').checked = false;">Nuestras Sedes</a></li>
+                    <li><a href="/index.html#docentes" onclick="document.getElementById('menu-check').checked = false;">Cuerpo Docente</a></li>
+                    <li><a href="/administracion/saber-mas.html#proyectos" onclick="document.getElementById('menu-check').checked = false;">Proyectos Transversales</a></li>
+                </ul>
+            </li>
+
+            <!-- SUBMENÚ 3: ACTUALIDAD -->
+            <li class="dropdown">
+                <a href="#noticias" class="drop-btn">Actualidad ▾</a>
+                <ul class="submenu">
+                    <li><a href="/index.html#noticias" onclick="document.getElementById('menu-check').checked = false;">Noticias</a></li>
+                    <li><a href="/index.html#galeria" onclick="document.getElementById('menu-check').checked = false;">Galería de Fotos</a></li>
+                </ul>
+            </li>
+
+            <!-- SUBMENÚ 4: CONTACTO -->
+            <li class="dropdown">
+                <a href="#contacto" class="drop-btn">Contacto ▾</a>
+                <ul class="submenu">
+                    <li><a href="/index.html#contacto" onclick="document.getElementById('menu-check').checked = false;">Información Contacto</a></li>
+                    <li><a href="/index.html#ubicación" onclick="document.getElementById('menu-check').checked = false;">Ubicación</a></li>
+                    <li><a href="/index.html#redes" onclick="document.getElementById('menu-check').checked = false;">Redes Sociales</a></li>
+                </ul>
+            </li>
+
+            <!-- BOTÓN DESTACADO IEAH-APP -->
+            <li>
+                <a href="/administracion/admin.html" class="enlace-admin" onclick="document.getElementById('menu-check').checked = false;">IEAH-APP</a>
+            </li>
+        </ul>
+    </nav>
+</header>
 
     <main>
         <section class="hero-poster-sec">

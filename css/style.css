@@ -836,3 +836,71 @@ body {
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4);
 }
+
+/* --- SUBMENÚS DESPLEGABLES --- */
+.menu-enlaces .dropdown {
+    position: relative;
+}
+
+/* Oculta los submenús inicialmente */
+.menu-enlaces .submenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #ffffff;
+    min-width: 210px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    list-style: none;
+    padding: 8px 0;
+    z-index: 1000;
+}
+
+/* Estilo de los enlaces dentro del submenú */
+.menu-enlaces .submenu li a {
+    color: #333333 !important;
+    padding: 10px 16px;
+    display: block;
+    font-size: 0.88rem;
+    text-align: left;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.menu-enlaces .submenu li a:hover {
+    background-color: #f0f4f1;
+    color: var(--verde-principal, #1a5c2e) !important;
+    font-weight: bold;
+}
+
+/* Despliega el submenú al pasar el cursor (Escritorio) */
+@media (min-width: 769px) {
+    .menu-enlaces .dropdown:hover .submenu {
+        display: block;
+        animation: fadeInMenu 0.3s ease;
+    }
+}
+
+/* Adaptación para celulares (Menú hamburguesa) */
+@media (max-width: 768px) {
+    .menu-enlaces .submenu {
+        position: static;
+        box-shadow: none;
+        background-color: rgba(255, 255, 255, 0.05);
+        padding-left: 15px;
+    }
+
+    .menu-enlaces .dropdown:hover .submenu,
+    .menu-enlaces .dropdown:focus-within .submenu {
+        display: block;
+    }
+
+    .menu-enlaces .submenu li a {
+        color: #ffffff !important;
+    }
+}
+
+@keyframes fadeInMenu {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
