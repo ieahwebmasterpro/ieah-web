@@ -587,6 +587,11 @@
 
     <script>
         const VALOR_CUOTA_FIJA = 35000;
+        const API_URL = 'https://ieah-backend.onrender.com';
+
+        // Variable global en memoria para autocompletar rápidamente
+        let docentesCache = [];
+        let pagosCache = [];
 
         function mostrarSeccion(seccion, elemento) {
             document.querySelectorAll('.seccion-modulo').forEach(s => s.classList.remove('activa'));
@@ -608,7 +613,7 @@
         // --- MANEJO DE MENSAJES ---
         async function cargarMensajes() {
             try {
-                const response = await fetch('https://ieah-backend.onrender.com/ver-mensajes');
+                const response = await fetch(`${API_URL}/ver-mensajes`);
                 const mensajes = await response.json();
                 document.getElementById('contadorMensajes').innerText = mensajes.length;
                 const tabla = document.getElementById('cuerpoTablaBuzon');
@@ -631,23 +636,23 @@
                     });
                 }
             } catch (error) {
-                console.error("Error:", error);
+                console.error("Error al cargar mensajes:", error);
             }
         }
 
         async function eliminar(id) {
             if (confirm("¿Eliminar este mensaje permanentemente?")) {
-                const response = await fetch(`https://ieah-backend.onrender.com/eliminar-mensaje/${id}`, { method: 'DELETE' });
-                if (response.ok) cargarMensajes();
+                try {
+                    const response = await fetch(`${API_URL}/eliminar-mensaje/${id}`, { method: 'DELETE' });
+                    if (response.ok) cargarMensajes();
+                } catch (error) {
+                    alert("📡 Error al eliminar el mensaje.");
+                }
             }
         }
 
-        // --- DIRECTORIO DE DOCENTES ---
-        function obtenerDocentesGuardados() {
-            return JSON.parse(localStorage.getItem('docentesIEAH')) || [];
-        }
-
-        function guardarDocente(e) {
+        // --- DIRECTORIO DE DOCENTES (CONECTADO A RENDER) ---
+        async function guardarDocente(e) {
             e.preventDefault();
             const nombre = document.getElementById('docNombre').value.trim();
             const documento = document.getElementById('docDocumento').value.trim();
@@ -655,56 +660,79 @@
             const veredaSel = document.getElementById('docDireccion').value;
             const direccionCompleta = veredaSel + ", Suaza, Huila";
 
-            let docentes = obtenerDocentesGuardados();
-            
-            const existe = docentes.findIndex(d => d.documento === documento);
-            if (existe !== -1) {
-                docentes[existe] = { nombre, documento, telefono, direccion: direccionCompleta };
-            } else {
-                docentes.push({ nombre, documento, telefono, direccion: direccionCompleta });
-            }
+            const nuevoDocente = {
+                nombre: nombre,
+                documento: documento,
+                telefono: telefono,
+                direccion: direccionCompleta
+            };
 
-            localStorage.setItem('docentesIEAH', JSON.stringify(docentes));
-            document.getElementById('formDocente').reset();
-            renderizarDocentes();
+            try {
+                const response = await fetch(`${API_URL}/docentes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevoDocente)
+                });
+
+                if (response.ok) {
+                    document.getElementById('formDocente').reset();
+                    renderizarDocentes();
+                } else {
+                    alert("❌ No se pudo guardar el docente en el servidor.");
+                }
+            } catch (error) {
+                alert("📡 Error de conexión con el servidor en Render.");
+            }
         }
 
-        function eliminarDocente(documento) {
+        async function eliminarDocente(documento) {
             if (confirm("¿Deseas eliminar este docente del directorio?")) {
-                let docentes = obtenerDocentesGuardados();
-                docentes = docentes.filter(d => d.documento !== documento);
-                localStorage.setItem('docentesIEAH', JSON.stringify(docentes));
-                renderizarDocentes();
+                try {
+                    const response = await fetch(`${API_URL}/docentes/${documento}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        renderizarDocentes();
+                    } else {
+                        alert("❌ No se pudo eliminar el docente.");
+                    }
+                } catch (error) {
+                    alert("📡 Error al comunicarse con el servidor.");
+                }
             }
         }
 
-        function renderizarDocentes() {
-            const docentes = obtenerDocentesGuardados();
-            document.getElementById('contadorDocentes').innerText = docentes.length;
-
+        async function renderizarDocentes() {
             const tabla = document.getElementById('cuerpoTablaDocentes');
             const selectPago = document.getElementById('pagoSelectDocente');
 
-            tabla.innerHTML = "";
-            selectPago.innerHTML = '<option value="">-- Seleccionar Docente --</option>';
+            try {
+                const response = await fetch(`${API_URL}/docentes`);
+                docentesCache = await response.json();
 
-            if (docentes.length === 0) {
-                tabla.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No hay docentes registrados.</td></tr>";
-            } else {
-                docentes.forEach(d => {
-                    tabla.innerHTML += `
-                        <tr>
-                            <td>${d.documento}</td>
-                            <td><strong>${d.nombre}</strong></td>
-                            <td>${d.telefono}</td>
-                            <td>${d.direccion}</td>
-                            <td>
-                                <button class="btn-del" onclick="eliminarDocente('${d.documento}')">🗑️</button>
-                            </td>
-                        </tr>
-                    `;
-                    selectPago.innerHTML += `<option value="${d.documento}">${d.nombre} (${d.documento})</option>`;
-                });
+                document.getElementById('contadorDocentes').innerText = docentesCache.length;
+                tabla.innerHTML = "";
+                selectPago.innerHTML = '<option value="">-- Seleccionar Docente --</option>';
+
+                if (docentesCache.length === 0) {
+                    tabla.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No hay docentes registrados.</td></tr>";
+                } else {
+                    docentesCache.forEach(d => {
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${d.documento}</td>
+                                <td><strong>${d.nombre}</strong></td>
+                                <td>${d.telefono}</td>
+                                <td>${d.direccion}</td>
+                                <td>
+                                    <button class="btn-del" onclick="eliminarDocente('${d.documento}')">🗑️</button>
+                                </td>
+                            </tr>
+                        `;
+                        selectPago.innerHTML += `<option value="${d.documento}">${d.nombre} (${d.documento})</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error("Error al obtener docentes:", error);
+                tabla.innerHTML = "<tr><td colspan='5' style='text-align:center; color:red;'>Error al cargar los docentes.</td></tr>";
             }
         }
 
@@ -714,11 +742,10 @@
             actualizarPrevisualizacion();
         }
 
-        // --- CONTABILIDAD & MULTI-MES ---
+        // --- CONTABILIDAD & MULTI-MES (CONECTADO A RENDER) ---
         function actualizarPrevisualizacion() {
             const docId = document.getElementById('pagoDocumento').value;
-            const docentes = obtenerDocentesGuardados();
-            const docenteInfo = docentes.find(d => d.documento === docId);
+            const docenteInfo = docentesCache.find(d => d.documento === docId);
 
             document.getElementById('prevDocente').innerHTML = docenteInfo 
                 ? `Docente: <strong>${docenteInfo.nombre}</strong> | ID: ${docenteInfo.documento}`
@@ -764,16 +791,11 @@
             }
         }
 
-        function obtenerPagosGuardados() {
-            return JSON.parse(localStorage.getItem('pagosDocentes')) || [];
-        }
-
-        function registrarPago(e) {
+        async function registrarPago(e) {
             e.preventDefault();
 
             const docId = document.getElementById('pagoDocumento').value;
-            const docentes = obtenerDocentesGuardados();
-            const docenteInfo = docentes.find(d => d.documento === docId);
+            const docenteInfo = docentesCache.find(d => d.documento === docId);
 
             if (!docenteInfo) {
                 alert("⚠️ Por favor selecciona un docente válido.");
@@ -801,8 +823,7 @@
             const fechaStr = ahora.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' }) + " " +
                              ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
 
-            const pagos = obtenerPagosGuardados();
-            const numTicket = pagos.length > 0 ? (Math.max(...pagos.map(p => p.numTicket || 50)) + 1) : 57;
+            const numTicket = pagosCache.length > 0 ? (Math.max(...pagosCache.map(p => p.numTicket || 50)) + 1) : 57;
 
             const nuevoPago = {
                 id: Date.now(),
@@ -818,63 +839,86 @@
                 cambio: cambioCalculado
             };
 
-            pagos.push(nuevoPago);
-            localStorage.setItem('pagosDocentes', JSON.stringify(pagos));
+            try {
+                const response = await fetch(`${API_URL}/pagos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevoPago)
+                });
 
-            document.getElementById('formPago').reset();
-            document.querySelectorAll('.chk-mes').forEach(c => c.checked = false);
-            actualizarPrevisualizacion();
-            renderizarPagos();
-
-            descargarTicketPDF(nuevoPago.id);
-        }
-
-        function eliminarPago(id) {
-            if (confirm("¿Deseas eliminar este registro de pago?")) {
-                let pagos = obtenerPagosGuardados();
-                pagos = pagos.filter(p => p.id !== id);
-                localStorage.setItem('pagosDocentes', JSON.stringify(pagos));
-                renderizarPagos();
+                if (response.ok) {
+                    document.getElementById('formPago').reset();
+                    document.querySelectorAll('.chk-mes').forEach(c => c.checked = false);
+                    actualizarPrevisualizacion();
+                    await renderizarPagos();
+                    descargarTicketPDF(nuevoPago.id);
+                } else {
+                    alert("❌ No se pudo guardar el pago en el servidor.");
+                }
+            } catch (error) {
+                alert("📡 Error al conectar con el servidor para registrar el pago.");
             }
         }
 
-        function renderizarPagos() {
-            const pagos = obtenerPagosGuardados();
+        async function eliminarPago(id) {
+            if (confirm("¿Deseas eliminar este registro de pago?")) {
+                try {
+                    const response = await fetch(`${API_URL}/pagos/${id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        renderizarPagos();
+                    } else {
+                        alert("❌ No se pudo eliminar el registro de pago.");
+                    }
+                } catch (error) {
+                    alert("📡 Error al comunicarse con el servidor.");
+                }
+            }
+        }
+
+        async function renderizarPagos() {
             const tabla = document.getElementById('cuerpoTablaPagos');
-            tabla.innerHTML = "";
             let totalGeneral = 0;
 
-            if (pagos.length === 0) {
-                tabla.innerHTML = "<tr><td colspan='7' style='text-align:center;'>No hay pagos registrados.</td></tr>";
-            } else {
-                pagos.forEach(p => {
-                    totalGeneral += p.totalPagar;
-                    const textoMeses = p.meses ? p.meses.join(', ') : p.mes;
-                    tabla.innerHTML += `
-                        <tr>
-                            <td><strong>#${p.numTicket}</strong></td>
-                            <td>${p.fecha}</td>
-                            <td>${p.docente}</td>
-                            <td>Cuota(s): ${textoMeses}</td>
-                            <td>$${p.totalPagar.toLocaleString('es-CO', {maximumFractionDigits: 0})}</td>
-                            <td>
-                                <button class="btn-pdf" onclick="descargarTicketPDF(${p.id})">🎟️ Imprimir Ticket</button>
-                            </td>
-                            <td style="text-align:center;">
-                                <button class="btn-del" onclick="eliminarPago(${p.id})">🗑️</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
+            try {
+                const response = await fetch(`${API_URL}/pagos`);
+                pagosCache = await response.json();
 
-            document.getElementById('totalRecaudado').innerText = "$" + totalGeneral.toLocaleString('es-CO', {maximumFractionDigits: 0});
+                tabla.innerHTML = "";
+
+                if (pagosCache.length === 0) {
+                    tabla.innerHTML = "<tr><td colspan='7' style='text-align:center;'>No hay pagos registrados.</td></tr>";
+                } else {
+                    pagosCache.forEach(p => {
+                        totalGeneral += p.totalPagar;
+                        const textoMeses = p.meses ? p.meses.join(', ') : p.mes;
+                        tabla.innerHTML += `
+                            <tr>
+                                <td><strong>#${p.numTicket}</strong></td>
+                                <td>${p.fecha}</td>
+                                <td>${p.docente}</td>
+                                <td>Cuota(s): ${textoMeses}</td>
+                                <td>$${p.totalPagar.toLocaleString('es-CO', {maximumFractionDigits: 0})}</td>
+                                <td>
+                                    <button class="btn-pdf" onclick="descargarTicketPDF(${p.id})">🎟️ Imprimir Ticket</button>
+                                </td>
+                                <td style="text-align:center;">
+                                    <button class="btn-del" onclick="eliminarPago(${p.id})">🗑️</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                document.getElementById('totalRecaudado').innerText = "$" + totalGeneral.toLocaleString('es-CO', {maximumFractionDigits: 0});
+            } catch (error) {
+                console.error("Error al cargar historial de pagos:", error);
+                tabla.innerHTML = "<tr><td colspan='7' style='text-align:center; color:red;'>Error al cargar los pagos.</td></tr>";
+            }
         }
 
         // --- GENERACIÓN DE TICKET ---
         function descargarTicketPDF(id) {
-            const pagos = obtenerPagosGuardados();
-            const pago = pagos.find(p => p.id === id);
+            const pago = pagosCache.find(p => p.id === id);
             if (!pago) return;
 
             const contenedor = document.getElementById('contenedorPDF');
@@ -1011,13 +1055,15 @@
             });
         }
 
-        // Inicialización
+        // Inicialización al cargar la página
         window.onload = function() {
             cargarMensajes();
             renderizarDocentes();
             renderizarPagos();
         };
     </script>
+
+    
 </body>
 
 </html>
