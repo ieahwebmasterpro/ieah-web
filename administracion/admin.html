@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - IEAH-APP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --verde-principal: #1a5c2e;
@@ -119,29 +118,29 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Usamos FormData porque el backend espera OAuth2 (form-data)
-            const formData = new FormData();
-            formData.append('username', document.getElementById('username').value);
-            formData.append('password', document.getElementById('password').value);
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
 
             try {
                 const response = await fetch('https://ieah-backend.onrender.com/login', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    // GUARDAMOS LA LLAVE DE ACCESO
                     localStorage.setItem('sesionIniciada', 'true');
                     alert("¡Bienvenido, " + data.user + "!");
-                    window.location.href = "panel.html";
+                    window.location.href = "buzon.html";
                 } else {
-                    alert("Error: " + (data.detail || "Credenciales incorrectas"));
+                    alert("⚠️ " + (data.detail || "Credenciales incorrectas"));
                 }
             } catch (error) {
-                alert("No se pudo conectar con el servidor backend.");
+                alert("❌ No se pudo conectar con el servidor backend. Espera un minuto a que Render despierte e intenta de nuevo.");
             }
         });
     </script>

@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // Middlewares
 app.use(cors());
@@ -32,9 +32,23 @@ function guardarDatos(datos) {
     fs.writeFileSync(FILE_PATH, JSON.stringify(datos, null, 2));
 }
 
-// Ruta principal de prueba
+// Ruta principal de comprobación
 app.get('/', (req, res) => {
     res.send('Servidor IEAH Backend activo 🚀');
+});
+
+// ==========================================
+// 0. AUTENTICACIÓN / LOGIN
+// ==========================================
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // Puedes modificar estas credenciales de acceso aquí:
+    if (username === "admin" && password === "admin123") {
+        res.json({ status: 'ok', user: 'Administrador' });
+    } else {
+        res.status(401).json({ detail: 'Usuario o contraseña incorrectos' });
+    }
 });
 
 // ==========================================
