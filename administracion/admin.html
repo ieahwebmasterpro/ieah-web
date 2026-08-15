@@ -135,7 +135,7 @@
                 if (response.ok) {
                     localStorage.setItem('sesionIniciada', 'true');
                     alert("¡Bienvenido, " + data.user + "!");
-                    window.location.href = "buzon.html";
+                    window.location.href = "panel.html";
                 } else {
                     alert("⚠️ " + (data.detail || "Credenciales incorrectas"));
                 }

@@ -589,7 +589,6 @@
         const VALOR_CUOTA_FIJA = 35000;
         const API_URL = 'https://ieah-backend.onrender.com';
 
-        // Variable global en memoria para autocompletar rápidamente
         let docentesCache = [];
         let pagosCache = [];
 
@@ -1055,15 +1054,12 @@
             });
         }
 
-        // Inicialización al cargar la página
         window.onload = function() {
             cargarMensajes();
             renderizarDocentes();
             renderizarPagos();
         };
     </script>
-
-    
 </body>
 
 </html>

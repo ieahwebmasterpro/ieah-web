@@ -904,3 +904,6 @@ body {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* CONTENEDOR DE CAPTURA FIJO EN LA ESQUINA SUPERIOR PARA EVITAR DESPLAZAMIENTOS */
+/* CONTENEDOR TEMPORAL DE CAPTURA EN POSICIÓN ABSOLUTA LIMPIA */
