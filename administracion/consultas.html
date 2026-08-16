@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Pagos - IEAH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Librerías jsPDF y AutoTable para la descarga en formato Matriz -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root {
+            --verde-principal: #1a5c2e;
+            --verde-hover: #0d3d1e;
+            --dorado: #B18C4D;
+            --fondo: #f4f6f9;
+            --blanco: #ffffff;
+            --texto: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--fondo);
+            color: var(--texto);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--blanco);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--verde-principal);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-busqueda {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        button {
+            background-color: var(--verde-principal);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--verde-hover);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: var(--verde-principal);
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.85rem;
+        }
+
+        .btn-pdf {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .btn-volver {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: var(--verde-principal);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* ESTILOS DEL CONTENEDOR OCULTO PARA TICKET */
+        #contenedorPDF {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: -1000;
+            visibility: hidden;
+            width: 58mm;
+            background: #ffffff !important;
+        }
+
+        .ticket-exacto {
+            width: 58mm;
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-family: Arial, Helvetica, sans-serif !important;
+            font-size: 8.5pt !important;
+            line-height: 1.25;
+            padding: 5mm 1.5mm 2mm 1.5mm;
+            text-align: center;
+            margin: 0;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .ticket-encabezado { text-align: center; margin-bottom: 2px; }
+        .ticket-encabezado h3 { font-size: 9.5pt !important; font-weight: bold; text-transform: uppercase; margin-bottom: 1px; line-height: 1.1; }
+        .ticket-linea { border-top: 1px dotted #000000 !important; margin: 3px 0; width: 100%; }
+        .ticket-datos { text-align: center; margin-bottom: 1px; word-wrap: break-word; }
+        .ticket-tabla { width: 100%; border-collapse: collapse; font-size: 8pt !important; margin: 1px 0; table-layout: fixed; }
+        .ticket-tabla th, .ticket-tabla td { padding: 1px 0; text-align: center !important; font-size: 8pt !important; color: #000 !important; background: transparent !important; }
+        .ticket-totales { width: 100%; border-collapse: collapse; font-size: 8.5pt !important; margin-top: 1px; table-layout: fixed; }
+        .ticket-totales td { padding: 1px 0; color: #000 !important; }
+        .ticket-pie { text-align: center; font-size: 8.5pt !important; margin-top: 3px; line-height: 1.2; }
+        .ticket-pie-legal { font-size: 7.5pt !important; line-height: 1.15; margin-top: 2px; margin-bottom: 2px; }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <a href="panel.html" class="btn-volver">← Volver al Panel</a>
+        <h2>🔍 Consulta de Pagos por Docente</h2>
+
+        <!-- event.preventDefault() en el onsubmit evita que la página titilee o se recargue -->
+        <form class="form-busqueda" onsubmit="buscarPagos(event)">
+            <input type="text" id="inputBuscar" placeholder="Ingrese Cédula/Documento o Nombre del Docente..." required>
+            <button type="submit">Buscar</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Ticket N°</th>
+                    <th>Fecha</th>
+                    <th>Docente</th>
+                    <th>Meses Pagados</th>
+                    <th>Total</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTablaConsulta">
+                <tr>
+                    <td colspan="6" style="text-align: center;">Ingrese un documento o nombre para realizar la búsqueda.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Contenedor oculto para la generación de PDFs -->
+    <div id="contenedorPDF"></div>
+
+    <script>
+        const API_URL = 'https://ieah-backend.onrender.com';
+        const VALOR_CUOTA_FIJA = 35000;
+        let resultadosCache = [];
+
+        // BUSQUEDA SIN RECARGAR LA PÁGINA
+        async function buscarPagos(e) {
+            e.preventDefault(); // EVITA EL REFRESTO / TITILEO DE LA PÁGINA
+
+            const criterio = document.getElementById('inputBuscar').value.trim().toLowerCase();
+            const tabla = document.getElementById('cuerpoTablaConsulta');
+
+            if (!criterio) return;
+
+            tabla.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Buscando registros...</td></tr>";
+
+            try {
+                const response = await fetch(`${API_URL}/pagos`);
+                const pagos = await response.json();
+
+                // Filtrar por Cédula/Documento o por Nombre
+                resultadosCache = pagos.filter(p => 
+                    (p.documento && p.documento.toString().toLowerCase().includes(criterio)) ||
+                    (p.docente && p.docente.toLowerCase().includes(criterio))
+                );
+
+                tabla.innerHTML = "";
+
+                if (resultadosCache.length === 0) {
+                    tabla.innerHTML = "<tr><td colspan='6' style='text-align:center;'>No se encontraron pagos asociados al criterio ingresado.</td></tr>";
+                    return;
+                }
+
+                resultadosCache.forEach(p => {
+                    const textoMeses = p.meses ? p.meses.join(', ') : (p.mes || 'N/A');
+                    tabla.innerHTML += `
+                        <tr>
+                            <td><strong>#${p.numTicket}</strong></td>
+                            <td>${p.fecha}</td>
+                            <td>${p.docente}</td>
+                            <td>${textoMeses}</td>
+                            <td>$${p.totalPagar ? p.totalPagar.toLocaleString('es-CO') : '0'}</td>
+                            <td>
+                                <button class="btn-pdf" onclick="descargarTicketPDF(${p.id})">🎟️ Descargar Ticket</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+            } catch (error) {
+                console.error("Error al consultar pagos:", error);
+                tabla.innerHTML = "<tr><td colspan='6' style='text-align:center; color:red;'>Error al conectar con el servidor.</td></tr>";
+            }
+        }
+
+        // DESCARGA DE PDF TICKET FUNCIONAL
+       // DESCARGA DE REPORTE INDIVIDUAL EN PDF
+// DESCARGA DE CONSULTA INDIVIDUAL CON FORMATO DE MATRIZ
+// DESCARGA DE CONSULTA INDIVIDUAL CON FORMATO DE MATRIZ
+// DESCARGA DE CONSULTA INDIVIDUAL AJUSTADA
+// DESCARGA DE CONSULTA INDIVIDUAL (COLORES Y PIE CENTRADO)
+// DESCARGA DE CONSULTA INDIVIDUAL (COLORES Y PIE CENTRADO CORREGIDOS)
+// DESCARGA DE CONSULTA INDIVIDUAL (ESTADO DINÁMICO A LA FECHA)
+async function descargarTicketPDF(id) {
+    const pago = resultadosCache.find(p => p.id === id);
+    if (!pago) {
+        alert("⚠️ No se encontró la información del pago.");
+        return;
+    }
+
+    try {
+        let jsPDFClass;
+        if (window.jspdf && window.jspdf.jsPDF) {
+            jsPDFClass = window.jspdf.jsPDF;
+        } else if (window.jsPDF) {
+            jsPDFClass = window.jsPDF;
+        }
+
+        if (!jsPDFClass) {
+            alert("⚠️ No se encontraron las librerías de PDF. Asegúrate de incluir los scripts en el <head>.");
+            return;
+        }
+
+        // 1. Obtener historial acumulado del docente
+        let mesesPagadosLista = [];
+        resultadosCache.forEach(p => {
+            if (p.documento === pago.documento) {
+                if (p.meses && Array.isArray(p.meses)) {
+                    mesesPagadosLista.push(...p.meses);
+                } else if (p.mes) {
+                    mesesPagadosLista.push(p.mes);
+                }
+            }
+        });
+
+        const MESES_ANIO = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+
+        // 2. Fecha y hora actual formateada
+        const ahora = new Date();
+        const fechaHoraFormateada = `${ahora.toLocaleDateString('es-CO')} ${ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+
+        // 3. Regla de "Mes Terminado":
+        // Si estamos en Agosto (índice 7), el último mes exigible a la fecha es Julio (índice 6).
+        const mesActualIndice = ahora.getMonth();
+        const ultimoMesExigibleIndice = mesActualIndice - 1;
+
+        let mesesTranscurridosAPagados = 0;
+        if (ultimoMesExigibleIndice >= 0) {
+            for (let i = 0; i <= ultimoMesExigibleIndice; i++) {
+                const nombreMes = MESES_ANIO[i];
+                const pagado = mesesPagadosLista.some(m => m.toLowerCase().includes(nombreMes.toLowerCase()));
+                if (pagado) {
+                    mesesTranscurridosAPagados++;
+                }
+            }
+        }
+
+        const mesesExigiblesTotales = Math.max(0, mesActualIndice); 
+        const mesesPendientesALaFecha = Math.max(0, mesesExigiblesTotales - mesesTranscurridosAPagados);
+
+        // 4. ESTADO A LA FECHA Y TOTALES ANUALES:
+        // Si no debe ningún mes vencido hasta la fecha actual, su estado es "AL DÍA"
+        const estadoTexto = mesesPendientesALaFecha === 0 ? "AL DÍA" : "PENDIENTE";
+
+        const cantMesesPagadosTotal = mesesPagadosLista.length;
+        const totalPagadoDocente = cantMesesPagadosTotal * VALOR_CUOTA_FIJA;
+        const saldoPendienteAnual = (12 * VALOR_CUOTA_FIJA) - totalPagadoDocente;
+
+        // 5. Instanciar PDF (Landscape A4)
+        const doc = new jsPDFClass({
+            orientation: 'landscape',
+            unit: 'pt',
+            format: 'a4'
+        });
+
+        // 6. Celdas para la tabla
+        let celdasMeses = [];
+        MESES_ANIO.forEach(mesNombre => {
+            const estaPagado = mesesPagadosLista.some(m => m.toLowerCase().includes(mesNombre.toLowerCase()));
+            if (estaPagado) {
+                celdasMeses.push(`$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}`);
+            } else {
+                celdasMeses.push(`-$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}-`);
+            }
+        });
+
+        // 7. Generación del reporte
+        const generarDocumento = () => {
+            // Encabezado
+            doc.setFontSize(13);
+            doc.setFont(undefined, 'bold');
+            doc.text("INSTITUCION EDUCATIVA ALTO HORIZONTE", 90, 35);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.text("GRUPO BIENESTAR 2026 - Reporte Individual de Aportes", 90, 48);
+
+            // Bloque de datos
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.text(`FECHA / HORA: ${fechaHoraFormateada}`, 40, 75);
+            doc.text(`IDENTIFICACIÓN: ${pago.documento}`, 260, 75);
+            doc.text(`DOCENTE: ${pago.docente.toUpperCase()}`, 450, 75);
+
+            doc.setFont(undefined, 'normal');
+            doc.text(`Meses Pagados Totales: ${cantMesesPagadosTotal}`, 40, 92);
+            doc.text(`Meses Pendientes a la Fecha: ${mesesPendientesALaFecha}`, 260, 92);
+            doc.text(`Estado General: ${estadoTexto}`, 450, 92);
+
+            // Tabla con colores procesados en didParseCell
+            doc.autoTable({
+                head: [
+                    ['Identificación', 'Nombre', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Total Pagado', 'Estado', 'Saldo Pendiente']
+                ],
+                body: [
+                    [
+                        pago.documento,
+                        pago.docente,
+                        ...celdasMeses,
+                        `$${totalPagadoDocente.toLocaleString('es-CO')}`,
+                        estadoTexto,
+                        `$${saldoPendienteAnual.toLocaleString('es-CO')}`
+                    ]
+                ],
+                startY: 110,
+                theme: 'grid',
+                styles: { fontSize: 7, halign: 'center', valign: 'middle' },
+                headStyles: { fillColor: [26, 92, 46], textColor: [255, 255, 255], fontStyle: 'bold' },
+                didParseCell: function (data) {
+                    // Aplicar colores exclusivamente a las celdas de los meses (índices 2 a 13)
+                    if (data.section === 'body' && data.column.index >= 2 && data.column.index <= 13) {
+                        const mesColIndice = data.column.index - 2;
+                        const mesNombre = MESES_ANIO[mesColIndice];
+                        const estaPagado = mesesPagadosLista.some(m => m.toLowerCase().includes(mesNombre.toLowerCase()));
+
+                        if (estaPagado) {
+                            // 1. Pagados -> Verde
+                            data.cell.styles.fillColor = [39, 174, 96];
+                            data.cell.styles.textColor = [255, 255, 255];
+                        } else if (mesColIndice <= ultimoMesExigibleIndice) {
+                            // 2. Pendientes vencidos (mes finalizado no pagado) -> Rojo
+                            data.cell.styles.fillColor = [231, 76, 60];
+                            data.cell.styles.textColor = [255, 255, 255];
+                        } else {
+                            // 3. Desde el mes actual hasta diciembre -> Naranja
+                            data.cell.styles.fillColor = [230, 126, 34];
+                            data.cell.styles.textColor = [255, 255, 255];
+                        }
+                    }
+                }
+            });
+
+            // Mensaje final CENTRADO
+            const centroX = 421;
+            const finalY = doc.lastAutoTable.finalY + 30;
+
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'italic');
+            doc.text("*** Estimad@ profesor@ - Administrativ@ - rector@", centroX, finalY, { align: 'center' });
+            doc.text("con su aporte contribuye al bienestar de todo el talento humano de nuestra institucion ***", centroX, finalY + 12, { align: 'center' });
+
+            doc.setFont(undefined, 'bold');
+            doc.text("¡GRACIAS POR SU APORTE!", centroX, finalY + 28, { align: 'center' });
+
+            // Doble espacio antes del copyright centrado
+            doc.setFont(undefined, 'normal');
+            doc.text("© Cemled corp 2026", centroX, finalY + 54, { align: 'center' });
+
+            // Descarga de PDF
+            doc.save(`Reporte_Individual_${pago.documento}_${pago.docente.replace(/\s+/g, '_')}.pdf`);
+        };
+
+        const imgLogo = new Image();
+        imgLogo.src = '../img/escudo.png';
+
+        imgLogo.onload = function () {
+            doc.addImage(imgLogo, 'PNG', 40, 20, 40, 40);
+            generarDocumento();
+        };
+
+        imgLogo.onerror = function () {
+            generarDocumento();
+        };
+
+    } catch (error) {
+        console.error("Error al generar reporte PDF:", error);
+        alert("⚠️ Ocurrió un error al generar el PDF: " + error.message);
+    }
+}
+    </script>
+</body>
+
+</html>

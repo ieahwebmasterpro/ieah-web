@@ -5,10 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - IEAH APP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-    
-    <!-- Librería html2pdf -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Librería html2pdf (para los tickets) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Librerías jsPDF + AutoTable oficiales (para el reporte de la matriz) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
         :root {
@@ -72,7 +78,8 @@
             gap: 10px;
         }
 
-        .menu-btn:hover, .menu-btn.activo {
+        .menu-btn:hover,
+        .menu-btn.activo {
             background-color: var(--dorado);
         }
 
@@ -118,7 +125,7 @@
             background: var(--blanco);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             border-left: 5px solid var(--verde-principal);
         }
 
@@ -139,7 +146,7 @@
             background: var(--blanco);
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
         }
 
@@ -188,7 +195,8 @@
             margin-bottom: 5px;
         }
 
-        .grupo input, .grupo select {
+        .grupo input,
+        .grupo select {
             padding: 9px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -375,15 +383,51 @@
             margin-top: 2px;
             margin-bottom: 2px;
         }
+
+        /* ESTILOS DE LA MATRIZ DE PAGOS (VERDE Y ROJO) */
+        .celda-pagado {
+            background-color: #27ae60 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .celda-pendiente {
+            background-color: #e74c3c !important;
+            color: #ffffff !important;
+            text-align: center;
+        }
+
+        .estado-al-dia {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .estado-pendiente {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .tabla-matriz-contenedor {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        .tabla-matriz th {
+            text-align: center;
+            white-space: nowrap;
+        }
     </style>
 </head>
+
+
 
 <body>
 
     <script>
         if (localStorage.getItem('sesionIniciada') !== 'true') {
             alert("⚠️ Acceso denegado. Por favor inicia sesión.");
-            window.location.href = "admin.html"; 
+            window.location.href = "admin.html";
         }
 
         function cerrarSesion() {
@@ -405,16 +449,25 @@
             <button class="menu-btn" onclick="mostrarSeccion('contabilidad', this)">
                 💰 Contabilidad & Tickets
             </button>
+            <button class="menu-btn" onclick="mostrarSeccion('matriz', this)">
+                📊 Matriz Anual de Pagos
+            </button>
+            <!-- BOTÓN PARA IR A CONSULTA INDIVIDUAL -->
+            <button class="menu-btn" onclick="window.location.href='consultas.html'">
+                🔍 Consultas
+            </button>
         </div>
         <div>
-            <a href="../index.html" style="color: white; text-decoration: none; font-size: 0.85rem; display: block; text-align: center; margin-bottom: 10px;">🏠 Ver Sitio Web</a>
+            <a href="../index.html"
+                style="color: white; text-decoration: none; font-size: 0.85rem; display: block; text-align: center; margin-bottom: 10px;">🏠
+                Ver Sitio Web</a>
             <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
         </div>
     </aside>
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="main-content">
-        
+
         <div class="header-panel">
             <h2 id="tituloVista">Buzón de Mensajes</h2>
         </div>
@@ -516,18 +569,30 @@
                 <div class="grupo" style="grid-column: 1 / -1;">
                     <label>Seleccionar Meses a Pagar ($35.000 c/u):</label>
                     <div class="meses-selector">
-                        <label><input type="checkbox" class="chk-mes" value="1 Enero" onchange="actualizarPrevisualizacion()"> 1 Enero</label>
-                        <label><input type="checkbox" class="chk-mes" value="2 Febrero" onchange="actualizarPrevisualizacion()"> 2 Febrero</label>
-                        <label><input type="checkbox" class="chk-mes" value="3 Marzo" onchange="actualizarPrevisualizacion()"> 3 Marzo</label>
-                        <label><input type="checkbox" class="chk-mes" value="4 Abril" onchange="actualizarPrevisualizacion()"> 4 Abril</label>
-                        <label><input type="checkbox" class="chk-mes" value="5 Mayo" onchange="actualizarPrevisualizacion()"> 5 Mayo</label>
-                        <label><input type="checkbox" class="chk-mes" value="6 Junio" onchange="actualizarPrevisualizacion()"> 6 Junio</label>
-                        <label><input type="checkbox" class="chk-mes" value="7 Julio" onchange="actualizarPrevisualizacion()"> 7 Julio</label>
-                        <label><input type="checkbox" class="chk-mes" value="8 Agosto" onchange="actualizarPrevisualizacion()"> 8 Agosto</label>
-                        <label><input type="checkbox" class="chk-mes" value="9 Septiembre" onchange="actualizarPrevisualizacion()"> 9 Septiembre</label>
-                        <label><input type="checkbox" class="chk-mes" value="10 Octubre" onchange="actualizarPrevisualizacion()"> 10 Octubre</label>
-                        <label><input type="checkbox" class="chk-mes" value="11 Noviembre" onchange="actualizarPrevisualizacion()"> 11 Noviembre</label>
-                        <label><input type="checkbox" class="chk-mes" value="12 Diciembre" onchange="actualizarPrevisualizacion()"> 12 Diciembre</label>
+                        <label><input type="checkbox" class="chk-mes" value="1 Enero"
+                                onchange="actualizarPrevisualizacion()"> 1 Enero</label>
+                        <label><input type="checkbox" class="chk-mes" value="2 Febrero"
+                                onchange="actualizarPrevisualizacion()"> 2 Febrero</label>
+                        <label><input type="checkbox" class="chk-mes" value="3 Marzo"
+                                onchange="actualizarPrevisualizacion()"> 3 Marzo</label>
+                        <label><input type="checkbox" class="chk-mes" value="4 Abril"
+                                onchange="actualizarPrevisualizacion()"> 4 Abril</label>
+                        <label><input type="checkbox" class="chk-mes" value="5 Mayo"
+                                onchange="actualizarPrevisualizacion()"> 5 Mayo</label>
+                        <label><input type="checkbox" class="chk-mes" value="6 Junio"
+                                onchange="actualizarPrevisualizacion()"> 6 Junio</label>
+                        <label><input type="checkbox" class="chk-mes" value="7 Julio"
+                                onchange="actualizarPrevisualizacion()"> 7 Julio</label>
+                        <label><input type="checkbox" class="chk-mes" value="8 Agosto"
+                                onchange="actualizarPrevisualizacion()"> 8 Agosto</label>
+                        <label><input type="checkbox" class="chk-mes" value="9 Septiembre"
+                                onchange="actualizarPrevisualizacion()"> 9 Septiembre</label>
+                        <label><input type="checkbox" class="chk-mes" value="10 Octubre"
+                                onchange="actualizarPrevisualizacion()"> 10 Octubre</label>
+                        <label><input type="checkbox" class="chk-mes" value="11 Noviembre"
+                                onchange="actualizarPrevisualizacion()"> 11 Noviembre</label>
+                        <label><input type="checkbox" class="chk-mes" value="12 Diciembre"
+                                onchange="actualizarPrevisualizacion()"> 12 Diciembre</label>
                     </div>
                 </div>
 
@@ -543,17 +608,21 @@
                             </tr>
                         </thead>
                         <tbody id="cuerpoPrevisTabla">
-                            <tr><td colspan="2" style="text-align:center;">Ningún mes seleccionado</td></tr>
+                            <tr>
+                                <td colspan="2" style="text-align:center;">Ningún mes seleccionado</td>
+                            </tr>
                         </tbody>
                     </table>
-                    <div style="text-align:right; margin-top:8px; font-weight:bold; font-size:1rem; color:var(--verde-principal);">
+                    <div
+                        style="text-align:right; margin-top:8px; font-weight:bold; font-size:1rem; color:var(--verde-principal);">
                         Total a Pagar: $<span id="lblTotalCalculado">0</span>
                     </div>
                 </div>
 
                 <div class="grupo">
                     <label>Valor Recibido ($)</label>
-                    <input type="number" id="pagoValorRecibido" placeholder="Ej: 35000" min="0" required oninput="calcularCambio()">
+                    <input type="number" id="pagoValorRecibido" placeholder="Ej: 35000" min="0" required
+                        oninput="calcularCambio()">
                 </div>
                 <div class="grupo">
                     <label>Cambio / Devuelto ($)</label>
@@ -580,6 +649,45 @@
             </table>
         </section>
 
+        <!-- SECCIÓN 4: MATRIZ ANUAL DE PAGOS -->
+        <section id="sec-matriz" class="seccion-modulo">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>Matriz General de Control - Cuotas 2026</h3>
+                <div>
+                    <button class="btn-act" onclick="renderizarMatrizPagos()">🔄 Actualizar Matriz</button>
+                    <button class="btn-pdf" style="padding: 8px 15px; font-size: 0.9rem;"
+                        onclick="descargarMatrizPDF()">📥 Descargar Reporte PDF</button>
+                </div>
+            </div>
+
+            <div class="tabla-matriz-contenedor">
+                <table class="tabla-matriz" id="tablaMatrizPDF">
+                    <thead>
+                        <tr>
+                            <th>Identificación</th>
+                            <th>Nombre</th>
+                            <th>Enero</th>
+                            <th>Febrero</th>
+                            <th>Marzo</th>
+                            <th>Abril</th>
+                            <th>Mayo</th>
+                            <th>Junio</th>
+                            <th>Julio</th>
+                            <th>Agosto</th>
+                            <th>Septiembre</th>
+                            <th>Octubre</th>
+                            <th>Noviembre</th>
+                            <th>Diciembre</th>
+                            <th>Total Pagado</th>
+                            <th>Estado</th>
+                            <th>Saldo Pendiente</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaMatriz"></tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
     <!-- CONTENEDOR OCULTO PARA GENERAR PDF TICKET -->
@@ -588,6 +696,10 @@
     <script>
         const VALOR_CUOTA_FIJA = 35000;
         const API_URL = 'https://ieah-backend.onrender.com';
+        const MESES_ANIO = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
 
         let docentesCache = [];
         let pagosCache = [];
@@ -596,15 +708,19 @@
             document.querySelectorAll('.seccion-modulo').forEach(s => s.classList.remove('activa'));
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('activo'));
 
-            if(seccion === 'buzon') {
+            if (seccion === 'buzon') {
                 document.getElementById('sec-buzon').classList.add('activa');
                 document.getElementById('tituloVista').innerText = "Buzón de Mensajes";
-            } else if(seccion === 'docentes') {
+            } else if (seccion === 'docentes') {
                 document.getElementById('sec-docentes').classList.add('activa');
                 document.getElementById('tituloVista').innerText = "Directorio Docentes";
-            } else {
+            } else if (seccion === 'contabilidad') {
                 document.getElementById('sec-contabilidad').classList.add('activa');
                 document.getElementById('tituloVista').innerText = "Gestión Contable & Recibos";
+            } else if (seccion === 'matriz') {
+                document.getElementById('sec-matriz').classList.add('activa');
+                document.getElementById('tituloVista').innerText = "Matriz General de Pagos";
+                renderizarMatrizPagos();
             }
             elemento.classList.add('activo');
         }
@@ -746,7 +862,7 @@
             const docId = document.getElementById('pagoDocumento').value;
             const docenteInfo = docentesCache.find(d => d.documento === docId);
 
-            document.getElementById('prevDocente').innerHTML = docenteInfo 
+            document.getElementById('prevDocente').innerHTML = docenteInfo
                 ? `Docente: <strong>${docenteInfo.nombre}</strong> | ID: ${docenteInfo.documento}`
                 : "Docente: No seleccionado";
 
@@ -764,13 +880,13 @@
                     tbody.innerHTML += `
                         <tr>
                             <td>Cuota ${chk.value}</td>
-                            <td>$${VALOR_CUOTA_FIJA.toLocaleString('es-CO', {maximumFractionDigits: 0})}</td>
+                            <td>$${VALOR_CUOTA_FIJA.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
                         </tr>
                     `;
                 });
             }
 
-            document.getElementById('lblTotalCalculado').innerText = totalCalculado.toLocaleString('es-CO', {maximumFractionDigits: 0});
+            document.getElementById('lblTotalCalculado').innerText = totalCalculado.toLocaleString('es-CO', { maximumFractionDigits: 0 });
             calcularCambio();
         }
 
@@ -784,9 +900,9 @@
             if (recibido === 0) {
                 document.getElementById('pagoCambio').value = "$0";
             } else if (cambio < 0) {
-                document.getElementById('pagoCambio').value = "Faltante: $" + Math.abs(cambio).toLocaleString('es-CO', {maximumFractionDigits: 0});
+                document.getElementById('pagoCambio').value = "Faltante: $" + Math.abs(cambio).toLocaleString('es-CO', { maximumFractionDigits: 0 });
             } else {
-                document.getElementById('pagoCambio').value = "$" + cambio.toLocaleString('es-CO', {maximumFractionDigits: 0}) + " cop.";
+                document.getElementById('pagoCambio').value = "$" + cambio.toLocaleString('es-CO', { maximumFractionDigits: 0 }) + " cop.";
             }
         }
 
@@ -812,7 +928,7 @@
             const valorRecibido = parseFloat(document.getElementById('pagoValorRecibido').value) || 0;
 
             if (valorRecibido < totalSumaMeses) {
-                alert("⚠️ Error: El valor ingresado es menor a la cantidad total (" + totalSumaMeses.toLocaleString('es-CO', {maximumFractionDigits: 0}) + " cop.) de los meses seleccionados.");
+                alert("⚠️ Error: El valor ingresado es menor a la cantidad total (" + totalSumaMeses.toLocaleString('es-CO', { maximumFractionDigits: 0 }) + " cop.) de los meses seleccionados.");
                 return;
             }
 
@@ -820,7 +936,7 @@
 
             const ahora = new Date();
             const fechaStr = ahora.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' }) + " " +
-                             ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
+                ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
 
             const numTicket = pagosCache.length > 0 ? (Math.max(...pagosCache.map(p => p.numTicket || 50)) + 1) : 57;
 
@@ -896,7 +1012,7 @@
                                 <td>${p.fecha}</td>
                                 <td>${p.docente}</td>
                                 <td>Cuota(s): ${textoMeses}</td>
-                                <td>$${p.totalPagar.toLocaleString('es-CO', {maximumFractionDigits: 0})}</td>
+                                <td>$${p.totalPagar.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
                                 <td>
                                     <button class="btn-pdf" onclick="descargarTicketPDF(${p.id})">🎟️ Imprimir Ticket</button>
                                 </td>
@@ -908,10 +1024,166 @@
                     });
                 }
 
-                document.getElementById('totalRecaudado').innerText = "$" + totalGeneral.toLocaleString('es-CO', {maximumFractionDigits: 0});
+                document.getElementById('totalRecaudado').innerText = "$" + totalGeneral.toLocaleString('es-CO', { maximumFractionDigits: 0 });
             } catch (error) {
                 console.error("Error al cargar historial de pagos:", error);
                 tabla.innerHTML = "<tr><td colspan='7' style='text-align:center; color:red;'>Error al cargar los pagos.</td></tr>";
+            }
+        }
+
+        // --- GENERACIÓN DE MATRIZ DE PAGOS EN VIVO ---
+        async function renderizarMatrizPagos() {
+            const tbody = document.getElementById('cuerpoTablaMatriz');
+            tbody.innerHTML = "<tr><td colspan='17' style='text-align:center;'>Cargando matriz...</td></tr>";
+
+            try {
+                const [resDocentes, resPagos] = await Promise.all([
+                    fetch(`${API_URL}/docentes`),
+                    fetch(`${API_URL}/pagos`)
+                ]);
+
+                docentesCache = await resDocentes.json();
+                pagosCache = await resPagos.json();
+
+                tbody.innerHTML = "";
+
+                if (docentesCache.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='17' style='text-align:center;'>No hay docentes registrados.</td></tr>";
+                    return;
+                }
+
+                docentesCache.forEach(docente => {
+                    const pagosDocente = pagosCache.filter(p => p.documento === docente.documento);
+
+                    let mesesPagados = [];
+                    pagosDocente.forEach(p => {
+                        if (p.meses && Array.isArray(p.meses)) {
+                            mesesPagados.push(...p.meses);
+                        } else if (p.mes) {
+                            mesesPagados.push(p.mes);
+                        }
+                    });
+
+                    let totalPagadoDocente = 0;
+                    let celdasMesesHTML = "";
+
+                    MESES_ANIO.forEach(mesNombre => {
+                        const estaPagado = mesesPagados.some(m => m.toLowerCase().includes(mesNombre.toLowerCase()));
+
+                        if (estaPagado) {
+                            totalPagadoDocente += VALOR_CUOTA_FIJA;
+                            celdasMesesHTML += `<td class="celda-pagado">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}</td>`;
+                        } else {
+                            celdasMesesHTML += `<td class="celda-pendiente">-$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}-</td>`;
+                        }
+                    });
+
+                    const totalAnualObligatorio = VALOR_CUOTA_FIJA * 12;
+                    const saldoPendiente = totalAnualObligatorio - totalPagadoDocente;
+                    const estadoTexto = saldoPendiente === 0 ? "AL DÍA" : "SALDO PENDIENTE";
+                    const claseEstado = saldoPendiente === 0 ? "estado-al-dia" : "estado-pendiente";
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${docente.documento}</td>
+                            <td><strong>${docente.nombre}</strong></td>
+                            ${celdasMesesHTML}
+                            <td style="font-weight:bold; text-align:center;">$${totalPagadoDocente.toLocaleString('es-CO')}</td>
+                            <td class="${claseEstado}">${estadoTexto}</td>
+                            <td style="font-weight:bold; text-align:center; color:#c0392b;">$${saldoPendiente.toLocaleString('es-CO')}</td>
+                        </tr>
+                    `;
+                });
+
+            } catch (error) {
+                console.error("Error al renderizar la matriz de pagos:", error);
+                tbody.innerHTML = "<tr><td colspan='17' style='text-align:center; color:red;'>Error al cargar los datos de la matriz.</td></tr>";
+            }
+        }
+
+        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (CORREGIDO) ---
+        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (CORREGIDO DEFINITIVO) ---
+        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (SOLUCIÓN DEFINITIVA) ---
+        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (SOLUCIÓN DEFINITIVA) ---
+        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (CON ESCUDO Y COLORES CORREGIDOS) ---
+        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (COLORES Y ESCUDO FORZADOS) ---
+        function descargarMatrizPDF() {
+            try {
+                const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
+
+                if (!jsPDFClass) {
+                    alert("⚠️ La librería PDF aún se está cargando. Por favor, recarga la página e inténtalo de nuevo.");
+                    return;
+                }
+
+                // Crear documento en orientación Horizontal (Landscape), hoja A4
+                const doc = new jsPDFClass({
+                    orientation: 'landscape',
+                    unit: 'pt',
+                    format: 'a4'
+                });
+
+                const imgLogo = new Image();
+                imgLogo.src = '../img/escudo.png'; // Asegúrate de ajustar esta ruta si es local (ej: ../img/escudo.png)
+
+                const generarTabla = () => {
+                    // Generar la tabla con autoTable
+                    doc.autoTable({
+                        html: '#tablaMatrizPDF',
+                        startY: 70,
+                        theme: 'grid',
+                        styles: { fontSize: 7, halign: 'center', valign: 'middle' },
+                        headStyles: { fillColor: [26, 92, 46], textColor: [255, 255, 255], fontStyle: 'bold' },
+                        willDrawCell: function (data) {
+                            // Forzar colores justo antes de dibujar cada celda en el canvas del PDF
+                            if (data.section === 'body') {
+                                const cellText = (data.cell && data.cell.text) ? data.cell.text.join('').trim() : '';
+
+                                // Evaluar meses pendientes (-$35.000-)
+                                if (cellText.includes('-$35.000-')) {
+                                    doc.setFillColor(231, 76, 60); // Rojo
+                                    doc.setTextColor(255, 255, 255); // Blanco
+                                    data.cell.styles.fillColor = [231, 76, 60];
+                                    data.cell.styles.textColor = [255, 255, 255];
+                                }
+                                // Evaluar meses pagados ($35.000) excluyendo columnas de totales (índices 2 a 13)
+                                else if (cellText.includes('$35.000') && data.column.index >= 2 && data.column.index <= 13) {
+                                    doc.setFillColor(39, 174, 96); // Verde
+                                    doc.setTextColor(255, 255, 255); // Blanco
+                                    data.cell.styles.fillColor = [39, 174, 96];
+                                    data.cell.styles.textColor = [255, 255, 255];
+                                }
+                            }
+                        }
+                    });
+
+                    // Guardar archivo PDF
+                    doc.save('Matriz_Anual_Pagos_IEAH_2026.pdf');
+                };
+
+                imgLogo.onload = function () {
+                    doc.addImage(imgLogo, 'PNG', 40, 20, 40, 40);
+                    doc.setFontSize(13);
+                    doc.setFont(undefined, 'bold');
+                    doc.text("INSTITUCION EDUCATIVA ALTO HORIZONTE", 90, 35);
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.text("Reporte General - Matriz Anual de Pagos 2026", 90, 48);
+
+                    generarTabla();
+                };
+
+                imgLogo.onerror = function () {
+                    doc.setFontSize(13);
+                    doc.text("INSTITUCION EDUCATIVA ALTO HORIZONTE", 40, 35);
+                    doc.text("Reporte General - Matriz Anual de Pagos 2026", 40, 48);
+
+                    generarTabla();
+                };
+
+            } catch (error) {
+                console.error("Error al generar el PDF de la matriz:", error);
+                alert("⚠️ Hubo un error al generar el reporte en PDF: " + error.message);
             }
         }
 
@@ -921,7 +1193,7 @@
             if (!pago) return;
 
             const contenedor = document.getElementById('contenedorPDF');
-            
+
             let filasMesesHTML = "";
             if (pago.meses && Array.isArray(pago.meses)) {
                 pago.meses.forEach(m => {
@@ -929,8 +1201,8 @@
                         <tr>
                             <td style="width: 35%; text-align: left;">${m}</td>
                             <td style="width: 15%; text-align: center;">1</td>
-                            <td style="width: 25%; text-align: center;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO', {maximumFractionDigits: 0})}</td>
-                            <td style="width: 25%; text-align: center;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO', {maximumFractionDigits: 0})}</td>
+                            <td style="width: 25%; text-align: center;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                            <td style="width: 25%; text-align: center;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
                         </tr>
                     `;
                 });
@@ -939,8 +1211,8 @@
                     <tr>
                         <td style="width: 35%; text-align: left;">${pago.mes || 'Cuota'}</td>
                         <td style="width: 15%; text-align: center;">1</td>
-                        <td style="width: 25%; text-align: center;">$${(pago.totalPagar || 35000).toLocaleString('es-CO', {maximumFractionDigits: 0})}</td>
-                        <td style="width: 25%; text-align: center;">$${(pago.totalPagar || 35000).toLocaleString('es-CO', {maximumFractionDigits: 0})}</td>
+                        <td style="width: 25%; text-align: center;">$${(pago.totalPagar || 35000).toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                        <td style="width: 25%; text-align: center;">$${(pago.totalPagar || 35000).toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
                     </tr>
                 `;
             }
@@ -999,15 +1271,15 @@
                     <table class="ticket-totales">
                         <tr>
                             <td style="width: 50%; text-align: left;">TOTAL A PAGAR</td>
-                            <td style="width: 50%; text-align: right;">$${pago.totalPagar.toLocaleString('es-CO', {maximumFractionDigits: 0})}<span style="font-size: 7.5pt; font-weight: normal;"> cop.</span></td>
+                            <td style="width: 50%; text-align: right;">$${pago.totalPagar.toLocaleString('es-CO', { maximumFractionDigits: 0 })}<span style="font-size: 7.5pt; font-weight: normal;"> cop.</span></td>
                         </tr>
                         <tr>
                             <td style="width: 50%; text-align: left;">TOTAL PAGADO</td>
-                            <td style="width: 50%; text-align: right;">$${pago.totalPagado.toLocaleString('es-CO', {maximumFractionDigits: 0})}<span style="font-size: 7.5pt; font-weight: normal;"> cop.</span></td>
+                            <td style="width: 50%; text-align: right;">$${pago.totalPagado.toLocaleString('es-CO', { maximumFractionDigits: 0 })}<span style="font-size: 7.5pt; font-weight: normal;"> cop.</span></td>
                         </tr>
                         <tr>
                             <td style="width: 50%; text-align: left;">CAMBIO</td>
-                            <td style="width: 50%; text-align: right;">$${pago.cambio.toLocaleString('es-CO', {maximumFractionDigits: 0})}<span style="font-size: 7.5pt; font-weight: normal;"> cop.</span></td>
+                            <td style="width: 50%; text-align: right;">$${pago.cambio.toLocaleString('es-CO', { maximumFractionDigits: 0 })}<span style="font-size: 7.5pt; font-weight: normal;"> cop.</span></td>
                         </tr>
                     </table>
 
@@ -1029,17 +1301,17 @@
             contenedor.style.visibility = "visible";
 
             const altoPx = elemento.offsetHeight;
-            const altoMm = Math.ceil(altoPx * 0.264583) + 3; 
+            const altoMm = Math.ceil(altoPx * 0.264583) + 3;
 
             const opt = {
-                margin:       [0, 0, 0, 0],
-                filename:     `TICKET_${pago.numTicket}_${pago.docente.replace(/\s+/g, '_')}.pdf`,
-                image:        { type: 'png' }, 
-                html2canvas:  { 
+                margin: [0, 0, 0, 0],
+                filename: `TICKET_${pago.numTicket}_${pago.docente.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'png' },
+                html2canvas: {
                     scale: 6,
                     dpi: 600,
                     letterRendering: true,
-                    scrollY: 0, 
+                    scrollY: 0,
                     scrollX: 0,
                     windowTop: 0,
                     windowLeft: 0,
@@ -1054,7 +1326,7 @@
             });
         }
 
-        window.onload = function() {
+        window.onload = function () {
             cargarMensajes();
             renderizarDocentes();
             renderizarPagos();
