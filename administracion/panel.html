@@ -283,7 +283,6 @@
             background: #ffffff !important;
         }
 
-        /* MARGEN SUPERIOR AÑADIDO Y NITIDEZ VECTORIAL */
         .ticket-exacto {
             width: 58mm;
             background: #ffffff !important;
@@ -376,7 +375,6 @@
             line-height: 1.2;
         }
 
-        /* FUENTE UN PUNTO MÁS PEQUEÑA PARA TEXTO LEGAL */
         .ticket-pie-legal {
             font-size: 7.5pt !important;
             line-height: 1.15;
@@ -384,7 +382,7 @@
             margin-bottom: 2px;
         }
 
-        /* ESTILOS DE LA MATRIZ DE PAGOS (VERDE Y ROJO) */
+        /* ESTILOS DE LA MATRIZ DE PAGOS */
         .celda-pagado {
             background-color: #27ae60 !important;
             color: #ffffff !important;
@@ -420,8 +418,6 @@
     </style>
 </head>
 
-
-
 <body>
 
     <script>
@@ -452,7 +448,6 @@
             <button class="menu-btn" onclick="mostrarSeccion('matriz', this)">
                 📊 Matriz Anual de Pagos
             </button>
-            <!-- BOTÓN PARA IR A CONSULTA INDIVIDUAL -->
             <button class="menu-btn" onclick="window.location.href='consultas.html'">
                 🔍 Consultas
             </button>
@@ -693,9 +688,34 @@
     <!-- CONTENEDOR OCULTO PARA GENERAR PDF TICKET -->
     <div id="contenedorPDF"></div>
 
-    <script>
+    <!-- SDK OFICIAL DE FIREBASE V10 Y LÓGICA DE NEGOCIO -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            addDoc,
+            deleteDoc,
+            doc
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // PEGA AQUÍ TUS CREDENCIALES OBTENIDAS DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAjZtbtNDCIQAh9OIQZ6bzMCX0QLQQQHe8",
+            authDomain: "ieah-bienestar.firebaseapp.com",
+            projectId: "ieah-bienestar",
+            storageBucket: "ieah-bienestar.firebasestorage.app",
+            messagingSenderId: "142124375725",
+            appId: "1:142124375725:web:9522a9494107d50970b024",
+            measurementId: "G-FXDJVHMHJH"
+        };
+
+        // Inicialización de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         const VALOR_CUOTA_FIJA = 35000;
-        const API_URL = 'https://ieah-backend.onrender.com';
         const MESES_ANIO = [
             "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
@@ -704,7 +724,8 @@
         let docentesCache = [];
         let pagosCache = [];
 
-        function mostrarSeccion(seccion, elemento) {
+        // --- NAVEGACIÓN ENTRE VISTAS ---
+        window.mostrarSeccion = function (seccion, elemento) {
             document.querySelectorAll('.seccion-modulo').forEach(s => s.classList.remove('activa'));
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('activo'));
 
@@ -720,54 +741,56 @@
             } else if (seccion === 'matriz') {
                 document.getElementById('sec-matriz').classList.add('activa');
                 document.getElementById('tituloVista').innerText = "Matriz General de Pagos";
-                renderizarMatrizPagos();
+                window.renderizarMatrizPagos();
             }
-            elemento.classList.add('activo');
-        }
+            if (elemento) elemento.classList.add('activo');
+        };
 
-        // --- MANEJO DE MENSAJES ---
-        async function cargarMensajes() {
+        // --- MANEJO DE MENSAJES (FIREBASE) ---
+        window.cargarMensajes = async function () {
             try {
-                const response = await fetch(`${API_URL}/ver-mensajes`);
-                const mensajes = await response.json();
-                document.getElementById('contadorMensajes').innerText = mensajes.length;
+                const querySnapshot = await getDocs(collection(db, "mensajes"));
                 const tabla = document.getElementById('cuerpoTablaBuzon');
                 tabla.innerHTML = "";
 
-                if (mensajes.length === 0) {
+                let contador = 0;
+                querySnapshot.forEach((docSnap) => {
+                    contador++;
+                    const m = docSnap.data();
+                    tabla.innerHTML += `
+                        <tr>
+                            <td>${m.nombre || ''}</td>
+                            <td>${m.correo || ''}</td>
+                            <td>${m.contenido || ''}</td>
+                            <td style="text-align:center;">
+                                <button class="btn-del" onclick="eliminarMensaje('${docSnap.id}')">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('contadorMensajes').innerText = contador;
+                if (contador === 0) {
                     tabla.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay mensajes en la base de datos.</td></tr>";
-                } else {
-                    mensajes.forEach(m => {
-                        tabla.innerHTML += `
-                            <tr>
-                                <td>${m.nombre}</td>
-                                <td>${m.correo}</td>
-                                <td>${m.contenido}</td>
-                                <td style="text-align:center;">
-                                    <button class="btn-del" onclick="eliminar(${m.id})">🗑️</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
                 }
             } catch (error) {
-                console.error("Error al cargar mensajes:", error);
+                console.error("Error al cargar mensajes desde Firebase:", error);
             }
-        }
+        };
 
-        async function eliminar(id) {
+        window.eliminarMensaje = async function (idDoc) {
             if (confirm("¿Eliminar este mensaje permanentemente?")) {
                 try {
-                    const response = await fetch(`${API_URL}/eliminar-mensaje/${id}`, { method: 'DELETE' });
-                    if (response.ok) cargarMensajes();
+                    await deleteDoc(doc(db, "mensajes", idDoc));
+                    window.cargarMensajes();
                 } catch (error) {
-                    alert("📡 Error al eliminar el mensaje.");
+                    alert("⚠️ Error al eliminar el mensaje: " + error.message);
                 }
             }
-        }
+        };
 
-        // --- DIRECTORIO DE DOCENTES (CONECTADO A RENDER) ---
-        async function guardarDocente(e) {
+        // --- DIRECTORIO DE DOCENTES (FIREBASE) ---
+        window.guardarDocente = async function (e) {
             e.preventDefault();
             const nombre = document.getElementById('docNombre').value.trim();
             const documento = document.getElementById('docDocumento').value.trim();
@@ -783,82 +806,72 @@
             };
 
             try {
-                const response = await fetch(`${API_URL}/docentes`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(nuevoDocente)
-                });
-
-                if (response.ok) {
-                    document.getElementById('formDocente').reset();
-                    renderizarDocentes();
-                } else {
-                    alert("❌ No se pudo guardar el docente en el servidor.");
-                }
+                await addDoc(collection(db, "docentes"), nuevoDocente);
+                document.getElementById('formDocente').reset();
+                window.renderizarDocentes();
+                alert("✅ Docente guardado correctamente.");
             } catch (error) {
-                alert("📡 Error de conexión con el servidor en Render.");
+                alert("⚠️ Error al guardar el docente: " + error.message);
             }
-        }
+        };
 
-        async function eliminarDocente(documento) {
+        window.eliminarDocente = async function (idDoc) {
             if (confirm("¿Deseas eliminar este docente del directorio?")) {
                 try {
-                    const response = await fetch(`${API_URL}/docentes/${documento}`, { method: 'DELETE' });
-                    if (response.ok) {
-                        renderizarDocentes();
-                    } else {
-                        alert("❌ No se pudo eliminar el docente.");
-                    }
+                    await deleteDoc(doc(db, "docentes", idDoc));
+                    window.renderizarDocentes();
                 } catch (error) {
-                    alert("📡 Error al comunicarse con el servidor.");
+                    alert("⚠️ Error al eliminar el docente: " + error.message);
                 }
             }
-        }
+        };
 
-        async function renderizarDocentes() {
+        window.renderizarDocentes = async function () {
             const tabla = document.getElementById('cuerpoTablaDocentes');
             const selectPago = document.getElementById('pagoSelectDocente');
 
             try {
-                const response = await fetch(`${API_URL}/docentes`);
-                docentesCache = await response.json();
-
-                document.getElementById('contadorDocentes').innerText = docentesCache.length;
+                const querySnapshot = await getDocs(collection(db, "docentes"));
+                docentesCache = [];
                 tabla.innerHTML = "";
                 selectPago.innerHTML = '<option value="">-- Seleccionar Docente --</option>';
 
+                querySnapshot.forEach((docSnap) => {
+                    const d = { id: docSnap.id, ...docSnap.data() };
+                    docentesCache.push(d);
+
+                    tabla.innerHTML += `
+                        <tr>
+                            <td>${d.documento}</td>
+                            <td><strong>${d.nombre}</strong></td>
+                            <td>${d.telefono}</td>
+                            <td>${d.direccion}</td>
+                            <td>
+                                <button class="btn-del" onclick="eliminarDocente('${d.id}')">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                    selectPago.innerHTML += `<option value="${d.documento}">${d.nombre} (${d.documento})</option>`;
+                });
+
+                document.getElementById('contadorDocentes').innerText = docentesCache.length;
                 if (docentesCache.length === 0) {
                     tabla.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No hay docentes registrados.</td></tr>";
-                } else {
-                    docentesCache.forEach(d => {
-                        tabla.innerHTML += `
-                            <tr>
-                                <td>${d.documento}</td>
-                                <td><strong>${d.nombre}</strong></td>
-                                <td>${d.telefono}</td>
-                                <td>${d.direccion}</td>
-                                <td>
-                                    <button class="btn-del" onclick="eliminarDocente('${d.documento}')">🗑️</button>
-                                </td>
-                            </tr>
-                        `;
-                        selectPago.innerHTML += `<option value="${d.documento}">${d.nombre} (${d.documento})</option>`;
-                    });
                 }
             } catch (error) {
                 console.error("Error al obtener docentes:", error);
                 tabla.innerHTML = "<tr><td colspan='5' style='text-align:center; color:red;'>Error al cargar los docentes.</td></tr>";
             }
-        }
+        };
 
-        function autocompletarDocente() {
+        window.autocompletarDocente = function () {
             const docSel = document.getElementById('pagoSelectDocente').value;
             document.getElementById('pagoDocumento').value = docSel;
-            actualizarPrevisualizacion();
-        }
+            window.actualizarPrevisualizacion();
+        };
 
-        // --- CONTABILIDAD & MULTI-MES (CONECTADO A RENDER) ---
-        function actualizarPrevisualizacion() {
+        // --- CONTABILIDAD & MULTI-MES (FIREBASE) ---
+        window.actualizarPrevisualizacion = function () {
             const docId = document.getElementById('pagoDocumento').value;
             const docenteInfo = docentesCache.find(d => d.documento === docId);
 
@@ -887,10 +900,10 @@
             }
 
             document.getElementById('lblTotalCalculado').innerText = totalCalculado.toLocaleString('es-CO', { maximumFractionDigits: 0 });
-            calcularCambio();
-        }
+            window.calcularCambio();
+        };
 
-        function calcularCambio() {
+        window.calcularCambio = function () {
             const checkboxes = document.querySelectorAll('.chk-mes:checked');
             const totalSumaMeses = checkboxes.length * VALOR_CUOTA_FIJA;
             const recibido = parseFloat(document.getElementById('pagoValorRecibido').value) || 0;
@@ -904,9 +917,9 @@
             } else {
                 document.getElementById('pagoCambio').value = "$" + cambio.toLocaleString('es-CO', { maximumFractionDigits: 0 }) + " cop.";
             }
-        }
+        };
 
-        async function registrarPago(e) {
+        window.registrarPago = async function (e) {
             e.preventDefault();
 
             const docId = document.getElementById('pagoDocumento').value;
@@ -941,7 +954,7 @@
             const numTicket = pagosCache.length > 0 ? (Math.max(...pagosCache.map(p => p.numTicket || 50)) + 1) : 57;
 
             const nuevoPago = {
-                id: Date.now(),
+                idFecha: Date.now(),
                 numTicket: numTicket,
                 fecha: fechaStr,
                 docente: docenteInfo.nombre,
@@ -955,95 +968,81 @@
             };
 
             try {
-                const response = await fetch(`${API_URL}/pagos`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(nuevoPago)
-                });
+                const docRef = await addDoc(collection(db, "pagos"), nuevoPago);
+                nuevoPago.id = docRef.id;
 
-                if (response.ok) {
-                    document.getElementById('formPago').reset();
-                    document.querySelectorAll('.chk-mes').forEach(c => c.checked = false);
-                    actualizarPrevisualizacion();
-                    await renderizarPagos();
-                    descargarTicketPDF(nuevoPago.id);
-                } else {
-                    alert("❌ No se pudo guardar el pago en el servidor.");
-                }
+                document.getElementById('formPago').reset();
+                document.querySelectorAll('.chk-mes').forEach(c => c.checked = false);
+                window.actualizarPrevisualizacion();
+                await window.renderizarPagos();
+                window.descargarTicketPDF(nuevoPago.id);
             } catch (error) {
-                alert("📡 Error al conectar con el servidor para registrar el pago.");
+                alert("⚠️ Error al registrar el pago en Firebase: " + error.message);
             }
-        }
+        };
 
-        async function eliminarPago(id) {
+        window.eliminarPago = async function (idDoc) {
             if (confirm("¿Deseas eliminar este registro de pago?")) {
                 try {
-                    const response = await fetch(`${API_URL}/pagos/${id}`, { method: 'DELETE' });
-                    if (response.ok) {
-                        renderizarPagos();
-                    } else {
-                        alert("❌ No se pudo eliminar el registro de pago.");
-                    }
+                    await deleteDoc(doc(db, "pagos", idDoc));
+                    window.renderizarPagos();
                 } catch (error) {
-                    alert("📡 Error al comunicarse con el servidor.");
+                    alert("⚠️ Error al eliminar el pago: " + error.message);
                 }
             }
-        }
+        };
 
-        async function renderizarPagos() {
+        window.renderizarPagos = async function () {
             const tabla = document.getElementById('cuerpoTablaPagos');
             let totalGeneral = 0;
 
             try {
-                const response = await fetch(`${API_URL}/pagos`);
-                pagosCache = await response.json();
-
+                const querySnapshot = await getDocs(collection(db, "pagos"));
+                pagosCache = [];
                 tabla.innerHTML = "";
 
-                if (pagosCache.length === 0) {
-                    tabla.innerHTML = "<tr><td colspan='7' style='text-align:center;'>No hay pagos registrados.</td></tr>";
-                } else {
-                    pagosCache.forEach(p => {
-                        totalGeneral += p.totalPagar;
-                        const textoMeses = p.meses ? p.meses.join(', ') : p.mes;
-                        tabla.innerHTML += `
-                            <tr>
-                                <td><strong>#${p.numTicket}</strong></td>
-                                <td>${p.fecha}</td>
-                                <td>${p.docente}</td>
-                                <td>Cuota(s): ${textoMeses}</td>
-                                <td>$${p.totalPagar.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
-                                <td>
-                                    <button class="btn-pdf" onclick="descargarTicketPDF(${p.id})">🎟️ Imprimir Ticket</button>
-                                </td>
-                                <td style="text-align:center;">
-                                    <button class="btn-del" onclick="eliminarPago(${p.id})">🗑️</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                }
+                querySnapshot.forEach((docSnap) => {
+                    const p = { id: docSnap.id, ...docSnap.data() };
+                    pagosCache.push(p);
+
+                    totalGeneral += p.totalPagar || 0;
+                    const textoMeses = p.meses ? p.meses.join(', ') : p.mes;
+
+                    tabla.innerHTML += `
+                        <tr>
+                            <td><strong>#${p.numTicket}</strong></td>
+                            <td>${p.fecha}</td>
+                            <td>${p.docente}</td>
+                            <td>Cuota(s): ${textoMeses}</td>
+                            <td>$${(p.totalPagar || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                            <td>
+                                <button class="btn-pdf" onclick="descargarTicketPDF('${p.id}')">🎟️ Imprimir Ticket</button>
+                            </td>
+                            <td style="text-align:center;">
+                                <button class="btn-del" onclick="eliminarPago('${p.id}')">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                });
 
                 document.getElementById('totalRecaudado').innerText = "$" + totalGeneral.toLocaleString('es-CO', { maximumFractionDigits: 0 });
+                if (pagosCache.length === 0) {
+                    tabla.innerHTML = "<tr><td colspan='7' style='text-align:center;'>No hay pagos registrados.</td></tr>";
+                }
             } catch (error) {
                 console.error("Error al cargar historial de pagos:", error);
                 tabla.innerHTML = "<tr><td colspan='7' style='text-align:center; color:red;'>Error al cargar los pagos.</td></tr>";
             }
-        }
+        };
 
         // --- GENERACIÓN DE MATRIZ DE PAGOS EN VIVO ---
-        async function renderizarMatrizPagos() {
+        window.renderizarMatrizPagos = async function () {
             const tbody = document.getElementById('cuerpoTablaMatriz');
             tbody.innerHTML = "<tr><td colspan='17' style='text-align:center;'>Cargando matriz...</td></tr>";
 
             try {
-                const [resDocentes, resPagos] = await Promise.all([
-                    fetch(`${API_URL}/docentes`),
-                    fetch(`${API_URL}/pagos`)
-                ]);
-
-                docentesCache = await resDocentes.json();
-                pagosCache = await resPagos.json();
+                await window.renderizarDocentes();
+                await window.renderizarPagos();
 
                 tbody.innerHTML = "";
 
@@ -1099,15 +1098,10 @@
                 console.error("Error al renderizar la matriz de pagos:", error);
                 tbody.innerHTML = "<tr><td colspan='17' style='text-align:center; color:red;'>Error al cargar los datos de la matriz.</td></tr>";
             }
-        }
+        };
 
-        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (CORREGIDO) ---
-        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (CORREGIDO DEFINITIVO) ---
-        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (SOLUCIÓN DEFINITIVA) ---
-        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (SOLUCIÓN DEFINITIVA) ---
-        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (CON ESCUDO Y COLORES CORREGIDOS) ---
-        // --- DESCARGAR MATRIZ DE PAGOS EN PDF (COLORES Y ESCUDO FORZADOS) ---
-        function descargarMatrizPDF() {
+        // --- DESCARGAR MATRIZ DE PAGOS EN PDF ---
+        window.descargarMatrizPDF = function () {
             try {
                 const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
 
@@ -1116,7 +1110,6 @@
                     return;
                 }
 
-                // Crear documento en orientación Horizontal (Landscape), hoja A4
                 const doc = new jsPDFClass({
                     orientation: 'landscape',
                     unit: 'pt',
@@ -1124,10 +1117,9 @@
                 });
 
                 const imgLogo = new Image();
-                imgLogo.src = '../img/escudo.png'; // Asegúrate de ajustar esta ruta si es local (ej: ../img/escudo.png)
+                imgLogo.src = '../img/escudo.png';
 
                 const generarTabla = () => {
-                    // Generar la tabla con autoTable
                     doc.autoTable({
                         html: '#tablaMatrizPDF',
                         startY: 70,
@@ -1135,21 +1127,17 @@
                         styles: { fontSize: 7, halign: 'center', valign: 'middle' },
                         headStyles: { fillColor: [26, 92, 46], textColor: [255, 255, 255], fontStyle: 'bold' },
                         willDrawCell: function (data) {
-                            // Forzar colores justo antes de dibujar cada celda en el canvas del PDF
                             if (data.section === 'body') {
                                 const cellText = (data.cell && data.cell.text) ? data.cell.text.join('').trim() : '';
 
-                                // Evaluar meses pendientes (-$35.000-)
                                 if (cellText.includes('-$35.000-')) {
-                                    doc.setFillColor(231, 76, 60); // Rojo
-                                    doc.setTextColor(255, 255, 255); // Blanco
+                                    doc.setFillColor(231, 76, 60);
+                                    doc.setTextColor(255, 255, 255);
                                     data.cell.styles.fillColor = [231, 76, 60];
                                     data.cell.styles.textColor = [255, 255, 255];
-                                }
-                                // Evaluar meses pagados ($35.000) excluyendo columnas de totales (índices 2 a 13)
-                                else if (cellText.includes('$35.000') && data.column.index >= 2 && data.column.index <= 13) {
-                                    doc.setFillColor(39, 174, 96); // Verde
-                                    doc.setTextColor(255, 255, 255); // Blanco
+                                } else if (cellText.includes('$35.000') && data.column.index >= 2 && data.column.index <= 13) {
+                                    doc.setFillColor(39, 174, 96);
+                                    doc.setTextColor(255, 255, 255);
                                     data.cell.styles.fillColor = [39, 174, 96];
                                     data.cell.styles.textColor = [255, 255, 255];
                                 }
@@ -1157,7 +1145,6 @@
                         }
                     });
 
-                    // Guardar archivo PDF
                     doc.save('Matriz_Anual_Pagos_IEAH_2026.pdf');
                 };
 
@@ -1185,10 +1172,10 @@
                 console.error("Error al generar el PDF de la matriz:", error);
                 alert("⚠️ Hubo un error al generar el reporte en PDF: " + error.message);
             }
-        }
+        };
 
         // --- GENERACIÓN DE TICKET ---
-        function descargarTicketPDF(id) {
+        window.descargarTicketPDF = function (id) {
             const pago = pagosCache.find(p => p.id === id);
             if (!pago) return;
 
@@ -1324,13 +1311,14 @@
             html2pdf().set(opt).from(elemento).save().then(() => {
                 contenedor.style.visibility = "hidden";
             });
-        }
-
-        window.onload = function () {
-            cargarMensajes();
-            renderizarDocentes();
-            renderizarPagos();
         };
+
+        // Cargar datos al iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            window.cargarMensajes();
+            window.renderizarDocentes();
+            window.renderizarPagos();
+        });
     </script>
 </body>
 
