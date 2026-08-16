@@ -117,7 +117,6 @@
             font-weight: bold;
         }
 
-        /* ESTILOS DEL CONTENEDOR OCULTO PARA TICKET */
         #contenedorPDF {
             position: absolute;
             left: 0;
@@ -127,31 +126,6 @@
             width: 58mm;
             background: #ffffff !important;
         }
-
-        .ticket-exacto {
-            width: 58mm;
-            background: #ffffff !important;
-            color: #000000 !important;
-            font-family: Arial, Helvetica, sans-serif !important;
-            font-size: 8.5pt !important;
-            line-height: 1.25;
-            padding: 5mm 1.5mm 2mm 1.5mm;
-            text-align: center;
-            margin: 0;
-            box-sizing: border-box;
-            display: block;
-        }
-
-        .ticket-encabezado { text-align: center; margin-bottom: 2px; }
-        .ticket-encabezado h3 { font-size: 9.5pt !important; font-weight: bold; text-transform: uppercase; margin-bottom: 1px; line-height: 1.1; }
-        .ticket-linea { border-top: 1px dotted #000000 !important; margin: 3px 0; width: 100%; }
-        .ticket-datos { text-align: center; margin-bottom: 1px; word-wrap: break-word; }
-        .ticket-tabla { width: 100%; border-collapse: collapse; font-size: 8pt !important; margin: 1px 0; table-layout: fixed; }
-        .ticket-tabla th, .ticket-tabla td { padding: 1px 0; text-align: center !important; font-size: 8pt !important; color: #000 !important; background: transparent !important; }
-        .ticket-totales { width: 100%; border-collapse: collapse; font-size: 8.5pt !important; margin-top: 1px; table-layout: fixed; }
-        .ticket-totales td { padding: 1px 0; color: #000 !important; }
-        .ticket-pie { text-align: center; font-size: 8.5pt !important; margin-top: 3px; line-height: 1.2; }
-        .ticket-pie-legal { font-size: 7.5pt !important; line-height: 1.15; margin-top: 2px; margin-bottom: 2px; }
     </style>
 </head>
 
@@ -161,8 +135,7 @@
         <a href="panel.html" class="btn-volver">← Volver al Panel</a>
         <h2>🔍 Consulta de Pagos por Docente</h2>
 
-        <!-- event.preventDefault() en el onsubmit evita que la página titilee o se recargue -->
-        <form class="form-busqueda" onsubmit="buscarPagos(event)">
+        <form class="form-busqueda" id="formBusqueda">
             <input type="text" id="inputBuscar" placeholder="Ingrese Cédula/Documento o Nombre del Docente..." required>
             <button type="submit">Buscar</button>
         </form>
@@ -186,28 +159,48 @@
         </table>
     </div>
 
-    <!-- Contenedor oculto para la generación de PDFs -->
     <div id="contenedorPDF"></div>
 
-    <script>
-        const API_URL = 'https://ieah-backend.onrender.com';
+    <!-- Firebase SDK Modular -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // CREDENCIALES DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAjZtbtNDCIQAh9OIQZ6bzMCX0QLQQQHe8",
+            authDomain: "ieah-bienestar.firebaseapp.com",
+            projectId: "ieah-bienestar",
+            storageBucket: "ieah-bienestar.firebasestorage.app",
+            messagingSenderId: "142124375725",
+            appId: "1:142124375725:web:9522a9494107d50970b024",
+            measurementId: "G-FXDJVHMHJH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         const VALOR_CUOTA_FIJA = 35000;
         let resultadosCache = [];
 
-        // BUSQUEDA SIN RECARGAR LA PÁGINA
+        // BUSQUEDA DIRECTA EN FIRESTORE
         async function buscarPagos(e) {
-            e.preventDefault(); // EVITA EL REFRESTO / TITILEO DE LA PÁGINA
+            e.preventDefault();
 
             const criterio = document.getElementById('inputBuscar').value.trim().toLowerCase();
             const tabla = document.getElementById('cuerpoTablaConsulta');
 
             if (!criterio) return;
 
-            tabla.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Buscando registros...</td></tr>";
+            tabla.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Buscando registros en Firebase...</td></tr>";
 
             try {
-                const response = await fetch(`${API_URL}/pagos`);
-                const pagos = await response.json();
+                const querySnapshot = await getDocs(collection(db, "pagos"));
+                const pagos = [];
+
+                querySnapshot.forEach((doc) => {
+                    pagos.push({ id: doc.id, ...doc.data() });
+                });
 
                 // Filtrar por Cédula/Documento o por Nombre
                 resultadosCache = pagos.filter(p => 
@@ -223,223 +216,212 @@
                 }
 
                 resultadosCache.forEach(p => {
-                    const textoMeses = p.meses ? p.meses.join(', ') : (p.mes || 'N/A');
+                    const textoMeses = p.meses ? (Array.isArray(p.meses) ? p.meses.join(', ') : p.meses) : (p.mes || 'N/A');
+                    const numTicketMostrar = p.numTicket || p.ticket || 'N/A';
+                    
                     tabla.innerHTML += `
                         <tr>
-                            <td><strong>#${p.numTicket}</strong></td>
-                            <td>${p.fecha}</td>
-                            <td>${p.docente}</td>
+                            <td><strong>#${numTicketMostrar}</strong></td>
+                            <td>${p.fecha || 'N/A'}</td>
+                            <td>${p.docente || 'N/A'}</td>
                             <td>${textoMeses}</td>
-                            <td>$${p.totalPagar ? p.totalPagar.toLocaleString('es-CO') : '0'}</td>
+                            <td>$${p.totalPagar ? Number(p.totalPagar).toLocaleString('es-CO') : '0'}</td>
                             <td>
-                                <button class="btn-pdf" onclick="descargarTicketPDF(${p.id})">🎟️ Descargar Ticket</button>
+                                <button class="btn-pdf" data-id="${p.id}">🎟️ Descargar Ticket</button>
                             </td>
                         </tr>
                     `;
                 });
 
+                // Asignar eventos a los botones generados
+                document.querySelectorAll('.btn-pdf').forEach(boton => {
+                    boton.addEventListener('click', (evt) => {
+                        const idDoc = evt.target.getAttribute('data-id');
+                        descargarTicketPDF(idDoc);
+                    });
+                });
+
             } catch (error) {
-                console.error("Error al consultar pagos:", error);
-                tabla.innerHTML = "<tr><td colspan='6' style='text-align:center; color:red;'>Error al conectar con el servidor.</td></tr>";
+                console.error("Error al consultar pagos en Firebase:", error);
+                tabla.innerHTML = "<tr><td colspan='6' style='text-align:center; color:red;'>Error al conectar con la base de datos de Firebase.</td></tr>";
             }
         }
 
-        // DESCARGA DE PDF TICKET FUNCIONAL
-       // DESCARGA DE REPORTE INDIVIDUAL EN PDF
-// DESCARGA DE CONSULTA INDIVIDUAL CON FORMATO DE MATRIZ
-// DESCARGA DE CONSULTA INDIVIDUAL CON FORMATO DE MATRIZ
-// DESCARGA DE CONSULTA INDIVIDUAL AJUSTADA
-// DESCARGA DE CONSULTA INDIVIDUAL (COLORES Y PIE CENTRADO)
-// DESCARGA DE CONSULTA INDIVIDUAL (COLORES Y PIE CENTRADO CORREGIDOS)
-// DESCARGA DE CONSULTA INDIVIDUAL (ESTADO DINÁMICO A LA FECHA)
-async function descargarTicketPDF(id) {
-    const pago = resultadosCache.find(p => p.id === id);
-    if (!pago) {
-        alert("⚠️ No se encontró la información del pago.");
-        return;
-    }
+        // DESCARGA DE REPORTE INDIVIDUAL EN PDF
+        async function descargarTicketPDF(id) {
+            const pago = resultadosCache.find(p => p.id === id);
+            if (!pago) {
+                alert("⚠️ No se encontró la información del pago.");
+                return;
+            }
 
-    try {
-        let jsPDFClass;
-        if (window.jspdf && window.jspdf.jsPDF) {
-            jsPDFClass = window.jspdf.jsPDF;
-        } else if (window.jsPDF) {
-            jsPDFClass = window.jsPDF;
-        }
-
-        if (!jsPDFClass) {
-            alert("⚠️ No se encontraron las librerías de PDF. Asegúrate de incluir los scripts en el <head>.");
-            return;
-        }
-
-        // 1. Obtener historial acumulado del docente
-        let mesesPagadosLista = [];
-        resultadosCache.forEach(p => {
-            if (p.documento === pago.documento) {
-                if (p.meses && Array.isArray(p.meses)) {
-                    mesesPagadosLista.push(...p.meses);
-                } else if (p.mes) {
-                    mesesPagadosLista.push(p.mes);
+            try {
+                let jsPDFClass;
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    jsPDFClass = window.jspdf.jsPDF;
+                } else if (window.jsPDF) {
+                    jsPDFClass = window.jsPDF;
                 }
-            }
-        });
 
-        const MESES_ANIO = [
-            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-        ];
-
-        // 2. Fecha y hora actual formateada
-        const ahora = new Date();
-        const fechaHoraFormateada = `${ahora.toLocaleDateString('es-CO')} ${ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
-
-        // 3. Regla de "Mes Terminado":
-        // Si estamos en Agosto (índice 7), el último mes exigible a la fecha es Julio (índice 6).
-        const mesActualIndice = ahora.getMonth();
-        const ultimoMesExigibleIndice = mesActualIndice - 1;
-
-        let mesesTranscurridosAPagados = 0;
-        if (ultimoMesExigibleIndice >= 0) {
-            for (let i = 0; i <= ultimoMesExigibleIndice; i++) {
-                const nombreMes = MESES_ANIO[i];
-                const pagado = mesesPagadosLista.some(m => m.toLowerCase().includes(nombreMes.toLowerCase()));
-                if (pagado) {
-                    mesesTranscurridosAPagados++;
+                if (!jsPDFClass) {
+                    alert("⚠️ No se encontraron las librerías de PDF.");
+                    return;
                 }
-            }
-        }
 
-        const mesesExigiblesTotales = Math.max(0, mesActualIndice); 
-        const mesesPendientesALaFecha = Math.max(0, mesesExigiblesTotales - mesesTranscurridosAPagados);
+                // 1. Obtener historial acumulado del docente
+                let mesesPagadosLista = [];
+                resultadosCache.forEach(p => {
+                    if (String(p.documento) === String(pago.documento)) {
+                        if (p.meses && Array.isArray(p.meses)) {
+                            mesesPagadosLista.push(...p.meses);
+                        } else if (p.meses) {
+                            mesesPagadosLista.push(p.meses);
+                        } else if (p.mes) {
+                            mesesPagadosLista.push(p.mes);
+                        }
+                    }
+                });
 
-        // 4. ESTADO A LA FECHA Y TOTALES ANUALES:
-        // Si no debe ningún mes vencido hasta la fecha actual, su estado es "AL DÍA"
-        const estadoTexto = mesesPendientesALaFecha === 0 ? "AL DÍA" : "PENDIENTE";
+                const MESES_ANIO = [
+                    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                ];
 
-        const cantMesesPagadosTotal = mesesPagadosLista.length;
-        const totalPagadoDocente = cantMesesPagadosTotal * VALOR_CUOTA_FIJA;
-        const saldoPendienteAnual = (12 * VALOR_CUOTA_FIJA) - totalPagadoDocente;
+                const ahora = new Date();
+                const fechaHoraFormateada = `${ahora.toLocaleDateString('es-CO')} ${ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
 
-        // 5. Instanciar PDF (Landscape A4)
-        const doc = new jsPDFClass({
-            orientation: 'landscape',
-            unit: 'pt',
-            format: 'a4'
-        });
+                const mesActualIndice = ahora.getMonth();
+                const ultimoMesExigibleIndice = mesActualIndice - 1;
 
-        // 6. Celdas para la tabla
-        let celdasMeses = [];
-        MESES_ANIO.forEach(mesNombre => {
-            const estaPagado = mesesPagadosLista.some(m => m.toLowerCase().includes(mesNombre.toLowerCase()));
-            if (estaPagado) {
-                celdasMeses.push(`$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}`);
-            } else {
-                celdasMeses.push(`-$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}-`);
-            }
-        });
-
-        // 7. Generación del reporte
-        const generarDocumento = () => {
-            // Encabezado
-            doc.setFontSize(13);
-            doc.setFont(undefined, 'bold');
-            doc.text("INSTITUCION EDUCATIVA ALTO HORIZONTE", 90, 35);
-            doc.setFontSize(9);
-            doc.setFont(undefined, 'normal');
-            doc.text("GRUPO BIENESTAR 2026 - Reporte Individual de Aportes", 90, 48);
-
-            // Bloque de datos
-            doc.setFontSize(9);
-            doc.setFont(undefined, 'bold');
-            doc.text(`FECHA / HORA: ${fechaHoraFormateada}`, 40, 75);
-            doc.text(`IDENTIFICACIÓN: ${pago.documento}`, 260, 75);
-            doc.text(`DOCENTE: ${pago.docente.toUpperCase()}`, 450, 75);
-
-            doc.setFont(undefined, 'normal');
-            doc.text(`Meses Pagados Totales: ${cantMesesPagadosTotal}`, 40, 92);
-            doc.text(`Meses Pendientes a la Fecha: ${mesesPendientesALaFecha}`, 260, 92);
-            doc.text(`Estado General: ${estadoTexto}`, 450, 92);
-
-            // Tabla con colores procesados en didParseCell
-            doc.autoTable({
-                head: [
-                    ['Identificación', 'Nombre', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Total Pagado', 'Estado', 'Saldo Pendiente']
-                ],
-                body: [
-                    [
-                        pago.documento,
-                        pago.docente,
-                        ...celdasMeses,
-                        `$${totalPagadoDocente.toLocaleString('es-CO')}`,
-                        estadoTexto,
-                        `$${saldoPendienteAnual.toLocaleString('es-CO')}`
-                    ]
-                ],
-                startY: 110,
-                theme: 'grid',
-                styles: { fontSize: 7, halign: 'center', valign: 'middle' },
-                headStyles: { fillColor: [26, 92, 46], textColor: [255, 255, 255], fontStyle: 'bold' },
-                didParseCell: function (data) {
-                    // Aplicar colores exclusivamente a las celdas de los meses (índices 2 a 13)
-                    if (data.section === 'body' && data.column.index >= 2 && data.column.index <= 13) {
-                        const mesColIndice = data.column.index - 2;
-                        const mesNombre = MESES_ANIO[mesColIndice];
-                        const estaPagado = mesesPagadosLista.some(m => m.toLowerCase().includes(mesNombre.toLowerCase()));
-
-                        if (estaPagado) {
-                            // 1. Pagados -> Verde
-                            data.cell.styles.fillColor = [39, 174, 96];
-                            data.cell.styles.textColor = [255, 255, 255];
-                        } else if (mesColIndice <= ultimoMesExigibleIndice) {
-                            // 2. Pendientes vencidos (mes finalizado no pagado) -> Rojo
-                            data.cell.styles.fillColor = [231, 76, 60];
-                            data.cell.styles.textColor = [255, 255, 255];
-                        } else {
-                            // 3. Desde el mes actual hasta diciembre -> Naranja
-                            data.cell.styles.fillColor = [230, 126, 34];
-                            data.cell.styles.textColor = [255, 255, 255];
+                let mesesTranscurridosAPagados = 0;
+                if (ultimoMesExigibleIndice >= 0) {
+                    for (let i = 0; i <= ultimoMesExigibleIndice; i++) {
+                        const nombreMes = MESES_ANIO[i];
+                        const pagado = mesesPagadosLista.some(m => String(m).toLowerCase().includes(nombreMes.toLowerCase()));
+                        if (pagado) {
+                            mesesTranscurridosAPagados++;
                         }
                     }
                 }
-            });
 
-            // Mensaje final CENTRADO
-            const centroX = 421;
-            const finalY = doc.lastAutoTable.finalY + 30;
+                const mesesExigiblesTotales = Math.max(0, mesActualIndice); 
+                const mesesPendientesALaFecha = Math.max(0, mesesExigiblesTotales - mesesTranscurridosAPagados);
+                const estadoTexto = mesesPendientesALaFecha === 0 ? "AL DÍA" : "PENDIENTE";
 
-            doc.setFontSize(8);
-            doc.setFont(undefined, 'italic');
-            doc.text("*** Estimad@ profesor@ - Administrativ@ - rector@", centroX, finalY, { align: 'center' });
-            doc.text("con su aporte contribuye al bienestar de todo el talento humano de nuestra institucion ***", centroX, finalY + 12, { align: 'center' });
+                const cantMesesPagadosTotal = mesesPagadosLista.length;
+                const totalPagadoDocente = cantMesesPagadosTotal * VALOR_CUOTA_FIJA;
+                const saldoPendienteAnual = (12 * VALOR_CUOTA_FIJA) - totalPagadoDocente;
 
-            doc.setFont(undefined, 'bold');
-            doc.text("¡GRACIAS POR SU APORTE!", centroX, finalY + 28, { align: 'center' });
+                const doc = new jsPDFClass({
+                    orientation: 'landscape',
+                    unit: 'pt',
+                    format: 'a4'
+                });
 
-            // Doble espacio antes del copyright centrado
-            doc.setFont(undefined, 'normal');
-            doc.text("© Cemled corp 2026", centroX, finalY + 54, { align: 'center' });
+                let celdasMeses = [];
+                MESES_ANIO.forEach(mesNombre => {
+                    const estaPagado = mesesPagadosLista.some(m => String(m).toLowerCase().includes(mesNombre.toLowerCase()));
+                    if (estaPagado) {
+                        celdasMeses.push(`$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}`);
+                    } else {
+                        celdasMeses.push(`-$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}-`);
+                    }
+                });
 
-            // Descarga de PDF
-            doc.save(`Reporte_Individual_${pago.documento}_${pago.docente.replace(/\s+/g, '_')}.pdf`);
-        };
+                const generarDocumento = () => {
+                    doc.setFontSize(13);
+                    doc.setFont(undefined, 'bold');
+                    doc.text("INSTITUCION EDUCATIVA ALTO HORIZONTE", 90, 35);
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.text("GRUPO BIENESTAR 2026 - Reporte Individual de Aportes", 90, 48);
 
-        const imgLogo = new Image();
-        imgLogo.src = '../img/escudo.png';
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`FECHA / HORA: ${fechaHoraFormateada}`, 40, 75);
+                    doc.text(`IDENTIFICACIÓN: ${pago.documento}`, 260, 75);
+                    doc.text(`DOCENTE: ${(pago.docente || '').toUpperCase()}`, 450, 75);
 
-        imgLogo.onload = function () {
-            doc.addImage(imgLogo, 'PNG', 40, 20, 40, 40);
-            generarDocumento();
-        };
+                    doc.setFont(undefined, 'normal');
+                    doc.text(`Meses Pagados Totales: ${cantMesesPagadosTotal}`, 40, 92);
+                    doc.text(`Meses Pendientes a la Fecha: ${mesesPendientesALaFecha}`, 260, 92);
+                    doc.text(`Estado General: ${estadoTexto}`, 450, 92);
 
-        imgLogo.onerror = function () {
-            generarDocumento();
-        };
+                    doc.autoTable({
+                        head: [
+                            ['Identificación', 'Nombre', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Total Pagado', 'Estado', 'Saldo Pendiente']
+                        ],
+                        body: [
+                            [
+                                pago.documento,
+                                pago.docente,
+                                ...celdasMeses,
+                                `$${totalPagadoDocente.toLocaleString('es-CO')}`,
+                                estadoTexto,
+                                `$${saldoPendienteAnual.toLocaleString('es-CO')}`
+                            ]
+                        ],
+                        startY: 110,
+                        theme: 'grid',
+                        styles: { fontSize: 7, halign: 'center', valign: 'middle' },
+                        headStyles: { fillColor: [26, 92, 46], textColor: [255, 255, 255], fontStyle: 'bold' },
+                        didParseCell: function (data) {
+                            if (data.section === 'body' && data.column.index >= 2 && data.column.index <= 13) {
+                                const mesColIndice = data.column.index - 2;
+                                const mesNombre = MESES_ANIO[mesColIndice];
+                                const estaPagado = mesesPagadosLista.some(m => String(m).toLowerCase().includes(mesNombre.toLowerCase()));
 
-    } catch (error) {
-        console.error("Error al generar reporte PDF:", error);
-        alert("⚠️ Ocurrió un error al generar el PDF: " + error.message);
-    }
-}
+                                if (estaPagado) {
+                                    data.cell.styles.fillColor = [39, 174, 96];
+                                    data.cell.styles.textColor = [255, 255, 255];
+                                } else if (mesColIndice <= ultimoMesExigibleIndice) {
+                                    data.cell.styles.fillColor = [231, 76, 60];
+                                    data.cell.styles.textColor = [255, 255, 255];
+                                } else {
+                                    data.cell.styles.fillColor = [230, 126, 34];
+                                    data.cell.styles.textColor = [255, 255, 255];
+                                }
+                            }
+                        }
+                    });
+
+                    const centroX = 421;
+                    const finalY = doc.lastAutoTable.finalY + 30;
+
+                    doc.setFontSize(8);
+                    doc.setFont(undefined, 'italic');
+                    doc.text("*** Estimad@ profesor@ - Administrativ@ - rector@", centroX, finalY, { align: 'center' });
+                    doc.text("con su aporte contribuye al bienestar de todo el talento humano de nuestra institucion ***", centroX, finalY + 12, { align: 'center' });
+
+                    doc.setFont(undefined, 'bold');
+                    doc.text("¡GRACIAS POR SU APORTE!", centroX, finalY + 28, { align: 'center' });
+
+                    doc.setFont(undefined, 'normal');
+                    doc.text("© Cemled corp 2026", centroX, finalY + 54, { align: 'center' });
+
+                    doc.save(`Reporte_Individual_${pago.documento}_${(pago.docente || '').replace(/\s+/g, '_')}.pdf`);
+                };
+
+                const imgLogo = new Image();
+                imgLogo.src = '../img/escudo.png';
+
+                imgLogo.onload = function () {
+                    doc.addImage(imgLogo, 'PNG', 40, 20, 40, 40);
+                    generarDocumento();
+                };
+
+                imgLogo.onerror = function () {
+                    generarDocumento();
+                };
+
+            } catch (error) {
+                console.error("Error al generar reporte PDF:", error);
+                alert("⚠️ Ocurrió un error al generar el PDF: " + error.message);
+            }
+        }
+
+        // EVENTOS DOM
+        document.getElementById('formBusqueda').addEventListener('submit', buscarPagos);
     </script>
 </body>
 
