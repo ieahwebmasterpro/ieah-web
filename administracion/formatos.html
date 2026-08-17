@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formatos Institucionales - IEAH</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --verde-principal: #1a5c2e;
+            --verde-hover: #0d3d1e;
+            --fondo: #f4f6f9;
+            --blanco: #ffffff;
+            --texto: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--fondo);
+            color: var(--texto);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--blanco);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-volver {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--verde-principal);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--verde-principal);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        p.subtitulo {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .grid-formatos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .card-formato {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: #fafafa;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-formato:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .icono-word {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card-formato h3 {
+            font-size: 1rem;
+            color: var(--verde-principal);
+            margin-bottom: 8px;
+        }
+
+        .card-formato p {
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .btn-descargar {
+            display: inline-block;
+            background-color: var(--verde-principal);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: background 0.3s;
+        }
+
+        .btn-descargar:hover {
+            background-color: var(--verde-hover);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Volver dinámico según el origen -->
+        <a href="panel.html" id="btnVolver" class="btn-volver">🏠 Volver al Panel</a>
+
+        <h2>📄 Formatos Institucionales 2026</h2>
+        <p class="subtitulo">Descargue las plantillas oficiales en formato Word (.docx)</p>
+
+        <div class="grid-formatos">
+
+            <tbody>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-excel" style="color: #1d6f42; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>1. formato Planilla de Asistencia Alterna</h3>
+                    <!--<p>Control mensual de asistencia estudiantil en Excel.</p>-->
+                    <a href="../formatos/1. Formato-planilla-de-asistencia-alterna.xlsx" download class="btn-descargar"
+                        style="background-color: #107c41;">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>2. formato actas </h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/2. Formato-de-actas.docx" download class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>3. formato de atencion a padres de familia</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/3. Formato-atención-a-padres-de-familia.doc" download class="btn-descargar">📥
+                        Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-excel" style="color: #1d6f42; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>4. Formato Permiso docente</h3>
+                    <!--<p>Control mensual de asistencia estudiantil en Excel.</p>-->
+                    <a href="../formatos/4. Formato-permiso-docente.xlsx" download class="btn-descargar"
+                        style="background-color: #107c41;">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>5. formato de salidas concentimiento informado </h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/5. Formato-salidas-consentimiento-informado.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>6. Formato de salidas acuerdo de exoneración</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/6. Formato-salidas-acuerdo-de-exoneración.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>7. Formato de plan de accion y mejoramiento de area</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/7. Formato-plan-de-acción-y-mejoramiento-de-área.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>8. Formato uso de medios</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/8. Formato-uso-de-medios.docx" download class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>9. Formato anecdotario</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/9. Formato-anecdotario.docx" download class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>10. Formato excusa inasistencia de estudiantes</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/10. Formato-excusa-inasistencia-estudiantes.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>11. Formato evidencias individuales proyectos transversales</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/11. Formato-evidencias-individuales-proyectos-transversales.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>12. Formato lideres informe final proyectos transversales</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/11. Formato-evidencias-individuales-proyectos-transversales.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>13. Formato proyectos transversales</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/13. Formato-proyectos-transversales.docx" download class="btn-descargar">📥
+                        Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>14. Consentimiento informado uso de imágenes y videos</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/14. Consentimiento-informado-uso-de-imágenes-y-videos.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>15. Formato asistencia reunión padres de familia</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/15. Formato-asistencia-reunión-padres-de-familia.doc" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>16. Formato plan de área</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/16. Formato-plan-de-área.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>17. Formato plan de aula</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/17. Formato-plan-de-aula.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>18. Formato citación a padres de familia</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/18. Formato-citación-a-padres-de-familia.pub" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>19. Formato remisión comité de convivencia-escolar</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/19. Formato-remisión-comité-de-convivencia-escolar.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-excel" style="color: #1d6f42; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>20. Formato actividades de nivelación y asistencia</h3>
+                    <!--<p>Control mensual de asistencia estudiantil en Excel.</p>-->
+                    <a href="../formatos/20. Formato-actividades-de-nivelación-y-asistencia.xlsx" download class="btn-descargar"
+                        style="background-color: #107c41;">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>21. Formato-membrete</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/21. Formato-membrete.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>22. Formato salida temporal de estudiantes</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/22. Formato-salida-temporal-de-estudiantes.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-excel" style="color: #1d6f42; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>23. Formato salida temporal docentes</h3>
+                    <!--<p>Control mensual de asistencia estudiantil en Excel.</p>-->
+                    <a href="../formatos/23. Formato-salida-temporal-docentes.xlsx" download class="btn-descargar"
+                        style="background-color: #107c41;">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-excel" style="color: #1d6f42; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>24. Formato desempeños por área</h3>
+                    <!--<p>Control mensual de asistencia estudiantil en Excel.</p>-->
+                    <a href="../formatos/24. Formato-desempeños-por-área.xlsx" download class="btn-descargar"
+                        style="background-color: #107c41;">📥 Descargar</a>
+                </div>
+
+                <div class="card-formato">
+                    <i class="fas fa-file-word" style="color: #2b579a; font-size: 3rem; margin-right: 8px;"></i>
+                    <h3>25.Formato registro diario de clase</h3>
+                    <!--<p>Plantilla oficial para la entrega de planes de aula.</p>-->
+                    <a href="../formatos/22. Formato-salida-temporal-de-estudiantes.docx" download
+                        class="btn-descargar">📥 Descargar</a>
+                </div>
+
+
+
+
+
+                <div class="grid-formatos"></div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Protección de ruta y verificación de sesión -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAjZtbtNDCIQAh9OIQZ6bzMCX0QLQQQHe8",
+            authDomain: "ieah-bienestar.firebaseapp.com",
+            projectId: "ieah-bienestar",
+            storageBucket: "ieah-bienestar.firebasestorage.app",
+            messagingSenderId: "142124375725",
+            appId: "1:142124375725:web:9522a9494107d50970b024",
+            measurementId: "G-FXDJVHMHJH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Seguridad: Si intenta ingresar sin iniciar sesión, se le bloquea el acceso
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                alert("⚠️ Debe iniciar sesión para acceder a los formatos institucionales.");
+                window.location.href = "../index.html";
+            }
+        });
+    </script>
+
+</body>
+
+</html>

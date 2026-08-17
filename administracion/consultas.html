@@ -132,7 +132,11 @@
 <body>
 
     <div class="container">
-        <a href="panel.html" class="btn-volver">← Volver al Panel</a>
+        <!-- Contenedor dinámico del botón de regresar -->
+        <div id="contenedorBtnVolver" style="margin-bottom: 15px;">
+            <a href="panel.html" class="btn-volver">⬅️ Volver al Panel</a>
+        </div>
+
         <h2>🔍 Consulta de Pagos por Docente</h2>
 
         <form class="form-busqueda" id="formBusqueda">
@@ -164,7 +168,8 @@
     <!-- Firebase SDK Modular -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // CREDENCIALES DE FIREBASE
         const firebaseConfig = {
@@ -178,7 +183,41 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // EVALUAR ROL DEL USUARIO PARA CONFIGURAR BOTÓN
+        onAuthStateChanged(auth, async (user) => {
+            const contenedorBtn = document.getElementById('contenedorBtnVolver');
+
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+                    if (userDoc.exists()) {
+                        const rol = (userDoc.data().rol || "docente").toLowerCase().trim();
+
+                        if (rol === "docente") {
+                            // Si es docente, lo envía directamente al index.html
+                            contenedorBtn.innerHTML = `
+                                <a href="../index.html" class="btn-volver">🏠 Volver al Inicio</a>
+                            `;
+                        } else {
+                            // Si es superadmin o bienestar, mantiene la opción de volver al panel.html
+                            contenedorBtn.innerHTML = `
+                                <a href="panel.html" class="btn-volver">⬅️ Volver al Panel</a>
+                            `;
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error al verificar rol del usuario:", error);
+                }
+            } else {
+                // Si no hay sesión iniciada, redirecciona a inicio por defecto
+                contenedorBtn.innerHTML = `
+                    <a href="../index.html" class="btn-volver">🏠 Volver al Inicio</a>
+                `;
+            }
+        });
 
         const VALOR_CUOTA_FIJA = 35000;
         let resultadosCache = [];

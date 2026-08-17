@@ -89,6 +89,14 @@
             font-size: 0.8rem;
             font-weight: 600;
         }
+
+        .mensaje-error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            display: none;
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -101,48 +109,95 @@
 
         <form id="loginForm">
             <div class="grupo-input">
-                <label>Usuario / Documento</label>
-                <input type="text" id="username" placeholder="Ingresa tu usuario" required>
+                <label>Correo Electrónico</label>
+                <input type="email" id="correo" placeholder="ingresa@tu-correo.com" required>
             </div>
             <div class="grupo-input">
                 <label>Contraseña</label>
                 <input type="password" id="password" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="boton-primario">Ingresar</button>
+            <button type="submit" class="boton-primario" id="btnIngresar">Ingresar</button>
+            <p id="mensajeError" class="mensaje-error"></p>
         </form>
 
         <a href="../index.html" class="back-link">← Volver al sitio principal</a>
     </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+    <!-- Firebase SDK Modular -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-            const username = document.getElementById('username').value.trim();
+        // CONFIGURA AQUÍ TUS CREDENCIALES DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAjZtbtNDCIQAh9OIQZ6bzMCX0QLQQQHe8",
+            authDomain: "ieah-bienestar.firebaseapp.com",
+            projectId: "ieah-bienestar",
+            storageBucket: "ieah-bienestar.firebasestorage.app",
+            messagingSenderId: "142124375725",
+            appId: "1:142124375725:web:9522a9494107d50970b024",
+            measurementId: "G-FXDJVHMHJH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const loginForm = document.getElementById('loginForm');
+        const mensajeError = document.getElementById('mensajeError');
+        const btnIngresar = document.getElementById('btnIngresar');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            mensajeError.style.display = 'none';
+            btnIngresar.disabled = true;
+            btnIngresar.textContent = 'Verificando...';
+
+            const correo = document.getElementById('correo').value.trim();
             const password = document.getElementById('password').value.trim();
 
             try {
-                const response = await fetch('https://ieah-backend.onrender.com/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
+                // 1. Iniciar Sesión en Firebase Auth
+                const userCredential = await signInWithEmailAndPassword(auth, correo, password);
+                const uid = userCredential.user.uid;
 
-                const data = await response.json();
+                // 2. Consultar el perfil del usuario en Firestore para conocer su Rol
+                const docRef = doc(db, "usuarios", uid);
+                const docSnap = await getDoc(docRef);
 
-                if (response.ok) {
+                if (docSnap.exists()) {
+                    const datosUsuario = docSnap.data();
+                    const rol = datosUsuario.rol;
+
+                    // Guardar rol y estado en localStorage para apoyo local
                     localStorage.setItem('sesionIniciada', 'true');
-                    alert("¡Bienvenido, " + data.user + "!");
+                    localStorage.setItem('rolUsuario', rol);
+
+                    // 3. Redirección unificada al Panel de Control para todos los roles
                     window.location.href = "panel.html";
+
                 } else {
-                    alert("⚠️ " + (data.detail || "Credenciales incorrectas"));
+                    mostrarError("⚠️ El usuario no tiene un rol asignado en la base de datos.");
                 }
+
             } catch (error) {
-                alert("❌ No se pudo conectar con el servidor backend. Espera un minuto a que Render despierte e intenta de nuevo.");
+                console.error("Error en login:", error);
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    mostrarError("⚠️ Correo o contraseña incorrectos.");
+                } else {
+                    mostrarError("❌ No se pudo conectar con Firebase. Revisa tu conexión.");
+                }
+            } finally {
+                btnIngresar.disabled = false;
+                btnIngresar.textContent = 'Ingresar';
             }
         });
+
+        function mostrarError(texto) {
+            mensajeError.textContent = texto;
+            mensajeError.style.display = 'block';
+        }
     </script>
 </body>
 

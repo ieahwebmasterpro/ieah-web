@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Egresos - IEAH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Librerías jsPDF y AutoTable para la generación del reporte PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root {
+            --verde-principal: #1a5c2e;
+            --verde-hover: #0d3d1e;
+            --rojo-egreso: #c0392b;
+            --rojo-hover: #a93226;
+            --fondo: #f4f6f9;
+            --blanco: #ffffff;
+            --texto: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--fondo);
+            color: var(--texto);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--blanco);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .header-acciones {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .btn-volver {
+            color: var(--verde-principal);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-pdf-general {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .btn-pdf-general:hover {
+            background-color: #219150;
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--verde-principal);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Tarjetas de Resumen Financiero */
+        .resumen-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+        }
+
+        .card-ingresos { background-color: #27ae60; }
+        .card-egresos { background-color: var(--rojo-egreso); }
+        .card-saldo { background-color: #2980b9; }
+
+        .card h3 {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .card p {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        /* Formulario */
+        .formulario-egreso {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 25px;
+        }
+
+        .formulario-egreso h3 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: var(--verde-principal);
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr auto;
+            gap: 10px;
+        }
+
+        input[type="date"], input[type="text"], input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+
+        button.btn-guardar {
+            background-color: var(--verde-principal);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button.btn-guardar:hover {
+            background-color: var(--verde-hover);
+        }
+
+        /* Tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background: var(--verde-principal);
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.85rem;
+        }
+
+        .btn-eliminar {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .btn-eliminar:hover { background: #c0392b; }
+
+        @media (max-width: 600px) {
+            .header-acciones {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            .form-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header-acciones">
+            <a href="panel.html" class="btn-volver">⬅️ Volver al Panel</a>
+            <button id="btnDescargarPDF" class="btn-pdf-general">📄 Descargar Reporte PDF</button>
+        </div>
+
+        <h2>📊 Control de Egresos y Balance General</h2>
+
+        <!-- Resumen de Balance Financiero -->
+        <div class="resumen-cards">
+            <div class="card card-ingresos">
+                <h3>Total Ingresos</h3>
+                <p id="lblIngresos">$0</p>
+            </div>
+            <div class="card card-egresos">
+                <h3>Total Egresos</h3>
+                <p id="lblEgresos">$0</p>
+            </div>
+            <div class="card card-saldo">
+                <h3>Saldo Actual</h3>
+                <p id="lblSaldo">$0</p>
+            </div>
+        </div>
+
+        <!-- Formulario para agregar nuevo egreso -->
+        <div class="formulario-egreso">
+            <h3>💸 Registrar Nuevo Egreso</h3>
+            <form id="formEgreso" class="form-group">
+                <input type="date" id="fechaEgreso" required>
+                <input type="text" id="conceptoEgreso" placeholder="Concepto (ej. Torta de cumpleaños)" required>
+                <input type="number" id="valorEgreso" placeholder="Valor ($)" min="1" required>
+                <button type="submit" class="btn-guardar">➕ Registrar</button>
+            </form>
+        </div>
+
+        <!-- Tabla de Movimientos de Egresos -->
+        <h3>📋 Descripción de Egresos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>Valor</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTablaEgresos">
+                <tr>
+                    <td colspan="4" style="text-align: center;">Cargando movimientos...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Firebase SDK Modular -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAjZtbtNDCIQAh9OIQZ6bzMCX0QLQQQHe8",
+            authDomain: "ieah-bienestar.firebaseapp.com",
+            projectId: "ieah-bienestar",
+            storageBucket: "ieah-bienestar.firebasestorage.app",
+            messagingSenderId: "142124375725",
+            appId: "1:142124375725:web:9522a9494107d50970b024",
+            measurementId: "G-FXDJVHMHJH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Variables globales para el PDF
+        let globalIngresos = 0;
+        let globalEgresos = 0;
+        let globalSaldo = 0;
+        let listaEgresos = [];
+
+        // Establecer fecha actual por defecto en el formulario
+        document.getElementById('fechaEgreso').value = new Date().toISOString().split('T')[0];
+
+        // Función Principal: Cargar Ingresos, Egresos y Calcular Saldo
+        async function cargarBalanceYEgresos() {
+            const tabla = document.getElementById('cuerpoTablaEgresos');
+            globalIngresos = 0;
+            globalEgresos = 0;
+            listaEgresos = [];
+
+            try {
+                // 1. Obtener TOTAL de Ingresos desde "pagos"
+                const snapshotPagos = await getDocs(collection(db, "pagos"));
+                snapshotPagos.forEach(docSnap => {
+                    const data = docSnap.data();
+                    globalIngresos += Number(data.totalPagar || 0);
+                });
+
+                // 2. Obtener la lista de EGRESOS desde "egresos"
+                const q = query(collection(db, "egresos"), orderBy("fecha", "desc"));
+                const snapshotEgresos = await getDocs(q);
+                
+                tabla.innerHTML = "";
+
+                if (snapshotEgresos.empty) {
+                    tabla.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay egresos registrados.</td></tr>";
+                } else {
+                    snapshotEgresos.forEach(docSnap => {
+                        const egreso = docSnap.data();
+                        const valor = Number(egreso.valor || 0);
+                        globalEgresos += valor;
+
+                        listaEgresos.push({
+                            id: docSnap.id,
+                            fecha: egreso.fecha,
+                            concepto: egreso.concepto,
+                            valor: valor
+                        });
+
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${egreso.fecha}</td>
+                                <td>${egreso.concepto}</td>
+                                <td style="color: var(--rojo-egreso); font-weight: bold;">-$ ${valor.toLocaleString('es-CO')}</td>
+                                <td>
+                                    <button class="btn-eliminar" data-id="${docSnap.id}">🗑️ Eliminar</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                // 3. Actualizar Valores y Saldo
+                globalSaldo = globalIngresos - globalEgresos;
+
+                document.getElementById('lblIngresos').innerText = `$ ${globalIngresos.toLocaleString('es-CO')}`;
+                document.getElementById('lblEgresos').innerText = `$ ${globalEgresos.toLocaleString('es-CO')}`;
+                document.getElementById('lblSaldo').innerText = `$ ${globalSaldo.toLocaleString('es-CO')}`;
+
+                // Eventos de eliminación
+                document.querySelectorAll('.btn-eliminar').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.target.getAttribute('data-id');
+                        if (confirm("¿Está seguro de eliminar este registro de egreso?")) {
+                            await deleteDoc(doc(db, "egresos", id));
+                            cargarBalanceYEgresos();
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error al calcular el balance:", error);
+                tabla.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red;'>Error al cargar los datos contables.</td></tr>";
+            }
+        }
+
+        // Registrar un nuevo egreso
+        document.getElementById('formEgreso').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fecha = document.getElementById('fechaEgreso').value;
+            const concepto = document.getElementById('conceptoEgreso').value.trim();
+            const valor = parseFloat(document.getElementById('valorEgreso').value);
+
+            if (!fecha || !concepto || isNaN(valor) || valor <= 0) {
+                alert("Por favor ingrese todos los campos con valores válidos.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "egresos"), {
+                    fecha: fecha,
+                    concepto: concepto,
+                    valor: valor,
+                    creado: new Date()
+                });
+
+                document.getElementById('conceptoEgreso').value = "";
+                document.getElementById('valorEgreso').value = "";
+                
+                cargarBalanceYEgresos();
+            } catch (error) {
+                console.error("Error al guardar el egreso:", error);
+                alert("Ocurrió un error al registrar el egreso.");
+            }
+        });
+
+        // GENERACIÓN DEL REPORTE PDF DE BALANCE Y EGRESOS
+        function generarReportePDF() {
+            try {
+                let jsPDFClass = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+                if (!jsPDFClass) {
+                    alert("⚠️ No se encontró la librería jsPDF.");
+                    return;
+                }
+
+                const doc = new jsPDFClass({
+                    orientation: 'portrait',
+                    unit: 'pt',
+                    format: 'a4'
+                });
+
+                const ahora = new Date();
+                const fechaHoraFormateada = `${ahora.toLocaleDateString('es-CO')} ${ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+
+                const generarContenido = () => {
+                    // Encabezado principal
+                    doc.setFontSize(14);
+                    doc.setFont(undefined, 'bold');
+                    doc.setTextColor(26, 92, 46);
+                    doc.text("INSTITUCIÓN EDUCATIVA ALTO HORIZONTE", 90, 40);
+
+                    doc.setFontSize(10);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(50, 50, 50);
+                    doc.text("GRUPO BIENESTAR 2026 - REPORTE GENERAL DE MOVIMIENTOS", 90, 55);
+
+                    doc.setFontSize(8);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`FECHA Y HORA DE EMISIÓN: ${fechaHoraFormateada}`, 40, 80);
+
+                    // Línea separadora
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(40, 88, 555, 88);
+
+                    // Cajas de Resumen Financiero
+                    // Total Ingresos
+                    doc.setFillColor(39, 174, 96);
+                    doc.roundedRect(40, 100, 160, 45, 4, 4, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(8);
+                    doc.setFont(undefined, 'bold');
+                    doc.text("TOTAL INGRESOS", 120, 115, { align: 'center' });
+                    doc.setFontSize(11);
+                    doc.text(`$ ${globalIngresos.toLocaleString('es-CO')}`, 120, 133, { align: 'center' });
+
+                    // Total Egresos
+                    doc.setFillColor(192, 57, 43);
+                    doc.roundedRect(217, 100, 160, 45, 4, 4, 'F');
+                    doc.setFontSize(8);
+                    doc.text("TOTAL EGRESOS", 297, 115, { align: 'center' });
+                    doc.setFontSize(11);
+                    doc.text(`-$ ${globalEgresos.toLocaleString('es-CO')}-`, 297, 133, { align: 'center' });
+
+                    // Saldo Actual
+                    doc.setFillColor(41, 128, 185);
+                    doc.roundedRect(395, 100, 160, 45, 4, 4, 'F');
+                    doc.setFontSize(8);
+                    doc.text("SALDO ACTUAL", 475, 115, { align: 'center' });
+                    doc.setFontSize(11);
+                    doc.text(`$ ${globalSaldo.toLocaleString('es-CO')}`, 475, 133, { align: 'center' });
+
+                    // Configurar datos de la tabla
+                    const filasTabla = listaEgresos.map(item => [
+                        item.fecha,
+                        item.concepto,
+                        `-$ ${item.valor.toLocaleString('es-CO')}-`
+                    ]);
+
+                    doc.autoTable({
+                        head: [['FECHA', 'CONCEPTO DE EGRESO', 'VALOR']],
+                        body: filasTabla,
+                        startY: 160,
+                        theme: 'striped',
+                        headStyles: { fillColor: [26, 92, 46], textColor: [255, 255, 255], fontStyle: 'bold' },
+                        styles: { fontSize: 8, valign: 'middle' },
+                        columnStyles: {
+                            0: { halign: 'center', cellWidth: 90 },
+                            1: { halign: 'left' },
+                            2: { halign: 'right', fontStyle: 'bold', textColor: [192, 57, 43], cellWidth: 110 }
+                        }
+                    });
+
+                    // Pie de página
+                    const finalY = doc.lastAutoTable.finalY + 30;
+                    const centroX = 297;
+
+                    doc.setFontSize(8);
+                    doc.setFont(undefined, 'italic');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text("*** Reporte oficial de movimientos contables y disponibilidad de fondos ***", centroX, finalY, { align: 'center' });
+
+                    doc.setFont(undefined, 'bold');
+                    doc.setTextColor(26, 92, 46);
+                    doc.text("GRUPO BIENESTAR IEAH 2026", centroX, finalY + 15, { align: 'center' });
+
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(120, 120, 120);
+                    doc.text("© Cemled corp 2026", centroX, finalY + 35, { align: 'center' });
+
+                    doc.save(`Reporte_Egresos_IEAH_${ahora.toISOString().split('T')[0]}.pdf`);
+                };
+
+                // Cargar escudo de la institución
+                const imgLogo = new Image();
+                imgLogo.src = '../img/escudo.png';
+
+                imgLogo.onload = function () {
+                    doc.addImage(imgLogo, 'PNG', 40, 25, 40, 40);
+                    generarContenido();
+                };
+
+                imgLogo.onerror = function () {
+                    generarContenido();
+                };
+
+            } catch (error) {
+                console.error("Error generando PDF de egresos:", error);
+                alert("⚠️ Ocurrió un error al generar el PDF del reporte.");
+            }
+        }
+
+        // Asignar evento al botón de PDF
+        document.getElementById('btnDescargarPDF').addEventListener('click', generarReportePDF);
+
+        // Carga inicial de datos al abrir la página
+        cargarBalanceYEgresos();
+    </script>
+</body>
+
+</html>
