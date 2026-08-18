@@ -55,6 +55,7 @@
             margin-bottom: 25px;
         }
 
+        input[type="password"],
         input[type="text"] {
             flex: 1;
             padding: 10px;
@@ -137,10 +138,10 @@
             <a href="panel.html" class="btn-volver">⬅️ Volver al Panel</a>
         </div>
 
-        <h2>🔍 Consulta de Pagos por Docente</h2>
+        <h2>🔍 Consulta Privada de Pagos</h2>
 
         <form class="form-busqueda" id="formBusqueda">
-            <input type="text" id="inputBuscar" placeholder="Ingrese Cédula/Documento o Nombre del Docente..." required>
+            <input type="password" id="inputBuscar" placeholder="Ingrese su número de identificación privado..." autocomplete="off" required>
             <button type="submit">Buscar</button>
         </form>
 
@@ -157,7 +158,7 @@
             </thead>
             <tbody id="cuerpoTablaConsulta">
                 <tr>
-                    <td colspan="6" style="text-align: center;">Ingrese un documento o nombre para realizar la búsqueda.</td>
+                    <td colspan="6" style="text-align: center;">Ingrese su número de identificación para realizar la búsqueda.</td>
                 </tr>
             </tbody>
         </table>
@@ -222,11 +223,11 @@
         const VALOR_CUOTA_FIJA = 35000;
         let resultadosCache = [];
 
-        // BUSQUEDA DIRECTA EN FIRESTORE
+        // BUSQUEDA DIRECTA EN FIRESTORE (ÚNICAMENTE POR NÚMERO DE IDENTIFICACIÓN EXACTO)
         async function buscarPagos(e) {
             e.preventDefault();
 
-            const criterio = document.getElementById('inputBuscar').value.trim().toLowerCase();
+            const criterio = document.getElementById('inputBuscar').value.trim();
             const tabla = document.getElementById('cuerpoTablaConsulta');
 
             if (!criterio) return;
@@ -241,16 +242,15 @@
                     pagos.push({ id: doc.id, ...doc.data() });
                 });
 
-                // Filtrar por Cédula/Documento o por Nombre
+                // Filtrar ÚNICAMENTE por coincidencia exacta del número de documento/identificación
                 resultadosCache = pagos.filter(p => 
-                    (p.documento && p.documento.toString().toLowerCase().includes(criterio)) ||
-                    (p.docente && p.docente.toLowerCase().includes(criterio))
+                    p.documento && String(p.documento).trim() === criterio
                 );
 
                 tabla.innerHTML = "";
 
                 if (resultadosCache.length === 0) {
-                    tabla.innerHTML = "<tr><td colspan='6' style='text-align:center;'>No se encontraron pagos asociados al criterio ingresado.</td></tr>";
+                    tabla.innerHTML = "<tr><td colspan='6' style='text-align:center;'>No se encontraron pagos asociados al número de identificación ingresado.</td></tr>";
                     return;
                 }
 
