@@ -873,6 +873,48 @@ body {
     font-weight: bold;
 }
 
+/* Contenedor principal con Grid Responsive */
+.contenedor-noticias {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+/* Tarjeta unificada */
+.tarjeta {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+/* Ajuste proporcional de imágenes */
+.img-noticia {
+    width: 100%;
+    height: 180px; /* Altura fija para uniformidad */
+    object-fit: cover; /* Recorta proporcionalmente la imagen sin deformarla */
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+/* Botón/Enlace elegante */
+.enlace-noticia {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--verde-principal, green);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.enlace-noticia:hover {
+    text-decoration: underline;
+}
+
 /* Despliega el submenú al pasar el cursor (Escritorio) */
 @media (min-width: 769px) {
     .menu-enlaces .dropdown:hover .submenu {

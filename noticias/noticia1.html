@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticias - Institución Educativa Alto Horizonte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        /* Estilos específicos para esta página que complementan al style.css */
+        .seccion-nosotros {
+            padding: 60px 10%;
+            line-height: 1.8;
+        }
+
+        .titulo-seccion {
+            color: var(--verde-principal);
+            border-left: 5px solid var(--dorado-institucional);
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+
+        .grid-simbolos,
+        .grid-proyectos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .tarjeta-info {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border-bottom: 4px solid var(--dorado-institucional);
+        }
+
+        .img-simbolo {
+            height: 150px;
+            margin-bottom: 20px;
+            object-fit: contain;
+        }
+
+        .proyecto-card {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: white;
+            transition: 0.3s;
+        }
+
+        .proyecto-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .proyecto-img {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .proyecto-body {
+            padding: 20px;
+        }
+
+        /* Estilo para centrar la imagen del PTA */
+        .img-pta {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        /* Estilos para que los enlaces de los formularios funcionen y se destaquen */
+        .enlace-formulario {
+            color: var(--verde-principal, #1a5c2e);
+            font-weight: bold;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        .enlace-formulario:hover {
+            color: #0d3d1e;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header-fijo">
+        <div class="header-top">
+            <div class="logo-container">
+                <img src="/img/logo.png" alt="Logo IE Alto Horizonte" class="logo-img">
+                <h1 class="titulo-principal-paginas">Institución Educativa <strong class="siglas">Alto
+                        Horizonte</strong></h1>
+            </div>
+        </div>
+
+        <nav class="header-bottom">
+            <input type="checkbox" id="menu-check">
+            <label for="menu-check" class="btn-menu">☰ Menú</label>
+
+            <ul class="menu-enlaces">
+                <li><a href="/index.html" onclick="document.getElementById('menu-check').checked = false;">Inicio</a>
+                </li>
+
+                <!-- SUBMENÚ 1: INSTITUCIÓN -->
+                <li class="dropdown">
+                    <a href="#nosotros" class="drop-btn">Institución ▾</a>
+                    <ul class="submenu">
+                        <li><a href="/index.html#nosotros"
+                                onclick="document.getElementById('menu-check').checked = false;">Nosotros</a></li>
+                        <li><a href="/administracion/saber-mas.html#identidad"
+                                onclick="document.getElementById('menu-check').checked = false;">Identidad</a></li>
+                        <li><a href="/administracion/saber-mas.html#simbolos"
+                                onclick="document.getElementById('menu-check').checked = false;">Símbolos Patrios</a>
+                        </li>
+                        <li><a href="/administracion/saber-mas.html#documentos"
+                                onclick="document.getElementById('menu-check').checked = false;">Documentos
+                                Institucionales</a></li>
+                    </ul>
+                </li>
+
+                <!-- SUBMENÚ 2: COMUNIDAD Y SEDES -->
+                <li class="dropdown">
+                    <a href="#sedes" class="drop-btn">Comunidad & Sedes ▾</a>
+                    <ul class="submenu">
+                        <li><a href="/index.html#sedes"
+                                onclick="document.getElementById('menu-check').checked = false;">Nuestras Sedes</a></li>
+                        <li><a href="/index.html#docentes"
+                                onclick="document.getElementById('menu-check').checked = false;">Cuerpo Docente</a></li>
+                        <li><a href="/administracion/saber-mas.html#proyectos"
+                                onclick="document.getElementById('menu-check').checked = false;">Proyectos
+                                Transversales</a></li>
+                    </ul>
+                </li>
+
+                <!-- SUBMENÚ 3: ACTUALIDAD -->
+                <li class="dropdown">
+                    <a href="#noticias" class="drop-btn">Actualidad ▾</a>
+                    <ul class="submenu">
+                        <li><a href="/index.html#noticias"
+                                onclick="document.getElementById('menu-check').checked = false;">Noticias</a></li>
+                        <li><a href="/index.html#galeria"
+                                onclick="document.getElementById('menu-check').checked = false;">Galería de Fotos</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- SUBMENÚ 4: CONTACTO -->
+                <li class="dropdown">
+                    <a href="#contacto" class="drop-btn">Contacto ▾</a>
+                    <ul class="submenu">
+                        <li><a href="/index.html#contacto"
+                                onclick="document.getElementById('menu-check').checked = false;">Información
+                                Contacto</a></li>
+                        <li><a href="/index.html#ubicación"
+                                onclick="document.getElementById('menu-check').checked = false;">Ubicación</a></li>
+                        <li><a href="/index.html#redes"
+                                onclick="document.getElementById('menu-check').checked = false;">Redes Sociales</a></li>
+                    </ul>
+                </li>
+
+                <!-- BOTÓN DESTACADO IEAH-APP -->
+                <li>
+                    <a href="/administracion/admin.html" class="enlace-admin"
+                        onclick="document.getElementById('menu-check').checked = false;">IEAH-APP</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Imagen PTA centrada -->
+    <img src="../img/pta.jpg" alt="Programa PTA" class="img-pta"
+        onerror="this.src='https://cdn-icons-png.flaticon.com/512/3252/3252936.png'">
+       
+
+    <main>
+
+        <section class="seccion-nosotros">
+
+            <h2 class="titulo-seccion"> Programa de Tutorías para el Aprendizaje y la Formación Integral</h2>
+            <p class="texto-reseña">
+                A partir el mes de Julio del año 2026, nuestra institución cuenta con el PTA/FI 3.0 (Programa de
+                Tutorías para el Aprendizaje y la Formación Integral), con el cual se busca brindar acompañamiento
+                situado a docentes de aula de Preescolar, Básica Primaria, Básica Secundaria y Media para fortalecer sus
+                capacidades y mejorar los aprendizajes de las niñas, niños y adolescentes. Además, el programa busca la
+                implementación de algunos centros de interés de arte, deporte, bienestar físico, ciencias, tecnología,
+                matemáticas, lectura, escritura y oralidad, bilingüismo y formación ciudadana. <br><br>
+
+                Los centros de interés son escenarios alternativos para el aprendizaje y el desarrollo integral de los
+                niños, niñas, adolescentes y jóvenes. Se conectan con las motivaciones, necesidades e intereses de los
+                estudiantes; posibilitan la exploración, la investigación, el goce y el disfrute, la conexión de la
+                escuela con el territorio y la integración e interrelación de diferentes conocimientos y saberes que les
+                permiten ampliar marcos de comprensión sobre el mundo (MEN, 2024). <br><br>
+
+                <strong>Apreciados docentes:</strong><br>
+                Para lograr los propósitos del PTA-FI 3.0, el presente formulario pretende recolectar información útil
+                sobre las percepciones que usted tiene respecto a las necesidades de formación integral y los intereses
+                específicos de los estudiantes para participar en los centros de interés que el colegio le ofrece
+                (Deporte, Arte-cultura-ciencias-tecnología y Derechos Humanos-CRESE), a través de un diálogo
+                constructivo que identifique fortalezas y áreas de mejora para el desarrollo de entornos educativos más
+                propicios y enriquecedores. Por favor, responda las siguientes preguntas en este enlace: <br>
+                👉 <a href="https://forms.gle/pK4rcYext5JzgMq89" target="_blank" rel="noopener noreferrer" class="enlace-formulario">https://forms.gle/pK4rcYext5JzgMq89</a>
+                <br><br>
+
+                <strong>Apreciados Estudiantes:</strong><br>
+                Con el fin de fortalecer el programa PTA-FI 3.0, este formulario busca conocer sus opiniones sobre las
+                necesidades de formación integral y los intereses específicos que tienen para participar en los centros
+                de interés que ofrece el colegio:
+                <br>• Deporte
+                <br>• Arte, cultura, ciencias y tecnología
+                <br>• Derechos Humanos – CRESE<br>
+                La idea es que, a través de sus respuestas, podamos reconocer sus fortalezas y también las áreas en las
+                que podemos mejorar, construyendo juntos espacios educativos más enriquecedores y motivadores.
+                Por favor, respondan las siguientes preguntas en el siguiente enlace: <br>
+                👉 <a href="https://forms.gle/LRwV87BeV7vFxoLg8" target="_blank" rel="noopener noreferrer" class="enlace-formulario">https://forms.gle/LRwV87BeV7vFxoLg8</a>
+            </p>
+        </section>
+
+        <section class="seccion-contacto">
+            <div class="contenedor-formulario">
+                <h2 id="contacto" class="titulo-contacto">Contáctanos</h2>
+                <form id="formContacto">
+                    <div class="grupo-input">
+                        <label for="nombre">Nombre Completo</label>
+                        <input type="text" id="nombre" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    <div class="grupo-input">
+                        <label for="correo">Correo Electrónico</label>
+                        <input type="email" id="correo" placeholder="ejemplo@correo.com" required>
+                    </div>
+                    <div class="grupo-input">
+                        <label for="mensaje">Tu Mensaje</label>
+                        <textarea id="mensaje" rows="5" placeholder="Escribe aquí tu duda o sugerencia..."
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="boton-enviar">Enviar Mensaje</button>
+                </form>
+            </div>
+        </section>
+
+        <script>
+            document.getElementById('formContacto').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const datos = {
+                    nombre: document.getElementById('nombre').value,
+                    correo: document.getElementById('correo').value,
+                    contenido: document.getElementById('mensaje').value
+                };
+
+                try {
+                    const response = await fetch('https://ieah-backend.onrender.com/contacto', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(datos)
+                    });
+
+                    if (response.ok) {
+                        alert("✅ ¡Éxito! Tu mensaje ha sido enviado a la institución.");
+                        document.getElementById('formContacto').reset(); // Limpia el formulario
+                    } else {
+                        alert("❌ Hubo un error al enviar el mensaje. Intenta más tarde.");
+                    }
+                } catch (error) {
+                    alert("📡 No se pudo conectar con el servidor. Verifica que el backend esté encendido.");
+                }
+            });
+        </script>
+
+        <div class="contacto-info">
+            <h2 class="titulo-ubicacion" id="ubicación">Nuestra Ubicación</h2>
+            <div class="mapa">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3986.9944640103734!2d-75.76341472594611!3d1.840670098150242!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e5c8e3c1a3b3e0b%3A0x67a3f3a8f1e5828e!2sInstituci%C3%B3n%20Educativa%20Alto%20Horizonte!5e0!3m2!1ses!2sco!4v1741915000000!5m2!1ses!2sco"
+                    width="100%" height="300" style="border:0; border-radius: 15px;" allowfullscreen="" loading="lazy">
+                </iframe>
+                <div class="info-item"><strong>📍 Dirección:</strong> Vereda Alto Horizonte, Suaza, Huila.</div>
+                <div class="info-item"><strong>⏰ Horario:</strong> Lunes a Viernes (7:00 AM – 4:00 PM)</div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer-principal">
+        <div class="footer-contenedor">
+            <div class="footer-col">
+                <img src="/img/logo.png" alt="Logo" class="footer-logo">
+                <p>Formando para la vida desde el corazón del Huila.</p>
+            </div>
+            <div class="footer-col">
+                <h3>Nuestras Redes Sociales</h3>
+                <div class="redes-sociales">
+                    <a href="https://www.facebook.com/profile.php?id=61592523481187" target="_blank"
+                        rel="noopener noreferrer" class="social-link facebook" title="Visítanos en Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Facebook</span>
+                    </a>
+                    <!-- WhatsApp (Enlace directo a chat) -->
+                    <a href="https://wa.me/573214115248?text=Hola,%20me%20gustaría%20solicitar%20información%20sobre%20la%20Institución"
+                        target="_blank" rel="noopener noreferrer" class="social-link whatsapp"
+                        title="Escríbenos a WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                    <a href="https://www.instagram.com/iealtohorizonte?utm_source=qr&igsh=b240ZDQ4dXQxdzho" target="_blank" rel="noopener noreferrer"
+                        class="social-link instagram" title="Síguenos en Instagram">
+                        <i class="fab fa-instagram"></i>
+                        <span>Instagram</span>
+                    </a>                 
+                </div>
+            </div>
+        </div>
+        <div class="footer-copy">
+            <p>I.E. Alto Horizonte. <br>© CEMLED CORP <br> 2026 <br>Todos los derechos reservados.</p>
+        </div>
+        <div id="redes"></div>
+    </footer>
+</body>
+
+</html>
