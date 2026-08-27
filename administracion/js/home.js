@@ -1,103 +1,88 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    addDoc 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Configuración de Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyAjZtbtNDCIQAh9OIQZ6bzMCX0QLQQQHe8",
     authDomain: "ieah-bienestar.firebaseapp.com",
     projectId: "ieah-bienestar",
     storageBucket: "ieah-bienestar.firebasestorage.app",
     messagingSenderId: "142124375725",
-    appId: "1:142124375725:web:9522a9494107d50970b024"
+    appId: "1:142124375725:web:9522a9494107d50970b024",
+    measurementId: "G-FXDJVHMHJH"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 1. Manejo del Formulario de Contacto (Guardado en Firestore)
-const formContacto = document.getElementById('formContacto');
+// Ejecutar lectura al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    cargarNoticiasPublicas();
+});
 
-if (formContacto) {
-    formContacto.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const btnEnviar = formContacto.querySelector('button[type="submit"]');
-        const textoOriginal = btnEnviar.textContent;
-
-        btnEnviar.disabled = true;
-        btnEnviar.textContent = "Enviando mensaje...";
-
-        const nombre = document.getElementById('nombre').value.trim();
-        const correo = document.getElementById('correo').value.trim();
-        const contenido = document.getElementById('mensaje').value.trim();
-
-        try {
-            // Guardar el mensaje en la colección "mensajes" de Firestore
-            await addDoc(collection(db, "mensajes"), {
-                nombre: nombre,
-                correo: correo,
-                contenido: contenido,
-                fecha: serverTimestamp(),
-                leido: false
-            });
-
-            alert("✅ ¡Éxito! Tu mensaje ha sido enviado a la institución.");
-            formContacto.reset();
-
-        } catch (error) {
-            console.error("Error al guardar el mensaje en Firestore:", error);
-            alert("❌ Hubo un error al enviar el mensaje. Revisa las reglas de seguridad de Firestore.");
-        } finally {
-            btnEnviar.disabled = false;
-            btnEnviar.textContent = textoOriginal;
-        }
-    });
-}
-
-// 2. Carga Dinámica de Noticias desde Firebase
 async function cargarNoticiasPublicas() {
-    const contenedor = document.getElementById('contenedorNoticiasDinamicas');
+    const contenedor = document.getElementById("contenedorNoticiasDinamicas");
     if (!contenedor) return;
 
     try {
         const querySnapshot = await getDocs(collection(db, "noticias"));
+        contenedor.innerHTML = "";
+
         if (querySnapshot.empty) {
-            contenedor.innerHTML = `
-                <div class="tarjeta">
-                    <img src="img/pta.jpg" alt="Programa PTA" class="img-noticia" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3252/3252936.png'">
-                    <h3>Programa de Tutorías para el Aprendizaje y la Formación Integral</h3>
-                    <p>Conoce todo lo relacionado con el programa PTA de nuestra institución.</p>
-                    <a class="enlace-noticia" href="noticias/noticia1.html">Saber más...</a>
-                </div>
-                <div class="tarjeta">
-                    <img src="img/bingo.jpg" alt="Gran Bingo Institucional" class="img-noticia" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3252/3252936.png'">
-                    <h3>🎉🎱 ¡Gran Bingo – Día de la Familia I.E. Alto Horizonte! 🎱🎉</h3>
-                    <p>La Institución Educativa Alto Horizonte invita a toda nuestra comunidad educativa a disfrutar de una jornada especial.</p>
-                    <a class="enlace-noticia" href="noticias/noticia2.html">Saber más...</a>
-                </div>
-            `;
+            contenedor.innerHTML = "<p style='text-align:center; width:100%;'>No hay comunicados u oficiales publicados por el momento.</p>";
             return;
         }
 
-        contenedor.innerHTML = "";
         querySnapshot.forEach((docSnap) => {
             const n = docSnap.data();
-            const urlImagen = n.imagen || 'https://cdn-icons-png.flaticon.com/512/3252/3252936.png';
-            const enlace = n.enlace ? `<a class="enlace-noticia" href="${n.enlace}" target="_blank">Saber más...</a>` : '';
+            const idNoticia = docSnap.id; // Capturamos el ID dinámico de la noticia
             
-            contenedor.innerHTML += `
-                <div class="tarjeta">
-                    <img src="${urlImagen}" alt="${n.titulo}" class="img-noticia" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3252/3252936.png'">
-                    <h3>${n.titulo}</h3>
-                    <p>${n.descripcion}</p>
-                    ${enlace}
+            // Prioriza la imagen subida en Base64 o la ruta local guardada
+            const imagenSrc = n.imagen || n.rutaLocal || "";
+
+            const tarjeta = document.createElement("article");
+            tarjeta.className = "tarjeta-noticia";
+            tarjeta.style.cssText = "background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid #e2e8f0;";
+
+            tarjeta.innerHTML = `
+                ${imagenSrc ? `<img src="${imagenSrc}" alt="${n.titulo}" style="width: 100%; max-height: 250px; object-fit: cover;">` : ''}
+                <div style="padding: 20px;">
+                    <h3 style="color: var(--verde-principal, #1a5c2e); margin-top: 0; font-family: 'Montserrat', sans-serif;">${n.titulo}</h3>
+                    <p style="color: #4a5568; line-height: 1.6; font-family: 'Open Sans', sans-serif;">${n.descripcion}</p>
+                    <a href="../noticias/noticias.html?id=${idNoticia}" style="display: inline-block; margin-top: 10px; color: var(--verde-principal, #1a5c2e); font-weight: bold; text-decoration: underline;">
+                        Leer noticia completa →
+                    </a>
                 </div>
             `;
+
+            contenedor.appendChild(tarjeta);
         });
     } catch (error) {
-        console.error("Error al cargar noticias:", error);
-        contenedor.innerHTML = "<p style='text-align:center;'>No se pudieron cargar los eventos oficiales en este momento.</p>";
+        console.error("Error al obtener las noticias en el portal:", error);
+        contenedor.innerHTML = "<p style='text-align:center; width:100%; color:red;'>Error al conectar con el servidor de noticias.</p>";
     }
 }
 
-window.addEventListener('DOMContentLoaded', cargarNoticiasPublicas);
+// Envío del Formulario de Contacto desde el Index al Buzón de Firestore
+document.getElementById('formContacto')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const nuevoMensaje = {
+        nombre: document.getElementById('nombre').value.trim(),
+        correo: document.getElementById('correo').value.trim(),
+        contenido: document.getElementById('mensaje').value.trim(),
+        fecha: Date.now()
+    };
+
+    try {
+        await addDoc(collection(db, "mensajes"), nuevoMensaje);
+        alert("✅ Mensaje enviado exitosamente al buzón institucional.");
+        e.target.reset();
+    } catch (error) {
+        alert("⚠️ Ocurrió un error al enviar el mensaje: " + error.message);
+    }
+});

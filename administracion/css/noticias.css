@@ -1,0 +1,60 @@
+/* --- ESTILOS DE VISTA NOTICIA FIJA (STICKY) --- */
+.noticia-header-sticky {
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+    padding: 15px 0;
+    z-index: 100;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.noticia-header-sticky .btn-volver {
+    display: inline-block;
+    color: var(--verde-principal, #1a5c2e);
+    font-weight: bold;
+    text-decoration: none;
+    margin-bottom: 8px;
+    transition: transform 0.2s;
+}
+
+.noticia-header-sticky .btn-volver:hover {
+    transform: translateX(-4px);
+}
+
+.noticia-header-sticky .titulo-fijo {
+    color: var(--verde-principal, #1a5c2e);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Formato enriquecido para el cuerpo de la noticia */
+.noticia-cuerpo {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.8;
+    color: #2d3748;
+    font-size: 1.05rem;
+    white-space: pre-wrap; /* Mantiene saltos de línea y párrafos */
+}
+
+.btn-volver-inline {
+    display: inline-flex;
+    align-items: center;
+    color: #1a5c2e;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    background: #edf2f7;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.btn-volver-inline:hover {
+    background: #e2e8f0;
+    color: #0f371b;
+}

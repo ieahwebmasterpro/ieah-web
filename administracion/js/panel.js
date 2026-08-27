@@ -42,7 +42,6 @@ let usuarioRolActual = "";
 // --- AUTENTICACIÓN Y PERMISOS ---
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
-        // Redirección corregida a login.html
         window.location.href = "login.html";
         return;
     }
@@ -104,7 +103,7 @@ function aplicarPermisosRol(rol) {
     }
 }
 
-// Botón de cerrar sesión actualizado a login.html
+// Botón de cerrar sesión
 document.getElementById('btnCerrarSesion')?.addEventListener('click', () => {
     signOut(auth).then(() => { window.location.href = "login.html"; });
 });
@@ -147,38 +146,53 @@ document.getElementById('formNoticia')?.addEventListener('submit', async (e) => 
     e.preventDefault();
     if (usuarioRolActual !== 'superadmin') return;
 
-    const archivoImagen = document.getElementById('noticiaImagenFile').files[0];
-    if (!archivoImagen) {
-        alert("⚠️ Selecciona una imagen desde tu equipo.");
-        return;
-    }
+    const btnSubmit = e.target.querySelector('button[type="submit"]');
+    const archivoImagen = document.getElementById('noticiaImagenFile')?.files[0];
+    
+    const titulo = document.getElementById('noticiaTitulo').value.trim();
+    const descripcion = document.getElementById('noticiaDescripcion').value.trim();
+    const contenidoCompleto = document.getElementById('noticiaContenidoCompleto')?.value.trim() || descripcion;
+    const enlace = document.getElementById('noticiaEnlace')?.value.trim() || "";
 
-    const reader = new FileReader();
-    reader.readAsDataURL(archivoImagen);
-    reader.onload = async function () {
+    try {
+        if (btnSubmit) btnSubmit.disabled = true;
+
+        let imagenDataUrl = "";
+        if (archivoImagen) {
+            imagenDataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(archivoImagen);
+            });
+        }
+
         const nuevaNoticia = {
-            titulo: document.getElementById('noticiaTitulo').value.trim(),
-            descripcion: document.getElementById('noticiaDescripcion').value.trim(),
-            imagen: reader.result,
-            rutaLocal: "img/" + archivoImagen.name,
-            enlace: document.getElementById('noticiaEnlace').value.trim(),
+            titulo: titulo,
+            descripcion: descripcion,
+            contenidoCompleto: contenidoCompleto,
+            imagen: imagenDataUrl || "",
+            rutaLocal: archivoImagen ? "img/" + archivoImagen.name : "",
+            enlace: enlace,
             fechaCreacion: Date.now()
         };
 
-        try {
-            await addDoc(collection(db, "noticias"), nuevaNoticia);
-            document.getElementById('formNoticia').reset();
-            renderizarNoticias();
-            alert("✅ Noticia/Evento publicado con éxito.");
-        } catch (error) {
-            alert("⚠️ Error al publicar la noticia: " + error.message);
-        }
-    };
+        await addDoc(collection(db, "noticias"), nuevaNoticia);
+        document.getElementById('formNoticia').reset();
+        await renderizarNoticias();
+        alert("✅ Noticia/Evento publicado con éxito en el portal.");
+
+    } catch (error) {
+        alert("⚠️ Error al publicar la noticia: " + error.message);
+    } finally {
+        if (btnSubmit) btnSubmit.disabled = false;
+    }
 });
 
 window.renderizarNoticias = async function () {
     if (usuarioRolActual !== 'superadmin') return;
     const tabla = document.getElementById('cuerpoTablaNoticias');
+    if (!tabla) return;
 
     try {
         const querySnapshot = await getDocs(collection(db, "noticias"));
@@ -186,16 +200,17 @@ window.renderizarNoticias = async function () {
 
         querySnapshot.forEach((docSnap) => {
             const n = docSnap.data();
-            tabla.innerHTML += `
-                <tr>
-                    <td><strong>${n.titulo}</strong></td>
-                    <td>${n.descripcion}</td>
-                    <td>${n.enlace ? `<a href="${n.enlace}" target="_blank">Ver enlace</a>` : 'Sin enlace'}</td>
-                    <td class="col-accion" style="text-align:center;">
-                        <button class="btn-del" onclick="eliminarNoticia('${docSnap.id}')">🗑️</button>
-                    </td>
-                </tr>
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td><strong>${n.titulo}</strong></td>
+                <td>${n.descripcion}</td>
+                <td>${n.enlace ? `<a href="${n.enlace}" target="_blank">Ver enlace</a>` : 'Sin enlace'}</td>
+                <td class="col-accion" style="text-align:center;">
+                    <button class="btn-del btn-eliminar-noticia" data-id="${docSnap.id}">🗑️</button>
+                </td>
             `;
+            tabla.appendChild(tr);
         });
 
         if (querySnapshot.empty) {
@@ -206,12 +221,23 @@ window.renderizarNoticias = async function () {
     }
 };
 
+// Event listener para eliminar noticias dinámicamente
+document.getElementById('cuerpoTablaNoticias')?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-eliminar-noticia');
+    if (btn) {
+        const idDoc = btn.getAttribute('data-id');
+        if (idDoc) {
+            await window.eliminarNoticia(idDoc);
+        }
+    }
+});
+
 window.eliminarNoticia = async function (idDoc) {
     if (usuarioRolActual !== 'superadmin') return;
     if (confirm("¿Estás seguro de eliminar esta noticia?")) {
         try {
             await deleteDoc(doc(db, "noticias", idDoc));
-            renderizarNoticias();
+            await renderizarNoticias();
             alert("🗑️ Noticia eliminada.");
         } catch (error) {
             alert("⚠️ Error al eliminar: " + error.message);
@@ -675,76 +701,135 @@ window.renderizarMatrizPagos = async function () {
 window.descargarMatrizPDF = function () {
     try {
         const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
-        if (!jsPDFClass) return;
+        if (!jsPDFClass) {
+            alert("⚠️ La librería jsPDF no está cargada correctamente.");
+            return;
+        }
 
         const doc = new jsPDFClass({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+        doc.setFontSize(14);
+        doc.setTextColor(26, 92, 46);
+        doc.text("INSTITUCIÓN EDUCATIVA ALTO HORIZONTE", 40, 30);
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text("Matriz General de Pagos y Control de Cuotas Anuales", 40, 45);
+
         doc.autoTable({
             html: '#tablaMatrizPDF',
-            startY: 40,
+            startY: 60,
             theme: 'grid',
-            styles: { fontSize: 7, halign: 'center' },
-            headStyles: { fillColor: [26, 92, 46], textColor: [255, 255, 255] }
+            styles: { 
+                fontSize: 6.5, 
+                halign: 'center',
+                valign: 'middle',
+                cellPadding: 3
+            },
+            headStyles: { 
+                fillColor: [26, 92, 46], 
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                halign: 'center'
+            },
+            willDrawCell: function (data) {
+                if (data.section === 'body') {
+                    const cellNode = data.cell.raw;
+                    if (cellNode && cellNode.classList) {
+                        if (cellNode.classList.contains('celda-pagado') || cellNode.classList.contains('estado-al-dia')) {
+                            doc.setFillColor(212, 239, 223);
+                            doc.setTextColor(20, 90, 50);
+                        } else if (cellNode.classList.contains('celda-pendiente') || cellNode.classList.contains('estado-pendiente')) {
+                            doc.setFillColor(249, 235, 234);
+                            doc.setTextColor(146, 43, 33);
+                        }
+                    }
+                }
+            }
         });
+
         doc.save('Matriz_Anual_Pagos_IEAH_2026.pdf');
     } catch (error) {
+        console.error("Error Matriz PDF:", error);
         alert("⚠️ Error generando PDF: " + error.message);
     }
 };
 
 window.descargarTicketPDF = function (id) {
     const pago = pagosCache.find(p => p.id === id);
-    if (!pago) return;
+    if (!pago) {
+        alert("⚠️ No se encontró la información del ticket.");
+        return;
+    }
 
     const contenedor = document.getElementById('contenedorPDF');
+    if (!contenedor) return;
+
     let filasMesesHTML = "";
     if (pago.meses && Array.isArray(pago.meses)) {
         pago.meses.forEach(m => {
             filasMesesHTML += `
                 <tr>
-                    <td style="width: 35%; text-align: left;">${m}</td>
-                    <td style="width: 15%; text-align: center;">1</td>
-                    <td style="width: 25%; text-align: center;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}</td>
-                    <td style="width: 25%; text-align: center;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}</td>
+                    <td style="width: 35%; text-align: left; font-size: 10px;">${m}</td>
+                    <td style="width: 15%; text-align: center; font-size: 10px;">1</td>
+                    <td style="width: 25%; text-align: center; font-size: 10px;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}</td>
+                    <td style="width: 25%; text-align: center; font-size: 10px;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}</td>
                 </tr>
             `;
         });
     }
 
     contenedor.innerHTML = `
-        <div class="ticket-exacto" id="elementoAImprimir">
-            <div class="ticket-encabezado">
-                <h3>INSTITUCION EDUCATIVA ALTO<br>HORIZONTE 2026</h3>
-                <div>Vereda Alto Horizonte</div>
+        <div class="ticket-exacto" id="elementoAImprimir" style="padding: 10px; background: #fff; color: #000; font-family: monospace;">
+            <div class="ticket-encabezado" style="text-align: center;">
+                <h3 style="margin: 0; font-size: 12px; font-weight: bold;">INSTITUCION EDUCATIVA ALTO HORIZONTE</h3>
+                <div style="font-size: 10px;">Vereda Alto Horizonte - Suaza</div>
             </div>
-            <div class="ticket-linea"></div>
-            <div class="ticket-datos">
+            <hr style="border-top: 1px dashed #000; margin: 5px 0;">
+            <div class="ticket-datos" style="font-size: 10px;">
                 <div>Fecha: ${pago.fecha}</div>
-                <div style="font-weight: bold;">TICKET NRO: ${pago.numTicket}</div>
-                <div>Cliente: ${pago.docente}</div>
+                <div style="font-weight: bold;">TICKET NRO: #${pago.numTicket}</div>
+                <div>Docente: ${pago.docente}</div>
+                <div>ID/CC: ${pago.documento}</div>
             </div>
-            <div class="ticket-linea"></div>
-            <table class="ticket-tabla">
+            <hr style="border-top: 1px dashed #000; margin: 5px 0;">
+            <table class="ticket-tabla" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="font-size: 9px; border-bottom: 1px solid #000;">
+                        <th style="text-align: left;">Con.</th>
+                        <th style="text-align: center;">Cant</th>
+                        <th style="text-align: center;">Val</th>
+                        <th style="text-align: center;">Subt</th>
+                    </tr>
+                </thead>
                 <tbody>${filasMesesHTML}</tbody>
             </table>
-            <div class="ticket-linea"></div>
-            <table class="ticket-totales">
+            <hr style="border-top: 1px dashed #000; margin: 5px 0;">
+            <table class="ticket-totales" style="width: 100%; font-size: 10px; font-weight: bold;">
                 <tr>
-                    <td style="text-align: left;">TOTAL PAGADO</td>
-                    <td style="text-align: right;">$${pago.totalPagar.toLocaleString('es-CO')} cop.</td>
+                    <td style="text-align: left;">TOTAL PAGADO:</td>
+                    <td style="text-align: right;">$${(pago.totalPagar || 0).toLocaleString('es-CO')} cop.</td>
                 </tr>
             </table>
         </div>
     `;
 
+    contenedor.style.display = "block";
     contenedor.style.visibility = "visible";
+
     const opt = {
-        margin: [0, 0, 0, 0],
+        margin: [2, 2, 2, 2],
         filename: `TICKET_${pago.numTicket}.pdf`,
-        html2canvas: { scale: 4 },
-        jsPDF: { unit: 'mm', format: [58, 120], orientation: 'portrait' }
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 3, logging: false, useCORS: true },
+        jsPDF: { unit: 'mm', format: [58, 140], orientation: 'portrait' }
     };
 
     html2pdf().set(opt).from(document.getElementById('elementoAImprimir')).save().then(() => {
         contenedor.style.visibility = "hidden";
+        contenedor.style.display = "none";
+    }).catch(err => {
+        console.error("Error PDF Ticket:", err);
+        contenedor.style.visibility = "hidden";
+        contenedor.style.display = "none";
     });
 };

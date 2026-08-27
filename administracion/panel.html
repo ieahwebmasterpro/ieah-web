@@ -7,7 +7,9 @@
     <title>Panel de Control - IEAH APP</title>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
 
     <!-- CSS del Panel -->
     <link rel="stylesheet" href="css/panel.css">
@@ -26,27 +28,38 @@
             <div class="brand">IEAH - Panel Admin</div>
             <div class="user-info-box">
                 <div id="lblUsuarioNombre" style="font-weight: bold;">Cargando...</div>
-                <div id="lblUsuarioRol" style="text-transform: uppercase; color: var(--dorado); font-size: 0.75rem;">...</div>
+                <div id="lblUsuarioRol" style="text-transform: uppercase; color: var(--dorado); font-size: 0.75rem;">...
+                </div>
             </div>
 
             <!-- Menú Administrativo / Bienestar -->
             <div id="menuAdministrativo" class="solo-admin-bienestar">
-                <button class="menu-btn solo-superadmin" id="btnBuzon" onclick="mostrarSeccion('buzon', this)">📩 Buzón Mensajes</button>
-                <button class="menu-btn solo-superadmin" id="btnNoticias" onclick="mostrarSeccion('noticias', this)">📰 Noticias y Eventos</button>
-                <button class="menu-btn solo-superadmin" id="btnUsuarios" onclick="mostrarSeccion('usuarios', this)">👤 Gestión de Usuarios</button>
-                <button class="menu-btn" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">👨‍🏫 Directorio Docentes</button>
-                <button class="menu-btn" id="btnContabilidad" onclick="mostrarSeccion('contabilidad', this)">💰 Contabilidad & Tickets</button>
-                <button class="menu-btn" id="btnMatriz" onclick="mostrarSeccion('matriz', this)">📊 Matriz Anual de Pagos</button>
+                <button class="menu-btn solo-superadmin" id="btnBuzon" onclick="mostrarSeccion('buzon', this)">📩 Buzón
+                    Mensajes</button>
+                <button class="menu-btn solo-superadmin" id="btnNoticias" onclick="mostrarSeccion('noticias', this)">📰
+                    Noticias y Eventos</button>
+                <button class="menu-btn solo-superadmin" id="btnUsuarios" onclick="mostrarSeccion('usuarios', this)">👤
+                    Gestión de Usuarios</button>
+                <button class="menu-btn" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">👨‍🏫 Directorio
+                    Docentes</button>
+                <button class="menu-btn" id="btnContabilidad" onclick="mostrarSeccion('contabilidad', this)">💰
+                    Contabilidad & Tickets</button>
+                <button class="menu-btn" id="btnMatriz" onclick="mostrarSeccion('matriz', this)">📊 Matriz Anual de
+                    Pagos</button>
                 <button class="menu-btn" onclick="window.location.href='egresos.html'">📊 Egresos</button>
             </div>
 
             <!-- Botones Generales para Docentes y Todos -->
-            <button class="menu-btn" id="btnConsultasMenu" onclick="window.location.href='consultas.html'">🔍 Consultas</button>
-            <button class="menu-btn" id="btnFormatosMenu" onclick="window.location.href='formatos.html'">📂 Formatos Institucionales</button>
+            <button class="menu-btn" id="btnConsultasMenu" onclick="window.location.href='consultas.html'">🔍
+                Consultas</button>
+            <button class="menu-btn" id="btnFormatosMenu" onclick="window.location.href='formatos.html'">📂 Formatos
+                Institucionales</button>
         </div>
 
         <div>
-            <a href="../index.html" style="color: white; text-decoration: none; font-size: 0.85rem; display: block; text-align: center; margin-bottom: 10px;">🏠 Ver Sitio Web</a>
+            <a href="../index.html"
+                style="color: white; text-decoration: none; font-size: 0.85rem; display: block; text-align: center; margin-bottom: 10px;">🏠
+                Ver Sitio Web</a>
             <button class="btn-logout" id="btnCerrarSesion">Cerrar Sesión</button>
         </div>
     </aside>
@@ -78,11 +91,14 @@
         <section id="sec-docente-bienvenida" class="seccion-modulo" style="display: none;">
             <h3>👋 Bienvenido a la Plataforma Institucional</h3>
             <p style="margin-top: 10px; line-height: 1.6;">
-                Desde este panel puedes acceder a la consulta de tus aportes y comprobantes de pago, o explorar y descargar la documentación y formatos institucionales requeridos.
+                Desde este panel puedes acceder a la consulta de tus aportes y comprobantes de pago, o explorar y
+                descargar la documentación y formatos institucionales requeridos.
             </p>
             <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                <button class="btn-guardar" onclick="window.location.href='consultas.html'">🔍 Ir a Consultas de Pago</button>
-                <button class="btn-act" style="background: var(--dorado); margin-bottom:0;" onclick="window.location.href='formatos.html'">📂 Ver Formatos Institucionales</button>
+                <button class="btn-guardar" onclick="window.location.href='consultas.html'">🔍 Ir a Consultas de
+                    Pago</button>
+                <button class="btn-act" style="background: var(--dorado); margin-bottom:0;"
+                    onclick="window.location.href='formatos.html'">📂 Ver Formatos Institucionales</button>
             </div>
         </section>
 
@@ -113,7 +129,8 @@
                     </div>
                     <div class="grupo" style="grid-column: 1 / -1;">
                         <label>Descripción / Detalle Resumido</label>
-                        <textarea id="noticiaDescripcion" rows="3" placeholder="Escribe el detalle breve del aviso..." required></textarea>
+                        <textarea id="noticiaDescripcion" rows="3" placeholder="Escribe el detalle breve del aviso..."
+                            required></textarea>
                     </div>
                     <div class="grupo">
                         <label>Seleccionar Imagen desde el Equipo</label>
@@ -122,6 +139,12 @@
                     <div class="grupo">
                         <label>URL / Enlace Más Información (Opcional)</label>
                         <input type="text" id="noticiaEnlace" placeholder="Ej: noticias/noticia2.html">
+                    </div><!-- Agrega este campo en el formulario de noticias del panel -->
+                    <div class="grupo-input">
+                        <label>Desarrollo / Contenido Completo:</label>
+                        <textarea id="noticiaContenidoCompleto" rows="8"
+                            placeholder="Escribe aquí todo el desarrollo detallado de la noticia..."
+                            required></textarea>
                     </div>
                     <div style="grid-column: 1 / -1; text-align: right;">
                         <button type="submit" class="btn-guardar">＋ Publicar Noticia</button>
@@ -170,7 +193,8 @@
                         </select>
                     </div>
                     <div style="grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end;">
-                        <button type="button" id="btnCancelarEditUsr" class="btn-act" style="display:none; background:#7f8c8d;">Cancelar</button>
+                        <button type="button" id="btnCancelarEditUsr" class="btn-act"
+                            style="display:none; background:#7f8c8d;">Cancelar</button>
                         <button type="submit" class="btn-guardar" id="btnSubmitUsr">＋ Crear Usuario</button>
                     </div>
                 </form>
@@ -290,7 +314,8 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <div style="text-align:right; margin-top:8px; font-weight:bold; font-size:1rem; color:var(--verde-principal);">
+                        <div
+                            style="text-align:right; margin-top:8px; font-weight:bold; font-size:1rem; color:var(--verde-principal);">
                             Total a Pagar: $<span id="lblTotalCalculado">0</span>
                         </div>
                     </div>
@@ -331,7 +356,8 @@
                 <h3>Matriz General de Control - Cuotas 2026</h3>
                 <div>
                     <button class="btn-act" onclick="renderizarMatrizPagos()">🔄 Actualizar Matriz</button>
-                    <button class="btn-pdf" style="padding: 8px 15px; font-size: 0.9rem;" onclick="descargarMatrizPDF()">📥 Descargar Reporte PDF</button>
+                    <button class="btn-pdf" style="padding: 8px 15px; font-size: 0.9rem;"
+                        onclick="descargarMatrizPDF()">📥 Descargar Reporte PDF</button>
                 </div>
             </div>
 
