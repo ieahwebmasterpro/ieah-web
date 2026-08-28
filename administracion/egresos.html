@@ -226,7 +226,7 @@
         </div>
 
         <!-- Formulario para agregar nuevo egreso -->
-        <div class="formulario-egreso">
+        <div class="formulario-egreso" id="contenedorFormEgreso">
             <h3>💸 Registrar Nuevo Egreso</h3>
             <form id="formEgreso" class="form-group">
                 <input type="date" id="fechaEgreso" required>
@@ -244,7 +244,7 @@
                     <th>Fecha</th>
                     <th>Concepto</th>
                     <th>Valor</th>
-                    <th>Acción</th>
+                    <th class="col-accion">Acción</th>
                 </tr>
             </thead>
             <tbody id="cuerpoTablaEgresos">
@@ -258,7 +258,8 @@
     <!-- Firebase SDK Modular -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, getDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAjZtbtNDCIQAh9OIQZ6bzMCX0QLQQQHe8",
@@ -271,13 +272,49 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Variables globales para el PDF
+        // Variables globales para el PDF y permisos
         let globalIngresos = 0;
         let globalEgresos = 0;
         let globalSaldo = 0;
         let listaEgresos = [];
+        let usuarioRolActual = "";
+
+        // Verificación de Autenticación y Rol
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+                if (userDoc.exists()) {
+                    usuarioRolActual = (userDoc.data().rol || "docente").toLowerCase().trim();
+                } else {
+                    usuarioRolActual = "docente";
+                }
+            } catch (error) {
+                console.error("Error obteniendo rol:", error);
+                usuarioRolActual = "docente";
+            }
+
+            aplicarPermisos();
+            cargarBalanceYEgresos();
+        });
+
+        function aplicarPermisos() {
+            const formBox = document.getElementById('contenedorFormEgreso');
+            if (usuarioRolActual !== 'superadmin') {
+                if (formBox) formBox.style.setProperty('display', 'none', 'important');
+                document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'none', 'important'));
+            } else {
+                if (formBox) formBox.style.display = 'block';
+                document.querySelectorAll('.col-accion').forEach(el => el.style.display = 'table-cell');
+            }
+        }
 
         // Establecer fecha actual por defecto en el formulario
         document.getElementById('fechaEgreso').value = new Date().toISOString().split('T')[0];
@@ -318,14 +355,16 @@
                             valor: valor
                         });
 
+                        const btnEliminar = usuarioRolActual === 'superadmin' 
+                            ? `<button class="btn-eliminar" data-id="${docSnap.id}">🗑️ Eliminar</button>` 
+                            : '';
+
                         tabla.innerHTML += `
                             <tr>
                                 <td>${egreso.fecha}</td>
                                 <td>${egreso.concepto}</td>
                                 <td style="color: var(--rojo-egreso); font-weight: bold;">-$ ${valor.toLocaleString('es-CO')}</td>
-                                <td>
-                                    <button class="btn-eliminar" data-id="${docSnap.id}">🗑️ Eliminar</button>
-                                </td>
+                                <td class="col-accion">${btnEliminar}</td>
                             </tr>
                         `;
                     });
@@ -338,16 +377,21 @@
                 document.getElementById('lblEgresos').innerText = `$ ${globalEgresos.toLocaleString('es-CO')}`;
                 document.getElementById('lblSaldo').innerText = `$ ${globalSaldo.toLocaleString('es-CO')}`;
 
-                // Eventos de eliminación
-                document.querySelectorAll('.btn-eliminar').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const id = e.target.getAttribute('data-id');
-                        if (confirm("¿Está seguro de eliminar este registro de egreso?")) {
-                            await deleteDoc(doc(db, "egresos", id));
-                            cargarBalanceYEgresos();
-                        }
+                // Re-aplicar ocultamiento según rol
+                aplicarPermisos();
+
+                // Eventos de eliminación solo para superadmin
+                if (usuarioRolActual === 'superadmin') {
+                    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const id = e.target.getAttribute('data-id');
+                            if (confirm("¿Está seguro de eliminar este registro de egreso?")) {
+                                await deleteDoc(doc(db, "egresos", id));
+                                cargarBalanceYEgresos();
+                            }
+                        });
                     });
-                });
+                }
 
             } catch (error) {
                 console.error("Error al calcular el balance:", error);
@@ -355,9 +399,11 @@
             }
         }
 
-        // Registrar un nuevo egreso
+        // Registrar un nuevo egreso (solo superadmin)
         document.getElementById('formEgreso').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (usuarioRolActual !== 'superadmin') return;
 
             const fecha = document.getElementById('fechaEgreso').value;
             const concepto = document.getElementById('conceptoEgreso').value.trim();
@@ -425,7 +471,6 @@
                     doc.line(40, 88, 555, 88);
 
                     // Cajas de Resumen Financiero
-                    // Total Ingresos
                     doc.setFillColor(39, 174, 96);
                     doc.roundedRect(40, 100, 160, 45, 4, 4, 'F');
                     doc.setTextColor(255, 255, 255);
@@ -435,7 +480,6 @@
                     doc.setFontSize(11);
                     doc.text(`$ ${globalIngresos.toLocaleString('es-CO')}`, 120, 133, { align: 'center' });
 
-                    // Total Egresos
                     doc.setFillColor(192, 57, 43);
                     doc.roundedRect(217, 100, 160, 45, 4, 4, 'F');
                     doc.setFontSize(8);
@@ -443,7 +487,6 @@
                     doc.setFontSize(11);
                     doc.text(`-$ ${globalEgresos.toLocaleString('es-CO')}-`, 297, 133, { align: 'center' });
 
-                    // Saldo Actual
                     doc.setFillColor(41, 128, 185);
                     doc.roundedRect(395, 100, 160, 45, 4, 4, 'F');
                     doc.setFontSize(8);
@@ -513,9 +556,6 @@
 
         // Asignar evento al botón de PDF
         document.getElementById('btnDescargarPDF').addEventListener('click', generarReportePDF);
-
-        // Carga inicial de datos al abrir la página
-        cargarBalanceYEgresos();
     </script>
 </body>
 

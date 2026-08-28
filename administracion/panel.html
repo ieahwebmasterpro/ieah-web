@@ -6,18 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - IEAH APP</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts Inter & Montserrat -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap"
         rel="stylesheet">
 
     <!-- CSS del Panel -->
     <link rel="stylesheet" href="css/panel.css">
 
-    <!-- Librerías Externas para Exportación de PDF -->
+    <!-- Librerías Externas para Exportación de PDF y Código de Barras -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 
 <body>
@@ -25,41 +26,43 @@
     <!-- BARRA LATERAL (SIDEBAR) -->
     <aside class="sidebar">
         <div>
-            <div class="brand">IEAH - Panel Admin</div>
+            <!-- DENTRO DE <aside class="sidebar"> -->
+            <div class="brand">
+                <img src="../img/escudo.png" alt="Escudo Institucional" class="escudo-img">
+            </div>
             <div class="user-info-box">
-                <div id="lblUsuarioNombre" style="font-weight: bold;">Cargando...</div>
-                <div id="lblUsuarioRol" style="text-transform: uppercase; color: var(--dorado); font-size: 0.75rem;">...
-                </div>
+                <div id="lblUsuarioNombre" class="user-name">Cargando...</div>
+                <div id="lblUsuarioRol" class="user-role">...</div>
             </div>
 
-            <!-- Menú Administrativo / Bienestar -->
-            <div id="menuAdministrativo" class="solo-admin-bienestar">
-                <button class="menu-btn solo-superadmin" id="btnBuzon" onclick="mostrarSeccion('buzon', this)">📩 Buzón
-                    Mensajes</button>
-                <button class="menu-btn solo-superadmin" id="btnNoticias" onclick="mostrarSeccion('noticias', this)">📰
-                    Noticias y Eventos</button>
-                <button class="menu-btn solo-superadmin" id="btnUsuarios" onclick="mostrarSeccion('usuarios', this)">👤
-                    Gestión de Usuarios</button>
-                <button class="menu-btn" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">👨‍🏫 Directorio
-                    Docentes</button>
-                <button class="menu-btn" id="btnContabilidad" onclick="mostrarSeccion('contabilidad', this)">💰
-                    Contabilidad & Tickets</button>
-                <button class="menu-btn" id="btnMatriz" onclick="mostrarSeccion('matriz', this)">📊 Matriz Anual de
-                    Pagos</button>
-                <button class="menu-btn" onclick="window.location.href='egresos.html'">📊 Egresos</button>
-            </div>
-
-            <!-- Botones Generales para Docentes y Todos -->
+            <!-- Botones Generales -->
+            <button class="menu-btn" id="btnNoticias" onclick="mostrarSeccion('noticias', this)">📰 Noticias y
+                Eventos</button>
             <button class="menu-btn" id="btnConsultasMenu" onclick="window.location.href='consultas.html'">🔍
                 Consultas</button>
             <button class="menu-btn" id="btnFormatosMenu" onclick="window.location.href='formatos.html'">📂 Formatos
-                Institucionales</button>
+                Inst.</button>
+
+            <!-- Menú Bienestar -->
+            <button class="menu-btn ver-bienestar" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">👨‍🏫
+                Directorio Docentes</button>
+            <button class="menu-btn ver-bienestar" id="btnContabilidad"
+                onclick="mostrarSeccion('contabilidad', this)">💰 Contabilidad & Tickets</button>
+            <button class="menu-btn ver-bienestar" id="btnMatriz" onclick="mostrarSeccion('matriz', this)">📊 Matriz
+                Anual</button>
+            <button class="menu-btn ver-bienestar" onclick="window.location.href='egresos.html'">📉 Egresos</button>
+
+            <!-- Menú Administrativo -->
+            <div id="menuAdministrativo" class="solo-admin-bienestar">
+                <button class="menu-btn solo-superadmin" id="btnBuzon" onclick="mostrarSeccion('buzon', this)">📩 Buzón
+                    Mensajes</button>
+                <button class="menu-btn solo-superadmin" id="btnUsuarios" onclick="mostrarSeccion('usuarios', this)">👤
+                    Gestión Usuarios</button>
+            </div>
         </div>
 
-        <div>
-            <a href="../index.html"
-                style="color: white; text-decoration: none; font-size: 0.85rem; display: block; text-align: center; margin-bottom: 10px;">🏠
-                Ver Sitio Web</a>
+        <div class="sidebar-footer">
+            <a href="../index.html" class="link-web">🏠 Ver Sitio Web</a>
             <button class="btn-logout" id="btnCerrarSesion">Cerrar Sesión</button>
         </div>
     </aside>
@@ -71,18 +74,27 @@
             <h2 id="tituloVista">Panel Principal</h2>
         </div>
 
-        <!-- Tarjetas Estadísticas -->
+        <!-- Tarjetas Estadísticas (KPIs) -->
         <div class="grid-stats" id="tarjetasEstadisticas">
             <div class="stat-card solo-superadmin" id="cardBuzon">
-                <h4>Mensajes en Buzón</h4>
+                <div class="stat-header">
+                    <h4>Mensajes en Buzón</h4>
+                    <span class="stat-icon">📩</span>
+                </div>
                 <div class="monto" id="contadorMensajes">0</div>
             </div>
             <div class="stat-card">
-                <h4>Docentes Registrados</h4>
+                <div class="stat-header">
+                    <h4>Docentes Registrados</h4>
+                    <span class="stat-icon">👥</span>
+                </div>
                 <div class="monto" id="contadorDocentes">0</div>
             </div>
             <div class="stat-card">
-                <h4>Recaudo Total Cuotas</h4>
+                <div class="stat-header">
+                    <h4>Recaudo Total Cuotas</h4>
+                    <span class="stat-icon">💰</span>
+                </div>
                 <div class="monto" id="totalRecaudado">$0</div>
             </div>
         </div>
@@ -90,44 +102,48 @@
         <!-- Bienvenido Docente -->
         <section id="sec-docente-bienvenida" class="seccion-modulo" style="display: none;">
             <h3>👋 Bienvenido a la Plataforma Institucional</h3>
-            <p style="margin-top: 10px; line-height: 1.6;">
+            <p style="margin-top: 10px; line-height: 1.6; color: var(--texto-secundario);">
                 Desde este panel puedes acceder a la consulta de tus aportes y comprobantes de pago, o explorar y
                 descargar la documentación y formatos institucionales requeridos.
             </p>
-            <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
                 <button class="btn-guardar" onclick="window.location.href='consultas.html'">🔍 Ir a Consultas de
                     Pago</button>
-                <button class="btn-act" style="background: var(--dorado); margin-bottom:0;"
-                    onclick="window.location.href='formatos.html'">📂 Ver Formatos Institucionales</button>
+                <button class="btn-act" onclick="window.location.href='formatos.html'">📂 Ver Formatos
+                    Institucionales</button>
             </div>
         </section>
 
         <!-- Módulo 1: Buzón -->
         <section id="sec-buzon" class="seccion-modulo">
-            <button class="btn-act" onclick="cargarMensajes()">🔄 Actualizar Mensajes</button>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Remitente</th>
-                        <th>Correo</th>
-                        <th>Mensaje</th>
-                        <th class="col-accion">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTablaBuzon"></tbody>
-            </table>
+            <div class="modulo-header">
+                <button class="btn-act" onclick="cargarMensajes()">🔄 Actualizar Mensajes</button>
+            </div>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Remitente</th>
+                            <th>Correo</th>
+                            <th>Mensaje</th>
+                            <th class="col-accion">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaBuzon"></tbody>
+                </table>
+            </div>
         </section>
 
         <!-- Módulo 2: Noticias -->
         <section id="sec-noticias" class="seccion-modulo">
-            <div style="margin-bottom: 25px;">
-                <h3>Publicar Evento o Noticia Oficial</h3>
+            <div class="form-contenedor">
+                <h3 class="seccion-titulo">Publicar Evento o Noticia Oficial</h3>
                 <form id="formNoticia" class="form-grid">
-                    <div class="grupo" style="grid-column: 1 / -1;">
+                    <div class="grupo col-span-2">
                         <label>Título del Evento / Aviso</label>
                         <input type="text" id="noticiaTitulo" placeholder="Ej: 🎉 Gran Bingo Familiar - IEAH" required>
                     </div>
-                    <div class="grupo" style="grid-column: 1 / -1;">
+                    <div class="grupo col-span-2">
                         <label>Descripción / Detalle Resumido</label>
                         <textarea id="noticiaDescripcion" rows="3" placeholder="Escribe el detalle breve del aviso..."
                             required></textarea>
@@ -139,37 +155,39 @@
                     <div class="grupo">
                         <label>URL / Enlace Más Información (Opcional)</label>
                         <input type="text" id="noticiaEnlace" placeholder="Ej: noticias/noticia2.html">
-                    </div><!-- Agrega este campo en el formulario de noticias del panel -->
-                    <div class="grupo-input">
+                    </div>
+                    <div class="grupo col-span-2">
                         <label>Desarrollo / Contenido Completo:</label>
-                        <textarea id="noticiaContenidoCompleto" rows="8"
+                        <textarea id="noticiaContenidoCompleto" rows="6"
                             placeholder="Escribe aquí todo el desarrollo detallado de la noticia..."
                             required></textarea>
                     </div>
-                    <div style="grid-column: 1 / -1; text-align: right;">
+                    <div class="col-span-2 btn-container-right">
                         <button type="submit" class="btn-guardar">＋ Publicar Noticia</button>
                     </div>
                 </form>
             </div>
 
-            <h3>Noticias Publicadas en la Web</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Título</th>
-                        <th>Descripción</th>
-                        <th>Enlace</th>
-                        <th class="col-accion">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTablaNoticias"></tbody>
-            </table>
+            <h3 class="seccion-titulo">Noticias Publicadas en la Web</h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Descripción</th>
+                            <th>Enlace</th>
+                            <th class="col-accion">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaNoticias"></tbody>
+                </table>
+            </div>
         </section>
 
         <!-- Módulo 3: Gestión de Usuarios -->
         <section id="sec-usuarios" class="seccion-modulo">
-            <div id="contenedorFormUsuario" style="margin-bottom: 25px;">
-                <h3 id="tituloFormUsuario">Registrar Nuevo Usuario del Sistema</h3>
+            <div id="contenedorFormUsuario" class="form-contenedor">
+                <h3 id="tituloFormUsuario" class="seccion-titulo">Registrar Nuevo Usuario del Sistema</h3>
                 <form id="formUsuario" class="form-grid">
                     <input type="hidden" id="usrDocId">
                     <div class="grupo">
@@ -192,32 +210,34 @@
                             <option value="docente">Docente (Solo Consultas)</option>
                         </select>
                     </div>
-                    <div style="grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end;">
-                        <button type="button" id="btnCancelarEditUsr" class="btn-act"
-                            style="display:none; background:#7f8c8d;">Cancelar</button>
+                    <div class="col-span-2 btn-container-right">
+                        <button type="button" id="btnCancelarEditUsr" class="btn-cancelar"
+                            style="display:none;">Cancelar</button>
                         <button type="submit" class="btn-guardar" id="btnSubmitUsr">＋ Crear Usuario</button>
                     </div>
                 </form>
             </div>
 
-            <h3>Cuentas Registradas en el Sistema</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Correo Electrónico</th>
-                        <th>Rol</th>
-                        <th class="col-accion">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTablaUsuarios"></tbody>
-            </table>
+            <h3 class="seccion-titulo">Cuentas Registradas en el Sistema</h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo Electrónico</th>
+                            <th>Rol</th>
+                            <th class="col-accion">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaUsuarios"></tbody>
+                </table>
+            </div>
         </section>
 
         <!-- Módulo 4: Directorio Docentes -->
         <section id="sec-docentes" class="seccion-modulo">
-            <div id="contenedorFormDocente" style="margin-bottom: 25px;">
-                <h3>Registrar Nuevo Docente / Personal</h3>
+            <div id="contenedorFormDocente" class="form-contenedor">
+                <h3 class="seccion-titulo">Registrar Nuevo Docente / Personal</h3>
                 <form id="formDocente" class="form-grid">
                     <div class="grupo">
                         <label>Nombre Completo</label>
@@ -245,29 +265,33 @@
                             <option value="Alto delicias">Alto delicias</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-guardar">＋ Guardar Docente</button>
+                    <div class="col-span-2 btn-container-right">
+                        <button type="submit" class="btn-guardar">＋ Guardar Docente</button>
+                    </div>
                 </form>
             </div>
 
-            <h3>Directorio de Docentes Guardados</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Documento</th>
-                        <th>Nombre</th>
-                        <th>Teléfono</th>
-                        <th>Dirección</th>
-                        <th class="col-accion">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTablaDocentes"></tbody>
-            </table>
+            <h3 class="seccion-titulo">Directorio de Docentes Guardados</h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Documento</th>
+                            <th>Nombre</th>
+                            <th>Teléfono</th>
+                            <th>Dirección</th>
+                            <th class="col-accion">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaDocentes"></tbody>
+                </table>
+            </div>
         </section>
 
         <!-- Módulo 5: Contabilidad -->
         <section id="sec-contabilidad" class="seccion-modulo">
-            <div class="solo-superadmin">
-                <h3>Registrar Nuevo Pago de Cuota</h3>
+            <div class="solo-superadmin form-contenedor">
+                <h3 class="seccion-titulo">Registrar Nuevo Pago de Cuota</h3>
                 <form id="formPago" class="form-grid">
                     <div class="grupo">
                         <label>Seleccionar Docente</label>
@@ -280,7 +304,7 @@
                         <input type="text" id="pagoDocumento" readonly placeholder="Se autocompleta">
                     </div>
 
-                    <div class="grupo" style="grid-column: 1 / -1;">
+                    <div class="grupo col-span-2">
                         <label>Seleccionar Meses a Pagar ($35.000 c/u):</label>
                         <div class="meses-selector">
                             <label><input type="checkbox" class="chk-mes" value="1 Enero"> 1 Enero</label>
@@ -298,24 +322,25 @@
                         </div>
                     </div>
 
-                    <div class="previsualizacion-box">
+                    <div class="previsualizacion-box col-span-2">
                         <strong>Previsualización del Pago:</strong>
-                        <div id="prevDocente" style="font-size: 0.85rem; margin-top:3px;">Docente: No seleccionado</div>
-                        <table style="background: white; margin-top:8px;">
-                            <thead>
-                                <tr>
-                                    <th>Mes</th>
-                                    <th>Valor Cuota</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuerpoPrevisTabla">
-                                <tr>
-                                    <td colspan="2" style="text-align:center;">Ningún mes seleccionado</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div
-                            style="text-align:right; margin-top:8px; font-weight:bold; font-size:1rem; color:var(--verde-principal);">
+                        <div id="prevDocente" class="prev-docente-lbl">Docente: No seleccionado</div>
+                        <div class="tabla-contenedor" style="margin-top: 10px;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Mes</th>
+                                        <th>Valor Cuota</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpoPrevisTabla">
+                                    <tr>
+                                        <td colspan="2" style="text-align:center;">Ningún mes seleccionado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="total-previs-lbl">
                             Total a Pagar: $<span id="lblTotalCalculado">0</span>
                         </div>
                     </div>
@@ -329,35 +354,38 @@
                         <input type="text" id="pagoCambio" readonly value="$0">
                     </div>
 
-                    <button type="submit" class="btn-guardar">＋ Generar Ticket y Guardar</button>
+                    <div class="col-span-2 btn-container-right">
+                        <button type="submit" class="btn-guardar">＋ Generar Ticket y Guardar</button>
+                    </div>
                 </form>
             </div>
 
-            <h3>Historial de Pagos y Recibos</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Ticket N°</th>
-                        <th>Fecha</th>
-                        <th>Docente</th>
-                        <th>Meses Pagados</th>
-                        <th>Total Pago</th>
-                        <th>Imprimir Ticket</th>
-                        <th class="col-accion">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTablaPagos"></tbody>
-            </table>
+            <h3 class="seccion-titulo">Historial de Pagos y Recibos</h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ticket N°</th>
+                            <th>Fecha</th>
+                            <th>Docente</th>
+                            <th>Meses Pagados</th>
+                            <th>Total Pago</th>
+                            <th>Imprimir Ticket</th>
+                            <th class="col-accion">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaPagos"></tbody>
+                </table>
+            </div>
         </section>
 
         <!-- Módulo 6: Matriz Anual -->
         <section id="sec-matriz" class="seccion-modulo">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3>Matriz General de Control - Cuotas 2026</h3>
-                <div>
-                    <button class="btn-act" onclick="renderizarMatrizPagos()">🔄 Actualizar Matriz</button>
-                    <button class="btn-pdf" style="padding: 8px 15px; font-size: 0.9rem;"
-                        onclick="descargarMatrizPDF()">📥 Descargar Reporte PDF</button>
+            <div class="modulo-header">
+                <h3 class="seccion-titulo" style="margin:0;">Matriz General de Control - Cuotas 2026</h3>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-act" onclick="renderizarMatrizPagos()">🔄 Actualizar</button>
+                    <button class="btn-pdf" onclick="descargarMatrizPDF()">📥 Descargar PDF</button>
                 </div>
             </div>
 
