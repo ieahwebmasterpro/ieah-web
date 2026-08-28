@@ -30,6 +30,7 @@
     /* Estados */
     --verde-exito: #10B981;
     --rojo-alerta: #EF4444;
+    --azul: #0808e4;
 }
 
 * {
@@ -351,6 +352,87 @@ body {
     box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
 }
 
+/* Botones seccion rol docentes  */
+/* boton consulta de pagos  */
+.btn-consulta {
+    background: var(--dorado-gradiente);
+    color: var(--negro-profundo);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+    transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn-consulta:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+}
+
+/* Boton descargar comprobante  */
+.btn-descargar-comprobante {
+    background: var(--esmeralda-acento);
+    color: var(--negro-profundo);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn-descargar-comprobante:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(6, 206, 39, 0.35);
+}
+
+/* Boton ver formatos institucionales  */
+.btn-descargar-formatos {
+    background: var(--azul);
+    color: var(--negro-profundo);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn-descargar-formatos:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(6, 206, 39, 0.35);
+}
+
+/* Boton publicar noticia  */
+.btn-noticias {
+    background: var(--rojo-alerta);
+    color: var(--negro-profundo);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn-noticias:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(6, 206, 39, 0.35);
+}
+
 .btn-act {
     background: var(--glass-bg);
     color: #FFFFFF;
@@ -538,34 +620,6 @@ tr:hover td {
     visibility: hidden;
 }
 
-/* ESCUDO INSTITUCIONAL */
-.brand {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--glass-border);
-    margin-bottom: 20px;
-}
-
-.escudo-img {
-    width: 80px;                  /* Tamaño ideal para la barra lateral */
-    height: auto;
-    object-fit: contain;
-    border-radius: 50%;           /* Opcional: si el escudo es circular */
-    border: 2px solid var(--dorado-premium); /* Borde dorado fino */
-    box-shadow: 0 0 12px rgba(245, 158, 11, 0.35); /* Resplandor dorado suave */
-    padding: 4px;
-    background: rgba(0, 0, 0, 0.3); /* Fondo oscuro sutil detrás del escudo */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.escudo-img:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 18px rgba(245, 158, 11, 0.55); /* Resplandor más intenso al pasar el cursor */
-}
-
-/* ESCUDO INSTITUCIONAL (MÁS GRANDE Y COLORES ORIGINALES) */
 /* ESCUDO INSTITUCIONAL CON FONDO BLANCO DENTRO DEL RECUADRO */
 .brand {
     display: flex;
@@ -592,4 +646,51 @@ tr:hover td {
 .escudo-img:hover {
     transform: scale(1.04);
     box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+}
+
+/* --- ADAPTACIÓN RESPONSIVA PARA PANTALLAS PEQUEÑAS --- */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+
+    /* Redimensionar barra lateral */
+    .sidebar {
+        width: 100%;
+        padding: 16px;
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    /* Ocultar la caja de información del usuario y los botones del menú */
+    .user-info-box,
+    .menu-btn,
+    #menuAdministrativo {
+        display: none !important;
+    }
+
+    /* Reordenar pie del sidebar: Escudo arriba, luego link y cerrar sesión */
+    .sidebar > div:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 0;
+    }
+
+    .brand {
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: none;
+    }
+
+    .sidebar-footer {
+        border-top: none;
+        padding-top: 8px;
+        width: 100%;
+    }
+
+    /* Ajuste de margen del contenido principal */
+    .main-content {
+        padding: 16px;
+    }
 }

@@ -39,6 +39,13 @@ let pagosCache = [];
 let usuariosCache = [];
 let usuarioRolActual = "";
 
+// Función auxiliar para obtener únicamente el primer nombre
+function obtenerPrimerNombre(nombreCompleto) {
+    if (!nombreCompleto) return 'Profe';
+    const primerNombre = nombreCompleto.trim().split(' ')[0];
+    return primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1).toLowerCase();
+}
+
 // --- AUTENTICACIÓN Y PERMISOS ---
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -55,6 +62,13 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('lblUsuarioNombre').innerText = data.nombre || user.email;
             document.getElementById('lblUsuarioRol').innerText = usuarioRolActual;
 
+            // Actualizar mensaje de bienvenida personalizado para docentes
+            const primerNombre = obtenerPrimerNombre(data.nombre);
+            const lblBienvenida = document.getElementById('mensajeBienvenidaDocente');
+            if (lblBienvenida) {
+                lblBienvenida.innerText = `👋 Hola profe ${primerNombre} Bienvenid@ a la Plataforma Institucional`;
+            }
+
             aplicarPermisosRol(usuarioRolActual);
         } else {
             aplicarPermisosRol("docente");
@@ -67,16 +81,23 @@ onAuthStateChanged(auth, async (user) => {
 
 function aplicarPermisosRol(rol) {
     const rolLimpio = String(rol).toLowerCase().trim();
-    
+
     // Elementos del DOM
     const formDocenteBox = document.getElementById('contenedorFormDocente');
-    const formPagoBox = document.getElementById('contenedorFormPago');       
-    const formEgresoBox = document.getElementById('contenedorFormEgreso');   
-    const formNoticiaBox = document.getElementById('contenedorFormNoticia'); 
-    
+    const formPagoBox = document.getElementById('contenedorFormPago');
+    const formEgresoBox = document.getElementById('contenedorFormEgreso');
+    const formNoticiaBox = document.getElementById('contenedorFormNoticia');
+
     const menuAdmin = document.getElementById('menuAdministrativo');
     const gridStats = document.getElementById('tarjetasEstadisticas');
     const secBienvenida = document.getElementById('sec-docente-bienvenida');
+    
+    // Si es Bienestar o SuperAdmin, ocultamos los botones con clase .solo-docente
+    if (rolLimpio === "bienestar" || rolLimpio === "superadmin") {
+        document.querySelectorAll('.solo-docente').forEach(el => el.style.setProperty('display', 'none', 'important'));
+    } else {
+        document.querySelectorAll('.solo-docente').forEach(el => el.style.setProperty('display', 'block', 'important'));
+    }
 
     if (rolLimpio === "docente") {
         // --- ROL DOCENTE ---
@@ -111,11 +132,11 @@ function aplicarPermisosRol(rol) {
 
         document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'none', 'important'));
 
-        renderizarNoticias();
         renderizarDocentes();
         renderizarPagos();
         if (typeof renderizarEgresos === 'function') renderizarEgresos();
-        mostrarSeccion('noticias', null);
+
+        mostrarSeccion('docentes', document.getElementById('btnDocentes'));
 
     } else {
         // --- ROL SUPERADMIN ---
@@ -131,7 +152,8 @@ function aplicarPermisosRol(rol) {
         if (formDocenteBox) formDocenteBox.style.cssText = "display: block !important;";
         if (formPagoBox) formPagoBox.style.cssText = "display: block !important;";
         if (formEgresoBox) formEgresoBox.style.cssText = "display: block !important;";
-        if (formNoticiaBox) formNoticiaBox.style.cssText = "display: block !important;";
+
+        if (formNoticiaBox) formNoticiaBox.style.setProperty('display', 'none', 'important');
 
         document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'table-cell', 'important'));
 
@@ -140,7 +162,6 @@ function aplicarPermisosRol(rol) {
         renderizarDocentes();
         renderizarPagos();
         renderizarUsuarios();
-        renderizarNoticias();
     }
 }
 
@@ -158,25 +179,25 @@ window.mostrarSeccion = function (seccion, elemento) {
         const sec = document.getElementById('sec-docente-bienvenida');
         if (sec) sec.classList.add('activa');
     } else if (seccion === 'buzon') {
-        document.getElementById('sec-buzon').classList.add('activa');
+        document.getElementById('sec-buzon')?.classList.add('activa');
         document.getElementById('tituloVista').innerText = "Buzón de Mensajes";
     } else if (seccion === 'noticias') {
-        document.getElementById('sec-noticias').classList.add('activa');
+        document.getElementById('sec-noticias')?.classList.add('activa');
         document.getElementById('tituloVista').innerText = "Noticias y Eventos Oficiales";
         renderizarNoticias();
     } else if (seccion === 'usuarios') {
-        document.getElementById('sec-usuarios').classList.add('activa');
+        document.getElementById('sec-usuarios')?.classList.add('activa');
         document.getElementById('tituloVista').innerText = "Gestión de Usuarios del Sistema";
         renderizarUsuarios();
     } else if (seccion === 'docentes') {
-        document.getElementById('sec-docentes').classList.add('activa');
+        document.getElementById('sec-docentes')?.classList.add('activa');
         document.getElementById('tituloVista').innerText = "Directorio Docentes";
         renderizarDocentes();
     } else if (seccion === 'contabilidad') {
-        document.getElementById('sec-contabilidad').classList.add('activa');
+        document.getElementById('sec-contabilidad')?.classList.add('activa');
         document.getElementById('tituloVista').innerText = "Gestión Contable & Recibos";
     } else if (seccion === 'matriz') {
-        document.getElementById('sec-matriz').classList.add('activa');
+        document.getElementById('sec-matriz')?.classList.add('activa');
         document.getElementById('tituloVista').innerText = "Matriz General de Pagos";
         renderizarMatrizPagos();
     } else if (seccion === 'egresos') {
@@ -185,7 +206,10 @@ window.mostrarSeccion = function (seccion, elemento) {
         document.getElementById('tituloVista').innerText = "Reporte de Egresos";
         if (typeof renderizarEgresos === 'function') renderizarEgresos();
     }
-    if (elemento) elemento.classList.add('activo');
+    
+    if (elemento && elemento.classList) {
+        elemento.classList.add('activo');
+    }
 };
 
 // --- GESTIÓN DE NOTICIAS ---
@@ -195,7 +219,7 @@ document.getElementById('formNoticia')?.addEventListener('submit', async (e) => 
 
     const btnSubmit = e.target.querySelector('button[type="submit"]');
     const archivoImagen = document.getElementById('noticiaImagenFile')?.files[0];
-    
+
     const titulo = document.getElementById('noticiaTitulo').value.trim();
     const descripcion = document.getElementById('noticiaDescripcion').value.trim();
     const contenidoCompleto = document.getElementById('noticiaContenidoCompleto')?.value.trim() || descripcion;
@@ -248,8 +272,8 @@ window.renderizarNoticias = async function () {
             const n = docSnap.data();
             const tr = document.createElement("tr");
 
-            const btnAccion = usuarioRolActual === 'superadmin' 
-                ? `<button class="btn-del btn-eliminar-noticia" data-id="${docSnap.id}">🗑️</button>` 
+            const btnAccion = usuarioRolActual === 'superadmin'
+                ? `<button class="btn-del btn-eliminar-noticia" data-id="${docSnap.id}">🗑️</button>`
                 : '<span style="color:#a0aec0;">Lectura</span>';
 
             tr.innerHTML = `
@@ -325,7 +349,7 @@ document.getElementById('formUsuario')?.addEventListener('submit', async (e) => 
 window.renderizarUsuarios = async function () {
     if (usuarioRolActual !== 'superadmin') return;
     const tabla = document.getElementById('cuerpoTablaUsuarios');
-    
+
     try {
         const querySnapshot = await getDocs(collection(db, "usuarios"));
         usuariosCache = [];
@@ -669,7 +693,7 @@ window.renderizarPagos = async function () {
 
             totalGeneral += p.totalPagar || 0;
             const textoMeses = p.meses ? p.meses.join(', ') : p.mes;
-            
+
             const btnDel = usuarioRolActual === 'superadmin' ? `<button class="btn-del" onclick="eliminarPago('${p.id}')">🗑️</button>` : '';
 
             tabla.innerHTML += `
@@ -780,14 +804,14 @@ window.descargarMatrizPDF = function () {
             html: '#tablaMatrizPDF',
             startY: 60,
             theme: 'grid',
-            styles: { 
-                fontSize: 6.5, 
+            styles: {
+                fontSize: 6.5,
                 halign: 'center',
                 valign: 'middle',
                 cellPadding: 3
             },
-            headStyles: { 
-                fillColor: [26, 92, 46], 
+            headStyles: {
+                fillColor: [26, 92, 46],
                 textColor: [255, 255, 255],
                 fontStyle: 'bold',
                 halign: 'center'
@@ -829,7 +853,6 @@ window.descargarTicketPDF = function (id) {
         document.body.appendChild(contenedor);
     }
 
-    // Formateador sin decimales ni COP
     const formatMoneda = (valor) => {
         const num = Math.round(Number(valor) || 0);
         return `$${num.toLocaleString('es-CO')}`;
@@ -839,19 +862,19 @@ window.descargarTicketPDF = function (id) {
     if (pago.meses && Array.isArray(pago.meses)) {
         pago.meses.forEach(m => {
             filasMesesHTML += `
-                <tr>
-                    <td style="text-align: center; vertical-align: top; padding: 2px 0; border: none !important; width: 20%; font-size: 12px !important;">1</td>
-                    <td style="text-align: center; vertical-align: top; padding: 2px 0; border: none !important; width: 50%; font-size: 12px !important;">Cuota ${m}</td>
-                    <td style="text-align: center; vertical-align: top; padding: 2px 0; border: none !important; width: 30%; font-size: 12px !important;">${formatMoneda(35000)}</td>
+                <tr style="background: transparent !important; color: #000000 !important;">
+                    <td style="text-align: center; vertical-align: top; padding: 4px 0; border: none !important; width: 20%; font-size: 12px !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">1</td>
+                    <td style="text-align: center; vertical-align: top; padding: 4px 0; border: none !important; width: 50%; font-size: 12px !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">Cuota ${m}</td>
+                    <td style="text-align: center; vertical-align: top; padding: 4px 0; border: none !important; width: 30%; font-size: 12px !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">${formatMoneda(35000)}</td>
                 </tr>
             `;
         });
     } else if (pago.mes) {
         filasMesesHTML = `
-            <tr>
-                <td style="text-align: center; vertical-align: top; padding: 2px 0; border: none !important; width: 20%; font-size: 12px !important;">1</td>
-                <td style="text-align: center; vertical-align: top; padding: 2px 0; border: none !important; width: 50%; font-size: 12px !important;">Cuota ${pago.mes}</td>
-                <td style="text-align: center; vertical-align: top; padding: 2px 0; border: none !important; width: 30%; font-size: 12px !important;">${formatMoneda(35000)}</td>
+            <tr style="background: transparent !important; color: #000000 !important;">
+                <td style="text-align: center; vertical-align: top; padding: 4px 0; border: none !important; width: 20%; font-size: 12px !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">1</td>
+                <td style="text-align: center; vertical-align: top; padding: 4px 0; border: none !important; width: 50%; font-size: 12px !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">Cuota ${pago.mes}</td>
+                <td style="text-align: center; vertical-align: top; padding: 4px 0; border: none !important; width: 30%; font-size: 12px !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">${formatMoneda(35000)}</td>
             </tr>
         `;
     }
@@ -861,51 +884,53 @@ window.descargarTicketPDF = function (id) {
     const cambioFormatted = formatMoneda(pago.cambio || 0);
     const codigoAlpha = `Y419J3T0F4-${pago.numTicket || 57}`;
 
-    // Tamaño de papel y contenedor ajustados
-    contenedor.style.cssText = "position: absolute; top: 0; left: 0; width: 78mm; background: #ffffff; z-index: 99999; visibility: visible; display: block;";
+    contenedor.style.cssText = "position: absolute; top: 0; left: 0; width: 78mm; background: #ffffff !important; z-index: 99999; visibility: visible; display: block;";
 
     contenedor.innerHTML = `
-        <div id="elementoAImprimir" style="width: 72mm; padding: 6mm 2mm 2mm 2mm; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif; font-size: 12px !important; font-weight: normal; line-height: 1.25; box-sizing: border-box; margin: 0 auto; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+        <div id="elementoAImprimir" style="width: 72mm; padding: 8mm 2mm 4mm 2mm; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 12px !important; font-weight: normal; line-height: 1.35; box-sizing: border-box; margin: 0 auto; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
             
             <!-- SECCIÓN 1: ENCABEZADO CENTRADO -->
-            <div style="text-align: center; font-size: 12px !important; background: transparent !important; color: #000000 !important;">
-                <span style="font-weight: bold;">INSTITUCION EDUCATIVA ALTO<br>HORIZONTE 2026</span><br>
-                <span>
+            <div style="text-align: center; font-size: 12px !important; background: transparent !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; margin-bottom: 4px;">
+                <span style="font-weight: bold; color: #000000 !important;">INSTITUCION EDUCATIVA ALTO<br>HORIZONTE 2026</span><br>
+                <span style="color: #000000 !important;">
                     Vereda Alto Horizonte<br>
                     Teléfono: 3214115248<br>
                     Email: altohorizonte.suaza@sedhuila.gov.co
                 </span>
             </div>
 
-            <!-- SEPARADOR DE SECCIÓN -->
-            <div style="border-bottom: 1px dashed #000000; margin: 6px 0;"></div>
+            <!-- SEPARADOR DE SECCIÓN CON ESPACIADO MODERADO -->
+            <div style="border-bottom: 1px dashed #000000; margin: 10px 0;"></div>
 
             <!-- SECCIÓN 2: DATOS DEL TICKET CENTRADOS -->
-            <div style="text-align: center; font-size: 12px !important; font-weight: normal; background: transparent !important; color: #000000 !important;">
+            <div style="text-align: center; font-size: 12px !important; font-weight: normal; background: transparent !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; padding: 2px 0;">
                 Fecha: ${pago.fecha || ''}<br>
                 Caja Nro: 1<br>
                 Cajero: Bienestar I E Alto Horizonte<br>
-                <span style="font-weight: bold;">TICKET NRO: ${pago.numTicket || ''}</span>
+                <span style="font-weight: bold; color: #000000 !important;">TICKET NRO: ${pago.numTicket || ''}</span>
             </div>
 
-            <!-- SEPARADOR DE SECCIÓN -->
-            <div style="border-bottom: 1px dashed #000000; margin: 6px 0;"></div>
+            <!-- SEPARADOR DE SECCIÓN CON ESPACIADO MODERADO -->
+            <div style="border-bottom: 1px dashed #000000; margin: 10px 0;"></div>
 
             <!-- SECCIÓN 3: DATOS DEL CLIENTE CENTRADOS -->
-            <div style="text-align: center; font-size: 12px !important; font-weight: normal; background: transparent !important; color: #000000 !important; padding-bottom: 2px;">
+            <div style="text-align: center; font-size: 12px !important; font-weight: normal; background: transparent !important; color: #000000 !important; padding: 2px 0; font-family: Arial, Helvetica, sans-serif !important;">
                 Cliente: ${pago.docente || ''}<br>
                 Documento: Otro ${pago.documento || ''}<br>
                 Teléfono: ${pago.telefono || ''}<br>
                 Dirección: ${pago.direccion || ''}
             </div>
 
+            <!-- SEPARADOR DE SECCIÓN CON ESPACIADO MODERADO -->
+            <div style="border-bottom: 1px dashed #000000; margin: 10px 0;"></div>
+
             <!-- SECCIÓN 4 Y 5: TABLA DETALLE -->
-            <table style="width: 100%; border-collapse: collapse; border: none !important; font-size: 12px !important; font-weight: normal; font-family: Arial, Helvetica, sans-serif; background: transparent !important; color: #000000 !important;">
+            <table style="width: 100%; border-collapse: collapse; border: none !important; font-size: 12px !important; font-weight: normal; font-family: Arial, Helvetica, sans-serif !important; background: transparent !important; color: #000000 !important; margin: 4px 0;">
                 <thead>
-                    <tr style="background: transparent !important; color: #000000 !important; border-top: 1px dashed #000000 !important; border-bottom: 1px dashed #000000 !important;">
-                        <th style="text-align: center; width: 20%; font-weight: normal; padding: 4px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important;">Cant.</th>
-                        <th style="text-align: center; width: 50%; font-weight: normal; padding: 4px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important;">Precio</th>
-                        <th style="text-align: center; width: 30%; font-weight: normal; padding: 4px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important;">Total</th>
+                    <tr style="background: transparent !important; color: #000000 !important; border-bottom: 1px dashed #000000 !important;">
+                        <th style="text-align: center; width: 20%; font-weight: normal; padding: 5px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">Cant.</th>
+                        <th style="text-align: center; width: 50%; font-weight: normal; padding: 5px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">Precio</th>
+                        <th style="text-align: center; width: 30%; font-weight: normal; padding: 5px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -913,49 +938,49 @@ window.descargarTicketPDF = function (id) {
                 </tbody>
             </table>
 
-            <!-- SEPARADOR DE SECCIÓN -->
-            <div style="border-bottom: 1px dashed #000000; margin: 6px 0;"></div>
+            <!-- SEPARADOR DE SECCIÓN CON ESPACIADO MODERADO -->
+            <div style="border-bottom: 1px dashed #000000; margin: 10px 0;"></div>
 
             <!-- SECCIÓN 6: TOTALES Y CAMBIO -->
-            <table style="width: 100%; border-collapse: collapse; border: none !important; font-size: 13px !important; font-weight: normal; font-family: Arial, Helvetica, sans-serif; background: transparent !important; color: #000000 !important;">
-                <tr>
-                    <td style="text-align: left; padding: 2px 0 2px 10px; border: none !important; width: 55%;">TOTAL A PAGAR</td>
-                    <td style="text-align: right; padding: 2px 10px 2px 0; border: none !important; width: 45%;">${totalPagarFormatted}</td>
+            <table style="width: 100%; border-collapse: collapse; border: none !important; font-size: 12px !important; font-weight: normal; font-family: Arial, Helvetica, sans-serif !important; background: transparent !important; color: #000000 !important; margin: 4px 0;">
+                <tr style="background: transparent !important; color: #000000 !important;">
+                    <td style="text-align: left; padding: 3px 0 3px 10px; border: none !important; width: 55%; color: #000000 !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">TOTAL A PAGAR</td>
+                    <td style="text-align: right; padding: 3px 10px 3px 0; border: none !important; width: 45%; color: #000000 !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">${totalPagarFormatted}</td>
                 </tr>
-                <tr>
-                    <td style="text-align: left; padding: 2px 0 2px 10px; border: none !important;">TOTAL PAGADO</td>
-                    <td style="text-align: right; padding: 2px 10px 2px 0; border: none !important;">${totalPagadoFormatted}</td>
+                <tr style="background: transparent !important; color: #000000 !important;">
+                    <td style="text-align: left; padding: 3px 0 3px 10px; border: none !important; color: #000000 !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">TOTAL PAGADO</td>
+                    <td style="text-align: right; padding: 3px 10px 3px 0; border: none !important; color: #000000 !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">${totalPagadoFormatted}</td>
                 </tr>
-                <tr>
-                    <td style="text-align: left; padding: 2px 0 2px 10px; border: none !important;">CAMBIO</td>
-                    <td style="text-align: right; padding: 2px 10px 2px 0; border: none !important;">${cambioFormatted}</td>
+                <tr style="background: transparent !important; color: #000000 !important;">
+                    <td style="text-align: left; padding: 3px 0 3px 10px; border: none !important; color: #000000 !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">CAMBIO</td>
+                    <td style="text-align: right; padding: 3px 10px 3px 0; border: none !important; color: #000000 !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important; opacity: 1 !important;">${cambioFormatted}</td>
                 </tr>
             </table>
 
-            <!-- SEPARADOR DE SECCIÓN -->
-            <div style="border-bottom: 1px dashed #000000; margin: 6px 0;"></div>
+            <!-- SEPARADOR DE SECCIÓN CON ESPACIADO MODERADO -->
+            <div style="border-bottom: 1px dashed #000000; margin: 10px 0;"></div>
 
-            <!-- MENSAJES INFORMATIVOS CON DOBLE ESPACIO VERTICAL SUPERIOR -->
-            <div style="text-align: center; font-size: 12px !important; font-weight: normal; line-height: 1.25; margin-top: 18px; background: transparent !important; color: #000000 !important;">
-                <div>*** Para poder realizar un reclamo o devolución debe de presentar este ticket ***</div>
-                <div style="margin-top: 8px;">*** Estimad@ profesor@ - Adminstrativ@ Rector@, con su cuota contribuye al bienestar de todo el talento humano de nuestra institución ***</div>
+            <!-- MENSAJES INFORMATIVOS -->
+            <div style="text-align: center; font-size: 12px !important; font-weight: normal; line-height: 1.35; margin-top: 14px; background: transparent !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important;">
+                <div style="color: #000000 !important;">*** Para poder realizar un reclamo o devolución debe de presentar este ticket ***</div>
+                <div style="margin-top: 10px; color: #000000 !important;">*** Estimad@ profesor@ - Adminstrativ@ Rector@, con su cuota contribuye al bienestar de todo el talento humano de nuestra institución ***</div>
             </div>
 
-            <div style="text-align: center; font-size: 12px !important; font-weight: normal; margin-top: 8px; background: transparent !important; color: #000000 !important;">
+            <div style="text-align: center; font-size: 12px !important; font-weight: normal; margin-top: 12px; background: transparent !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important;">
                 ¡GRACIAS POR SU APORTE!
             </div>
 
             <!-- CEMLED CORP -->
-            <div style="text-align: center; font-size: 13px !important; font-weight: bold; margin-top: 8px; background: transparent !important; color: #000000 !important;">
+            <div style="text-align: center; font-size: 13px !important; font-weight: bold; margin-top: 12px; background: transparent !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important;">
                 Cemled corp 2026
             </div>
 
             <!-- CÓDIGO DE BARRAS CENTRADO -->
-            <div style="text-align: center; margin-top: 8px; background: transparent !important; width: 100%;">
+            <div style="text-align: center; margin-top: 12px; background: transparent !important; width: 100%;">
                 <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
                     <svg id="barcodeTicket" style="margin: 0 auto; display: block;"></svg>
                 </div>
-                <div style="font-size: 12px !important; font-weight: normal; margin-top: 3px; color: #000000 !important; text-align: center;">${codigoAlpha}</div>
+                <div style="font-size: 12px !important; font-weight: normal; margin-top: 4px; color: #000000 !important; text-align: center; font-family: Arial, Helvetica, sans-serif !important;">${codigoAlpha}</div>
             </div>
 
         </div>
@@ -967,7 +992,7 @@ window.descargarTicketPDF = function (id) {
             JsBarcode("#barcodeTicket", codigoAlpha, {
                 format: "CODE128",
                 displayValue: false,
-                height: 50,
+                height: 48,
                 width: 1.6,
                 margin: 0,
                 lineColor: "#000000"
@@ -977,23 +1002,23 @@ window.descargarTicketPDF = function (id) {
         console.error("Error al generar el código de barras:", e);
     }
 
-    // Renderizado en Ultra Alta Definición
+    // Renderizado en PDF con altura dinámica ajustada
     setTimeout(() => {
         const elemento = document.getElementById('elementoAImprimir');
         const opt = {
-            margin:       [0, 0, 0, 0],
-            filename:     `TICKET_${pago.numTicket || 'PAGO'}.pdf`,
-            image:        { type: 'png', quality: 1.0 },
-            html2canvas:  { 
-                scale: 6, 
-                logging: false, 
-                useCORS: true, 
+            margin: [0, 0, 0, 0],
+            filename: `TICKET_${pago.numTicket || 'PAGO'}.pdf`,
+            image: { type: 'png', quality: 1.0 },
+            html2canvas: {
+                scale: 6,
+                logging: false,
+                useCORS: true,
                 letterRendering: true,
                 backgroundColor: '#ffffff',
-                scrollX: 0, 
-                scrollY: 0 
+                scrollX: 0,
+                scrollY: 0
             },
-            jsPDF:        { unit: 'mm', format: [78, 245], orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: [78, 260], orientation: 'portrait' }
         };
 
         html2pdf().set(opt).from(elemento).save().then(() => {

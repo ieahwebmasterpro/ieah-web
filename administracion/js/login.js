@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjZtbtNDCIQAh9OIQZ6bzMCX0QLQQQHe8",
@@ -14,42 +14,52 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const btn = document.getElementById('btnLogin');
-    const correo = document.getElementById('loginCorreo').value.trim();
-    const clave = document.getElementById('loginClave').value.trim();
-
-    try {
-        btn.innerText = "Verificando...";
-        btn.disabled = true;
-
-        await signInWithEmailAndPassword(auth, correo, clave);
-        
-        // Redirección directa al panel de control
+// Redirección si ya inició sesión
+onAuthStateChanged(auth, (user) => {
+    if (user) {
         window.location.href = "panel.html";
-
-    } catch (error) {
-        btn.innerText = "Ingresar al Panel";
-        btn.disabled = false;
-        
-        console.error("Error Login:", error.code, error.message);
-        alert("⚠️ Error al ingresar: " + obtenerMensajeError(error.code));
     }
 });
 
-function obtenerMensajeError(codigo) {
-    switch (codigo) {
-        case 'auth/user-not-found':
-        case 'auth/wrong-password':
-        case 'auth/invalid-credential':
-            return "Usuario o contraseña incorrectos.";
-        case 'auth/invalid-email':
-            return "El formato del correo no es válido.";
-        case 'auth/too-many-requests':
-            return "Demasiados intentos fallidos. Intenta más tarde.";
-        default:
-            return "Ocurrió un error inesperado al conectar con Firebase.";
-    }
+const formLogin = document.getElementById('formLogin');
+const lblError = document.getElementById('lblError');
+const btnIngresar = document.getElementById('btnIngresar');
+
+if (formLogin) {
+    formLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        lblError.style.display = 'none';
+
+        const correo = document.getElementById('txtCorreo').value.trim();
+        const clave = document.getElementById('txtClave').value.trim();
+
+        try {
+            btnIngresar.disabled = true;
+            btnIngresar.innerText = "Cargando...";
+
+            await signInWithEmailAndPassword(auth, correo, clave);
+            window.location.href = "panel.html";
+
+        } catch (error) {
+            btnIngresar.disabled = false;
+            btnIngresar.innerText = "Ingresar al Sistema";
+            lblError.style.display = 'block';
+
+            switch (error.code) {
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                case 'auth/invalid-credential':
+                    lblError.innerText = "⚠️ Credenciales incorrectas. Verifica el correo y la contraseña.";
+                    break;
+                case 'auth/invalid-email':
+                    lblError.innerText = "⚠️ Formato de correo electrónico no válido.";
+                    break;
+                case 'auth/too-many-requests':
+                    lblError.innerText = "⚠️ Demasiados intentos fallidos. Intenta más tarde.";
+                    break;
+                default:
+                    lblError.innerText = "⚠️ Error al iniciar sesión: " + error.message;
+            }
+        }
+    });
 }

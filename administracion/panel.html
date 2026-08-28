@@ -35,14 +35,7 @@
                 <div id="lblUsuarioRol" class="user-role">...</div>
             </div>
 
-            <!-- Botones Generales -->
-            <button class="menu-btn" id="btnNoticias" onclick="mostrarSeccion('noticias', this)">📰 Noticias y
-                Eventos</button>
-            <button class="menu-btn" id="btnConsultasMenu" onclick="window.location.href='consultas.html'">🔍
-                Consultas</button>
-            <button class="menu-btn" id="btnFormatosMenu" onclick="window.location.href='formatos.html'">📂 Formatos
-                Inst.</button>
-
+           
             <!-- Menú Bienestar -->
             <button class="menu-btn ver-bienestar" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">👨‍🏫
                 Directorio Docentes</button>
@@ -101,16 +94,17 @@
 
         <!-- Bienvenido Docente -->
         <section id="sec-docente-bienvenida" class="seccion-modulo" style="display: none;">
-            <h3>👋 Bienvenido a la Plataforma Institucional</h3>
+            <h3 id="mensajeBienvenidaDocente">👋 Hola profe Bienvenid@ a la Plataforma Institucional</h3>
             <p style="margin-top: 10px; line-height: 1.6; color: var(--texto-secundario);">
                 Desde este panel puedes acceder a la consulta de tus aportes y comprobantes de pago, o explorar y
                 descargar la documentación y formatos institucionales requeridos.
             </p>
             <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
-                <button class="btn-guardar" onclick="window.location.href='consultas.html'">🔍 Ir a Consultas de
-                    Pago</button>
-                <button class="btn-act" onclick="window.location.href='formatos.html'">📂 Ver Formatos
-                    Institucionales</button>
+                <button class="btn-consulta" onclick="window.location.href='consultas.html'">🔍 Consultar reporte general de pagos individual
+                </button>
+                <button class="btn-descargar-comprobante" onclick="window.location.href=''">🔍 Descargar los comprobantes de pago</button>
+                <button class="btn-descargar-formatos" onclick="window.location.href='formatos.html'">📂 Ver Formatos Institucionales</button>
+                <button class="btn-noticias" id="btn-noticias" onclick="mostrarSeccion('noticias', this)">Publicar un evento en la pagina institucional</button>
             </div>
         </section>
 
