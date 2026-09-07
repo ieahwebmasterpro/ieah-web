@@ -1,0 +1,116 @@
+:root {
+    --verde-principal: #1a5c2e;
+    --verde-hover: #0d3d1e;
+    --dorado: #B18C4D;
+    --fondo: #f4f6f9;
+    --blanco: #ffffff;
+    --texto: #333333;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: var(--fondo);
+    color: var(--texto);
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--blanco);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+h2 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--verde-principal);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-busqueda {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+input[type="password"],
+input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+button {
+    background-color: var(--verde-principal);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: var(--verde-hover);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th {
+    background: var(--verde-principal);
+    color: white;
+    padding: 10px;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.85rem;
+}
+
+.btn-pdf {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.btn-volver {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: var(--verde-principal);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#contenedorPDF {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1000;
+    visibility: hidden;
+    width: 58mm;
+    background: #ffffff !important;
+}

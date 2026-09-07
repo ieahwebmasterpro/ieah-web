@@ -26,7 +26,6 @@
     <!-- BARRA LATERAL (SIDEBAR) -->
     <aside class="sidebar">
         <div>
-            <!-- DENTRO DE <aside class="sidebar"> -->
             <div class="brand">
                 <img src="../img/escudo.png" alt="Escudo Institucional" class="escudo-img">
             </div>
@@ -35,7 +34,6 @@
                 <div id="lblUsuarioRol" class="user-role">...</div>
             </div>
 
-           
             <!-- Menú Bienestar -->
             <button class="menu-btn ver-bienestar" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">👨‍🏫
                 Directorio Docentes</button>
@@ -43,7 +41,7 @@
                 onclick="mostrarSeccion('contabilidad', this)">💰 Contabilidad & Tickets</button>
             <button class="menu-btn ver-bienestar" id="btnMatriz" onclick="mostrarSeccion('matriz', this)">📊 Matriz
                 Anual</button>
-            <button class="menu-btn ver-bienestar" onclick="window.location.href='egresos.html'">📉 Egresos</button>
+            <button class="menu-btn ver-bienestar" id="btnEgresos" onclick="mostrarSeccion('egresos', this)">📉 Egresos</button>
 
             <!-- Menú Administrativo -->
             <div id="menuAdministrativo" class="solo-admin-bienestar">
@@ -78,13 +76,6 @@
             </div>
             <div class="stat-card">
                 <div class="stat-header">
-                    <h4>Docentes Registrados</h4>
-                    <span class="stat-icon">👥</span>
-                </div>
-                <div class="monto" id="contadorDocentes">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-header">
                     <h4>Recaudo Total Cuotas</h4>
                     <span class="stat-icon">💰</span>
                 </div>
@@ -100,11 +91,46 @@
                 descargar la documentación y formatos institucionales requeridos.
             </p>
             <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
-                <button class="btn-consulta" onclick="window.location.href='consultas.html'">🔍 Consultar reporte general de pagos individual
+                <button class="btn-consulta" onclick="consultarReporteIndividualDocente()">🔍 Consultar reporte
+                    general de pagos individual
                 </button>
-                <button class="btn-descargar-comprobante" onclick="window.location.href=''">🔍 Descargar los comprobantes de pago</button>
-                <button class="btn-descargar-formatos" onclick="window.location.href='formatos.html'">📂 Ver Formatos Institucionales</button>
-                <button class="btn-noticias" id="btn-noticias" onclick="mostrarSeccion('noticias', this)">Publicar un evento en la pagina institucional</button>
+                <button class="btn-descargar-comprobante"
+                    onclick="mostrarSeccion('mis-comprobantes', this);">
+                    🔍 Descargar los comprobantes de pago
+                </button>
+                <button class="btn-descargar-formatos" onclick="window.location.href='formatos.html'">📂 Ver Formatos
+                    Institucionales</button>
+                <button class="btn-noticias" id="btn-noticias" onclick="mostrarSeccion('noticias', this)">Publicar un
+                    evento en la pagina institucional</button>
+            </div>
+        </section>
+
+        <!-- Módulo: Comprobantes del Docente -->
+        <section id="sec-mis-comprobantes" class="seccion-modulo" style="display: none;">
+            <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 class="seccion-titulo" style="margin: 0;">📄 Mis Comprobantes de Pago</h3>
+                <button class="btn-pdf" id="btnDescargarReporteDocente" onclick="descargarReporteIndividualDocentePDF()" style="display:none;">📥 Descargar Reporte Individual PDF</button>
+            </div>
+            
+            <div id="contenedorReporteDocenteUI" style="display: none; margin-bottom: 20px; background: #ffffff; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; color: #1a202c;">
+                <!-- Se llena dinámicamente con JS al consultar reporte -->
+            </div>
+
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ticket</th>
+                            <th>Fecha</th>
+                            <th>Detalle</th>
+                            <th>Monto</th>
+                            <th style="text-align:center;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaPagosDocente">
+                        <!-- Se llena dinámicamente con JS -->
+                    </tbody>
+                </table>
             </div>
         </section>
 
@@ -130,7 +156,7 @@
 
         <!-- Módulo 2: Noticias -->
         <section id="sec-noticias" class="seccion-modulo">
-            <div class="form-contenedor">
+            <div id="contenedorFormNoticia" class="form-contenedor solo-superadmin">
                 <h3 class="seccion-titulo">Publicar Evento o Noticia Oficial</h3>
                 <form id="formNoticia" class="form-grid">
                     <div class="grupo col-span-2">
@@ -284,7 +310,7 @@
 
         <!-- Módulo 5: Contabilidad -->
         <section id="sec-contabilidad" class="seccion-modulo">
-            <div class="solo-superadmin form-contenedor">
+            <div id="contenedorFormPago" class="solo-superadmin form-contenedor">
                 <h3 class="seccion-titulo">Registrar Nuevo Pago de Cuota</h3>
                 <form id="formPago" class="form-grid">
                     <div class="grupo">
@@ -403,10 +429,85 @@
                             <th>Diciembre</th>
                             <th>Total Pagado</th>
                             <th>Estado</th>
-                            <th>Saldo Pendiente</th>
+                            <th>Saldo Pendiente a la Fecha</th>
+                            <th>Saldo Pendiente en el Año</th>
                         </tr>
                     </thead>
                     <tbody id="cuerpoTablaMatriz"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Módulo 7: Egresos -->
+        <section id="sec-egresos" class="seccion-modulo">
+            <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 class="seccion-titulo" style="margin:0;">📊 Control de Egresos y Balance General</h3>
+                <button id="btnDescargarPDFEgresos" class="btn-pdf">📄 Descargar Reporte PDF</button>
+            </div>
+
+            <!-- Balance Financiero -->
+            <div class="grid-stats" style="margin-bottom: 25px;">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h4>Total Ingresos</h4>
+                        <span class="stat-icon">💰</span>
+                    </div>
+                    <div class="monto" id="lblIngresos">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h4>Total Egresos</h4>
+                        <span class="stat-icon">📉</span>
+                    </div>
+                    <div class="monto" id="lblEgresos" style="color: #e53e3e;">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h4>Saldo Actual</h4>
+                        <span class="stat-icon">🏦</span>
+                    </div>
+                    <div class="monto" id="lblSaldo">$0</div>
+                </div>
+            </div>
+
+            <!-- Formulario de Registro -->
+            <div id="contenedorFormEgreso" class="form-contenedor solo-superadmin">
+                <h3 class="seccion-titulo">💸 Registrar Nuevo Egreso</h3>
+                <form id="formEgreso" class="form-grid">
+                    <div class="grupo">
+                        <label>Fecha</label>
+                        <input type="date" id="fechaEgreso" required>
+                    </div>
+                    <div class="grupo">
+                        <label>Concepto / Motivo</label>
+                        <input type="text" id="conceptoEgreso" placeholder="Concepto (ej. Torta de cumpleaños)" required>
+                    </div>
+                    <div class="grupo col-span-2">
+                        <label>Valor ($)</label>
+                        <input type="number" id="valorEgreso" placeholder="Valor ($)" min="1" required>
+                    </div>
+                    <div class="col-span-2 btn-container-right">
+                        <button type="submit" class="btn-guardar">➕ Registrar Egreso</button>
+                    </div>
+                </form>
+            </div>
+
+            <h3 class="seccion-titulo">📋 Descripción de Egresos</h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Concepto</th>
+                            <th>Valor</th>
+                            <th class="col-accion">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaEgresos">
+                        <tr>
+                            <td colspan="4" style="text-align: center;">Cargando movimientos...</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </section>

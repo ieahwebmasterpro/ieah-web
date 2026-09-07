@@ -77,6 +77,9 @@ body {
     background: linear-gradient(90deg, #FBBF24, #F59E0B);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .user-info-box {
@@ -211,7 +214,7 @@ body {
 
 .stat-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(251, 191, 36, 0.35); /* Borde dorado tenue al pasar el cursor */
+    border-color: rgba(251, 191, 36, 0.35);
 }
 
 .stat-header {
@@ -236,7 +239,7 @@ body {
 .stat-card .monto {
     font-size: 1.6rem;
     font-weight: 700;
-    color: var(--dorado-premium); /* Montos en dorado para destacar el valor financiero */
+    color: var(--dorado-premium);
 }
 
 /* MÓDULOS / SECCIONES */
@@ -281,7 +284,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
-    background: var(--negro-cristal); /* Fondo negro semitransparente para enmarcar el formulario */
+    background: var(--negro-cristal);
     padding: 20px;
     border-radius: 12px;
     border: 1px solid var(--glass-border);
@@ -331,8 +334,6 @@ body {
 }
 
 /* BOTONES */
-
-/* Botón Principal de Guardar en Dorado con Texto Negro para Alto Impacto */
 .btn-guardar {
     background: var(--dorado-gradiente);
     color: var(--negro-profundo);
@@ -352,8 +353,6 @@ body {
     box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
 }
 
-/* Botones seccion rol docentes  */
-/* boton consulta de pagos  */
 .btn-consulta {
     background: var(--dorado-gradiente);
     color: var(--negro-profundo);
@@ -373,7 +372,6 @@ body {
     box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
 }
 
-/* Boton descargar comprobante  */
 .btn-descargar-comprobante {
     background: var(--esmeralda-acento);
     color: var(--negro-profundo);
@@ -393,44 +391,42 @@ body {
     box-shadow: 0 4px 16px rgba(6, 206, 39, 0.35);
 }
 
-/* Boton ver formatos institucionales  */
 .btn-descargar-formatos {
     background: var(--azul);
-    color: var(--negro-profundo);
+    color: #FFFFFF;
     border: none;
     padding: 10px 20px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.85rem;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    box-shadow: 0 4px 12px rgba(8, 8, 228, 0.35);
     transition: opacity 0.2s ease, transform 0.1s ease;
 }
 
 .btn-descargar-formatos:hover {
     opacity: 0.95;
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(6, 206, 39, 0.35);
+    box-shadow: 0 4px 16px rgba(8, 8, 228, 0.5);
 }
 
-/* Boton publicar noticia  */
 .btn-noticias {
     background: var(--rojo-alerta);
-    color: var(--negro-profundo);
+    color: #FFFFFF;
     border: none;
     padding: 10px 20px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.85rem;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
     transition: opacity 0.2s ease, transform 0.1s ease;
 }
 
 .btn-noticias:hover {
     opacity: 0.95;
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(6, 206, 39, 0.35);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.5);
 }
 
 .btn-act {
@@ -510,7 +506,7 @@ table {
 
 th {
     background: var(--negro-cristal);
-    color: var(--dorado-premium); /* Títulos de columna en dorado para jerarquía */
+    color: var(--dorado-premium);
     font-weight: 600;
     padding: 12px 14px;
     text-align: left;
@@ -621,25 +617,16 @@ tr:hover td {
 }
 
 /* ESCUDO INSTITUCIONAL CON FONDO BLANCO DENTRO DEL RECUADRO */
-.brand {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--glass-border);
-    margin-bottom: 20px;
-}
-
 .escudo-img {
-    width: 120px;                             /* Tamaño amplio */
+    width: 120px;
     max-height: 120px;
     height: auto;
     object-fit: contain;
-    border-radius: 12px;                      /* Esquinas redondeadas del recuadro */
-    border: 2px solid var(--dorado-premium);  /* Borde dorado tenue */
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); /* Resplandor dorado exterior */
+    border-radius: 12px;
+    border: 2px solid var(--dorado-premium);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
     padding: 6px;
-    background: #FFFFFF;                      /* Fondo blanco sólido para resaltar el escudo */
+    background: #FFFFFF;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -648,13 +635,12 @@ tr:hover td {
     box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
 }
 
-/* --- ADAPTACIÓN RESPONSIVA PARA PANTALLAS PEQUEÑAS --- */
+/* ADAPTACIÓN RESPONSIVA PARA PANTALLAS PEQUEÑAS */
 @media (max-width: 768px) {
     body {
         flex-direction: column;
     }
 
-    /* Redimensionar barra lateral */
     .sidebar {
         width: 100%;
         padding: 16px;
@@ -662,14 +648,12 @@ tr:hover td {
         border-bottom: 1px solid var(--glass-border);
     }
 
-    /* Ocultar la caja de información del usuario y los botones del menú */
     .user-info-box,
     .menu-btn,
     #menuAdministrativo {
         display: none !important;
     }
 
-    /* Reordenar pie del sidebar: Escudo arriba, luego link y cerrar sesión */
     .sidebar > div:first-child {
         display: flex;
         flex-direction: column;
@@ -689,7 +673,6 @@ tr:hover td {
         width: 100%;
     }
 
-    /* Ajuste de margen del contenido principal */
     .main-content {
         padding: 16px;
     }

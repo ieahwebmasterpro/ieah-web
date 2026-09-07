@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Comprobantes - IEAH Bienestar</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <link rel="stylesheet" href="css/comprobantes.css">
+    
+    <!-- Librerías para Generación de PDF y Código de Barras -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-bar">
+        <h2>Historial de Comprobantes de Pago</h2>
+        <a href="panel.html" class="btn-regresar">← Volver al Panel</a>
+    </div>
+
+    <p id="infoDocente">Cargando información del usuario...</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>N° Ticket</th>
+                <th>Fecha</th>
+                <th>Detalle</th>
+                <th>Valor Total</th>
+                <th style="text-align: center;">Acción</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTablaPagosDocente">
+            <tr>
+                <td colspan="5" style="text-align:center;">Cargando comprobantes...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script type="module" src="js/comprobantes.js"></script>
+</body>
+</html>

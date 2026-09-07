@@ -1,0 +1,63 @@
+/* Estilos específicos para el Proyecto Educativo Institucional (PEI) */
+.seccion-nosotros {
+    padding: 60px 10%;
+    line-height: 1.8;
+}
+
+.titulo-seccion {
+    color: var(--verde-principal);
+    border-left: 5px solid var(--dorado-institucional);
+    padding-left: 15px;
+    margin-bottom: 20px;
+}
+
+.grid-simbolos,
+.grid-proyectos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.tarjeta-info {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    border-bottom: 4px solid var(--dorado-institucional);
+}
+
+.img-simbolo {
+    height: 150px;
+    margin-bottom: 20px;
+    object-fit: contain;
+}
+
+.proyecto-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: white;
+    transition: 0.3s;
+}
+
+.proyecto-card:hover {
+    transform: translateY(-5px);
+}
+
+.proyecto-img {
+    height: 200px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.proyecto-body {
+    padding: 20px;
+}
+
+/* Espaciado para la separación vertical de Contacto y Ubicación */
+.seccion-contacto,
+.seccion-ubicacion {
+    padding: 40px 10%;
+}

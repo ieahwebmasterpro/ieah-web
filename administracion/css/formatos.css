@@ -1,0 +1,112 @@
+:root {
+    --verde-principal: #1a5c2e;
+    --verde-hover: #0d3d1e;
+    --fondo: #f4f6f9;
+    --blanco: #ffffff;
+    --texto: #333333;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: var(--fondo);
+    color: var(--texto);
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--blanco);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.btn-volver {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: var(--verde-principal);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Estilo para centrar e integrar el escudo institucional */
+.escudo-institucion {
+    display: block;
+    margin: 0 auto 15px auto;
+    max-width: 120px;
+    height: auto;
+}
+
+h2 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--verde-principal);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+p.subtitulo {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 0.9rem;
+}
+
+.grid-formatos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+}
+
+.card-formato {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    background: #fafafa;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-formato:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.icono-word {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.card-formato h3 {
+    font-size: 1rem;
+    color: var(--verde-principal);
+    margin-bottom: 8px;
+}
+
+.card-formato p {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.btn-descargar {
+    display: inline-block;
+    background-color: var(--verde-principal);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.85rem;
+    transition: background 0.3s;
+}
+
+.btn-descargar:hover {
+    background-color: var(--verde-hover);
+}
