@@ -53,34 +53,48 @@ function obtenerPrimerNombre(nombreCompleto) {
 // ----------------------------------------------------
 async function actualizarResumenFinanciero() {
     try {
-        // Cargar pagos si aún no han sido cargados
+        // Consultar pagos si no están cacheados
         if (pagosCache.length === 0) {
             const queryPagos = await getDocs(collection(db, "pagos"));
             pagosCache = [];
             queryPagos.forEach(d => pagosCache.push({ id: d.id, ...d.data() }));
         }
 
-        // Cargar egresos si aún no han sido cargados
+        // Consultar egresos si no están cacheados
         if (egresosCache.length === 0) {
             const queryEgresos = await getDocs(collection(db, "egresos"));
             egresosCache = [];
             queryEgresos.forEach(d => egresosCache.push({ id: d.id, ...d.data() }));
         }
 
+        // 1. Total Ingresos = Suma de lo recaudado en cuotas de docentes
         const totalIngresos = pagosCache.reduce((sum, p) => sum + (Number(p.totalPagar) || 0), 0);
+        
+        // 2. Total Egresos = Suma de los gastos registrados
         const totalEgresos = egresosCache.reduce((sum, e) => sum + (Number(e.valor) || 0), 0);
+        
+        // 3. Saldo Actual = Ingresos menos Egresos
         const saldoActual = totalIngresos - totalEgresos;
 
-        // Actualizar etiquetas en la interfaz si existen
-        const lblIngresos = document.getElementById('totalRecaudado') || document.getElementById('totalIngresos');
+        // Búsqueda de elementos HTML con compatibilidad para distintos IDs
+        const lblIngresos = document.getElementById('totalIngresos') || document.getElementById('totalRecaudado');
         const lblEgresos = document.getElementById('totalEgresos');
         const lblSaldo = document.getElementById('saldoActual') || document.getElementById('totalSaldo');
 
+        // Renderizado en la interfaz con formato de moneda colombiana
         if (lblIngresos) lblIngresos.innerText = `$${totalIngresos.toLocaleString('es-CO')}`;
         if (lblEgresos) lblEgresos.innerText = `$${totalEgresos.toLocaleString('es-CO')}`;
         if (lblSaldo) lblSaldo.innerText = `$${saldoActual.toLocaleString('es-CO')}`;
+
+        // Renderizado exclusivo en la sección de egresos
+        const eIngresos = document.getElementById('egresosTotalIngresos');
+        const eEgresos = document.getElementById('egresosTotalEgresos');
+        const eSaldo = document.getElementById('egresosSaldoActual');
+        if (eIngresos) eIngresos.innerText = `$${totalIngresos.toLocaleString('es-CO')}`;
+        if (eEgresos) eEgresos.innerText = `$${totalEgresos.toLocaleString('es-CO')}`;
+        if (eSaldo) eSaldo.innerText = `$${saldoActual.toLocaleString('es-CO')}`;
     } catch (error) {
-        console.error("Error al actualizar resumen financiero:", error);
+        console.error("Error al actualizar el resumen financiero:", error);
     }
 }
 
@@ -330,7 +344,6 @@ window.descargarReporteIndividualDocentePDF = async function () {
     contenedor.innerHTML = `
         <div id="elementoReporteIndividualAImprimir" style="width: 100%; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 8.5px !important; box-sizing: border-box; padding-bottom: 60px;">
             
-            <!-- ENCABEZADO -->
             <div style="text-align: center; font-size: 11px !important; background: transparent !important; margin-bottom: 6px;">
                 <img src="../img/logo.png" alt="Escudo Institucional" style="width: 58px; height: auto; margin-bottom: 2px; display: block; margin-left: auto; margin-right: auto;" />
                 <span style="font-weight: bold; font-size: 15px !important; color: #2e7d32 !important;">INSTITUCION EDUCATIVA ALTO HORIZONTE</span><br>
@@ -394,7 +407,6 @@ window.descargarReporteIndividualDocentePDF = async function () {
                 </table>
             </div>
 
-            <!-- PIE DE PÁGINA AMPLIADO -->
             <div style="text-align: center; font-size: 10px !important; line-height: 1.5; font-weight: normal; margin-top: 25px; padding: 15px 10px 30px 10px; color: #212121 !important; page-break-inside: avoid; display: block; clear: both; width: 100%;">
                 Estimad@ profesor@ - Administrativ@ - rector@<br>
                 con su aporte contribuye al bienestar de todo el talento humano de nuestra institución.<br>
@@ -493,11 +505,21 @@ async function aplicarPermisosRol(rol) {
     const menuAdmin = document.getElementById('menuAdministrativo');
     const gridStats = document.getElementById('tarjetasEstadisticas');
     const secBienvenida = document.getElementById('sec-docente-bienvenida');
+    const btnInicioPanel = document.getElementById('inicio-panel');
     
     if (rolLimpio === "bienestar" || rolLimpio === "superadmin") {
         document.querySelectorAll('.solo-docente').forEach(el => el.style.setProperty('display', 'none', 'important'));
     } else {
         document.querySelectorAll('.solo-docente').forEach(el => el.style.setProperty('display', 'block', 'important'));
+    }
+
+    // Visibilidad del botón inicio-panel (solo visible para docente)
+    if (btnInicioPanel) {
+        if (rolLimpio === 'docente') {
+            btnInicioPanel.style.setProperty('display', 'inline-block', 'important');
+        } else {
+            btnInicioPanel.style.setProperty('display', 'none', 'important');
+        }
     }
 
     if (rolLimpio === "docente") {
@@ -528,12 +550,14 @@ async function aplicarPermisosRol(rol) {
         document.querySelectorAll('.ver-bienestar').forEach(el => el.style.setProperty('display', 'block', 'important'));
         document.querySelectorAll('.solo-superadmin').forEach(el => el.style.setProperty('display', 'none', 'important'));
 
+        // ROL BIENESTAR: SOLO VISUALIZACIÓN
         if (formDocenteBox) formDocenteBox.style.setProperty('display', 'none', 'important');
-        if (formPagoBox) formPagoBox.style.cssText = "display: block !important;";
-        if (formEgresoBox) formEgresoBox.style.cssText = "display: block !important;";
+        if (formPagoBox) formPagoBox.style.setProperty('display', 'none', 'important');
+        if (formEgresoBox) formEgresoBox.style.setProperty('display', 'none', 'important');
         if (formNoticiaBox) formNoticiaBox.style.setProperty('display', 'none', 'important');
 
-        document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'table-cell', 'important'));
+        // Ocultar acciones de registro/eliminación en tablas
+        document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'none', 'important'));
 
         await window.renderizarDocentes();
         await window.renderizarPagos();
@@ -554,7 +578,7 @@ async function aplicarPermisosRol(rol) {
         if (formDocenteBox) formDocenteBox.style.cssText = "display: block !important;";
         if (formPagoBox) formPagoBox.style.cssText = "display: block !important;";
         if (formEgresoBox) formEgresoBox.style.cssText = "display: block !important;";
-        if (formNoticiaBox) formNoticiaBox.style.cssText = "display: block !important;";
+        if (formNoticiaBox) formNoticiaBox.style.setProperty('display', 'none', 'important');
 
         document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'table-cell', 'important'));
 
@@ -651,6 +675,11 @@ window.renderizarPagosDocente = async function () {
 document.getElementById('formNoticia')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    if (usuarioRolActual !== 'docente') {
+        alert("Solo los usuarios con rol Docente tienen permisos para publicar noticias.");
+        return;
+    }
+
     const btnSubmit = e.target.querySelector('button[type="submit"]');
     const archivoImagen = document.getElementById('noticiaImagenFile')?.files[0];
 
@@ -706,7 +735,7 @@ window.renderizarNoticias = async function () {
             const n = docSnap.data();
             const tr = document.createElement("tr");
 
-            const btnAccion = (usuarioRolActual === 'superadmin' || usuarioRolActual === 'bienestar')
+            const btnAccion = (usuarioRolActual === 'superadmin')
                 ? `<button class="btn-del btn-eliminar-noticia" onclick="window.eliminarNoticia('${docSnap.id}')">Eliminar</button>`
                 : '<span style="color:#a0aec0;">Lectura</span>';
 
@@ -728,7 +757,7 @@ window.renderizarNoticias = async function () {
 };
 
 window.eliminarNoticia = async function (idDoc) {
-    if (usuarioRolActual !== 'superadmin' && usuarioRolActual !== 'bienestar') return;
+    if (usuarioRolActual !== 'superadmin') return;
     if (confirm("¿Estás seguro de eliminar esta noticia?")) {
         try {
             await deleteDoc(doc(db, "noticias", idDoc));
@@ -741,13 +770,12 @@ window.eliminarNoticia = async function (idDoc) {
 };
 
 // ----------------------------------------------------
-// GESTIÓN DE EGRESOS (CREAR Y ELIMINAR REGISTROS EN FIREBASE)
+// GESTIÓN DE EGRESOS
 // ----------------------------------------------------
 document.getElementById('formEgreso')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (usuarioRolActual !== 'superadmin' && usuarioRolActual !== 'bienestar') return;
+    if (usuarioRolActual !== 'superadmin') return;
 
-    // Obtener inputs soportando múltiples variantes de IDs del HTML
     const inputConcepto = document.getElementById('egresoConcepto') || document.getElementById('conceptoEgreso');
     const inputValor = document.getElementById('egresoValor') || document.getElementById('valorEgreso');
     const inputFecha = document.getElementById('egresoFecha') || document.getElementById('fechaEgreso');
@@ -800,7 +828,7 @@ window.renderizarEgresos = async function () {
         }
 
         egresosCache.forEach(eg => {
-            const btnAccion = (usuarioRolActual === 'superadmin' || usuarioRolActual === 'bienestar')
+            const btnAccion = (usuarioRolActual === 'superadmin')
                 ? `<button class="btn-del" onclick="window.eliminarEgreso('${eg.id}')">Eliminar</button>`
                 : '<span style="color:#a0aec0;">Lectura</span>';
 
@@ -819,7 +847,7 @@ window.renderizarEgresos = async function () {
 };
 
 window.eliminarEgreso = async function (idDoc) {
-    if (usuarioRolActual !== 'superadmin' && usuarioRolActual !== 'bienestar') return;
+    if (usuarioRolActual !== 'superadmin') return;
     if (confirm("¿Estás seguro de eliminar este egreso?")) {
         try {
             await deleteDoc(doc(db, "egresos", idDoc));
@@ -829,6 +857,108 @@ window.eliminarEgreso = async function (idDoc) {
             alert("Error al eliminar egreso: " + error.message);
         }
     }
+};
+
+window.descargarEgresosPDF = async function () {
+    let contenedor = document.getElementById('contenedorEgresosPDF');
+    if (!contenedor) {
+        contenedor = document.createElement('div');
+        contenedor.id = 'contenedorEgresosPDF';
+        document.body.appendChild(contenedor);
+    }
+
+    const totalIngresos = pagosCache.reduce((sum, p) => sum + (Number(p.totalPagar) || 0), 0);
+    const totalEgresos = egresosCache.reduce((sum, e) => sum + (Number(e.valor) || 0), 0);
+    const saldoActual = totalIngresos - totalEgresos;
+
+    let filasEgresosHTML = "";
+    if (egresosCache.length === 0) {
+        filasEgresosHTML = `<tr><td colspan="3" style="text-align: center; padding: 6px;">No hay egresos registrados.</td></tr>`;
+    } else {
+        egresosCache.forEach(e => {
+            filasEgresosHTML += `
+                <tr>
+                    <td style="border: 0.1px solid #d1d5db; padding: 4px; text-align: center;">${e.fecha || ''}</td>
+                    <td style="border: 0.1px solid #d1d5db; padding: 4px; text-align: left;">${e.concepto || ''}</td>
+                    <td style="border: 0.1px solid #d1d5db; padding: 4px; text-align: right;">$${(Number(e.valor) || 0).toLocaleString('es-CO')}</td>
+                </tr>
+            `;
+        });
+    }
+
+    const ahora = new Date();
+    const fechaHoraStr = `${ahora.toLocaleDateString('es-CO')} ${ahora.toLocaleTimeString('es-CO')}`;
+
+    contenedor.style.cssText = "position: absolute; top: 0; left: 0; width: 100%; background: #ffffff !important; z-index: 99999; display: block; padding: 10px;";
+
+    contenedor.innerHTML = `
+        <div id="elementoEgresosAImprimir" style="width: 100%; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 9px !important; box-sizing: border-box; padding-bottom: 30px;">
+            <div style="text-align: center; font-size: 11px !important; background: transparent !important; margin-bottom: 6px;">
+                <img src="../img/logo.png" alt="Escudo" style="width: 58px; height: auto; margin-bottom: 2px; display: block; margin-left: auto; margin-right: auto;" />
+                <span style="font-weight: bold; font-size: 15px !important; color: #2e7d32 !important;">INSTITUCION EDUCATIVA ALTO HORIZONTE</span><br>
+                <span style="font-weight: bold; font-size: 11px !important; color: #000000 !important;">REGISTRO GENERAL DE EGRESOS - BIENESTAR</span><br>
+                <span style="color: #6b7280 !important; font-size: 9.5px !important;">FECHA / HORA GENERACION: ${fechaHoraStr}</span>
+            </div>
+
+            <div style="border-bottom: 0.5px solid #d1d5db; margin: 6px 0 12px 0;"></div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="flex: 1; background-color: #2e7d32; color: #ffffff; padding: 8px; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 9px; font-weight: bold;">TOTAL INGRESOS</div>
+                    <div style="font-size: 13px; font-weight: bold;">$${totalIngresos.toLocaleString('es-CO')}</div>
+                </div>
+                <div style="flex: 1; background-color: #d32f2f; color: #ffffff; padding: 8px; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 9px; font-weight: bold;">TOTAL EGRESOS</div>
+                    <div style="font-size: 13px; font-weight: bold;">$${totalEgresos.toLocaleString('es-CO')}</div>
+                </div>
+                <div style="flex: 1; background-color: #ef6c00; color: #ffffff; padding: 8px; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 9px; font-weight: bold;">SALDO ACTUAL</div>
+                    <div style="font-size: 13px; font-weight: bold;">$${saldoActual.toLocaleString('es-CO')}</div>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background-color: #1b5e20; color: #ffffff;">
+                        <th style="border: 0.1px solid #d1d5db; padding: 6px; width: 20%; text-align: center;">Fecha</th>
+                        <th style="border: 0.1px solid #d1d5db; padding: 6px; width: 55%; text-align: left;">Concepto</th>
+                        <th style="border: 0.1px solid #d1d5db; padding: 6px; width: 25%; text-align: right;">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filasEgresosHTML}
+                </tbody>
+            </table>
+
+            <div style="text-align: center; font-size: 10px !important; margin-top: 30px; color: #212121 !important;">
+                <strong style="font-size: 11px; color: #000000;">¡GRACIAS POR SU GESTIÓN Y TRANS PARENCIA!</strong><br>
+                <span style="font-weight: bold; margin-top: 4px; display: inline-block; color: #1b5e20;">Cemled corp 2026</span>
+            </div>
+        </div>
+    `;
+
+    setTimeout(() => {
+        const elemento = document.getElementById('elementoEgresosAImprimir');
+        if (typeof html2pdf === "undefined") {
+            alert("La librería html2pdf no está cargada.");
+            return;
+        }
+
+        const opt = {
+            margin: [8, 8, 12, 8],
+            filename: `REGISTRO_EGRESOS_${new Date().getFullYear()}.pdf`,
+            image: { type: 'jpeg', quality: 1.0 },
+            html2canvas: { scale: 2, logging: false, useCORS: true, backgroundColor: '#ffffff' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(elemento).save().then(() => {
+            contenedor.innerHTML = "";
+        }).catch(err => {
+            console.error("Error generando PDF egresos:", err);
+            contenedor.innerHTML = "";
+        });
+    }, 400);
 };
 
 // ----------------------------------------------------
@@ -1171,13 +1301,17 @@ window.renderizarDocentes = async function () {
             docentesCache.push(d);
 
             if (tabla) {
+                const btnAccion = (usuarioRolActual === 'superadmin')
+                    ? `<button class="btn-del" onclick="window.eliminarDocente('${d.id}')">Eliminar</button>`
+                    : '';
+
                 tabla.innerHTML += `
                     <tr>
                         <td>${d.documento}</td>
                         <td><strong>${d.nombre}</strong></td>
                         <td>${d.telefono}</td>
                         <td>${d.direccion}</td>
-                        <td class="col-accion"><button class="btn-del" onclick="window.eliminarDocente('${d.id}')">Eliminar</button></td>
+                        <td class="col-accion">${btnAccion}</td>
                     </tr>
                 `;
             }
@@ -1216,6 +1350,10 @@ window.renderizarPagos = async function () {
 
         pagosCache.forEach(p => {
             const textoMeses = p.meses ? p.meses.join(', ') : p.mes;
+            const btnAccion = (usuarioRolActual === 'superadmin')
+                ? `<button class="btn-del" onclick="window.eliminarPago('${p.id}')">Eliminar</button>`
+                : '';
+
             tabla.innerHTML += `
                 <tr>
                     <td><strong>#${p.numTicket || ''}</strong></td>
@@ -1226,9 +1364,7 @@ window.renderizarPagos = async function () {
                     <td>
                         <button class="btn-pdf" type="button" onclick="window.descargarTicketPDF('${p.id}')">Imprimir Ticket</button>
                     </td>
-                    <td class="col-accion" style="text-align:center;">
-                        <button class="btn-del" onclick="window.eliminarPago('${p.id}')">Eliminar</button>
-                    </td>
+                    <td class="col-accion" style="text-align:center;">${btnAccion}</td>
                 </tr>
             `;
         });
@@ -1238,7 +1374,7 @@ window.renderizarPagos = async function () {
 };
 
 window.eliminarPago = async function (idDoc) {
-    if (usuarioRolActual !== 'superadmin' && usuarioRolActual !== 'bienestar') return;
+    if (usuarioRolActual !== 'superadmin') return;
     if (confirm("¿Eliminar comprobante de pago?")) {
         await deleteDoc(doc(db, "pagos", idDoc));
         await window.renderizarPagos();
@@ -1246,7 +1382,7 @@ window.eliminarPago = async function (idDoc) {
 };
 
 // ----------------------------------------------------
-// MATRIZ ANUAL Y REPORTE GENERAL CON BORDES ULTRA FINOS Y PIE AMPLIADO
+// MATRIZ ANUAL Y REPORTE GENERAL
 // ----------------------------------------------------
 window.renderizarMatrizPagos = async function () {
     const tbody = document.getElementById('cuerpoTablaMatriz');
@@ -1367,7 +1503,6 @@ window.descargarMatrizPDF = async function () {
     contenedor.innerHTML = `
         <div id="elementoMatrizAImprimir" style="width: 100%; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 8.5px !important; box-sizing: border-box; padding-bottom: 60px;">
             
-            <!-- ENCABEZADO -->
             <div style="text-align: center; font-size: 11px !important; background: transparent !important; margin-bottom: 6px;">
                 <img src="../img/logo.png" alt="Escudo Institucional" style="width: 58px; height: auto; margin-bottom: 2px; display: block; margin-left: auto; margin-right: auto;" />
                 <span style="font-weight: bold; font-size: 15px !important; color: #2e7d32 !important;">INSTITUCION EDUCATIVA ALTO HORIZONTE</span><br>
@@ -1397,7 +1532,6 @@ window.descargarMatrizPDF = async function () {
                 ${contenidoTablaHTML}
             </div>
 
-            <!-- PIE DE PÁGINA AMPLIADO -->
             <div style="text-align: center; font-size: 10px !important; line-height: 1.5; font-weight: normal; margin-top: 25px; padding: 15px 10px 30px 10px; color: #212121 !important; page-break-inside: avoid; display: block; clear: both; width: 100%;">
                 Estimad@ profesor@ - Administrativ@ - rector@<br>
                 con su aporte contribuye al bienestar de todo el talento humano de nuestra institución.<br>
@@ -1436,7 +1570,6 @@ window.descargarMatrizPDF = async function () {
     }, 400);
 };
 
-// Listeners de los botones de la Matriz Anual
 document.getElementById('btnActualizarMatriz')?.addEventListener('click', async () => {
     await window.renderizarMatrizPagos();
 });
@@ -1498,7 +1631,7 @@ document.getElementById('pagoValorRecibido')?.addEventListener('input', actualiz
 
 document.getElementById('formPago')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (usuarioRolActual !== 'superadmin' && usuarioRolActual !== 'bienestar') return;
+    if (usuarioRolActual !== 'superadmin') return;
 
     const selectDocente = document.getElementById('pagoSelectDocente');
     const documentoSeleccionado = selectDocente ? selectDocente.value.trim() : '';
@@ -1531,7 +1664,6 @@ document.getElementById('formPago')?.addEventListener('submit', async (e) => {
     try {
         let nuevoPagoId = "";
 
-        // Transacción atómica para autonumerar secuencialmente los tickets desde 1
         await runTransaction(db, async (transaction) => {
             const counterRef = doc(db, "configuracion", "contadores");
             const counterSnap = await transaction.get(counterRef);
@@ -1585,6 +1717,7 @@ window.renderizarDocentes = window.renderizarDocentes;
 window.renderizarPagos = window.renderizarPagos;
 window.renderizarEgresos = window.renderizarEgresos;
 window.eliminarEgreso = window.eliminarEgreso;
+window.descargarEgresosPDF = window.descargarEgresosPDF;
 window.renderizarUsuarios = window.renderizarUsuarios;
 window.cargarMensajes = window.cargarMensajes;
 window.renderizarMatrizPagos = window.renderizarMatrizPagos;

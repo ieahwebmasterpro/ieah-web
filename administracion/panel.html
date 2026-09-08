@@ -4,303 +4,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - IEAH APP</title>
-
-    <!-- Google Fonts Inter & Montserrat -->
+    <title>Plataforma Institucional - Bienestar IE Alto Horizonte</title>
+    <!-- Fuentes Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap"
         rel="stylesheet">
-
-    <!-- CSS del Panel -->
+    <!-- Estilos CSS -->
     <link rel="stylesheet" href="css/panel.css">
-
-    <!-- Librerías Externas para Exportación de PDF y Código de Barras -->
+    <!-- Librerías de exportación y códigos de barra -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 
 <body>
 
+
     <!-- BARRA LATERAL (SIDEBAR) -->
     <aside class="sidebar">
         <div>
-            <div class="brand">
-                <img src="../img/escudo.png" alt="Escudo Institucional" class="escudo-img">
-            </div>
+
+           <div class="header-contenedor">
+  <!-- Escudo Cuadrado con Marco Dorado -->
+  <div class="escudo-marco">
+    <img src="../img/escudo.png" alt="Escudo I.E. Alto Horizonte" class="escudo-imagen">
+  </div>
+
+  <!-- Título Centrado -->
+  <h1 class="titulo-institucion">
+    I.E. ALTO HORIZONTE
+  </h1>
+</div>
+
             <div class="user-info-box">
-                <div id="lblUsuarioNombre" class="user-name">Cargando...</div>
-                <div id="lblUsuarioRol" class="user-role">...</div>
+                <div class="user-name" id="lblUsuarioNombre">Cargando usuario...</div>
+                <div class="user-role" id="lblUsuarioRol">...</div>
             </div>
 
-            <!-- Menú Bienestar -->
-            <button class="menu-btn ver-bienestar" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">👨‍🏫
-                Directorio Docentes</button>
-            <button class="menu-btn ver-bienestar" id="btnContabilidad"
-                onclick="mostrarSeccion('contabilidad', this)">💰 Contabilidad & Tickets</button>
-            <button class="menu-btn ver-bienestar" id="btnMatriz" onclick="mostrarSeccion('matriz', this)">📊 Matriz
-                Anual</button>
-            <button class="menu-btn ver-bienestar" id="btnEgresos" onclick="mostrarSeccion('egresos', this)">📉 Egresos</button>
-
-            <!-- Menú Administrativo -->
-            <div id="menuAdministrativo" class="solo-admin-bienestar">
-                <button class="menu-btn solo-superadmin" id="btnBuzon" onclick="mostrarSeccion('buzon', this)">📩 Buzón
-                    Mensajes</button>
-                <button class="menu-btn solo-superadmin" id="btnUsuarios" onclick="mostrarSeccion('usuarios', this)">👤
-                    Gestión Usuarios</button>
-            </div>
+            <nav id="menuAdministrativo">
+                
+                
+                <button class="menu-btn solo-docente" id="btnReporteDocente"
+                    onclick="consultarReporteIndividualDocente()">
+                    📊 Mi Estado de Cuenta
+                </button>
+                <button class="menu-btn solo-docente" id="btnMisComprobantes"
+                    onclick="mostrarSeccion('mis-comprobantes', this)">
+                    🧾 Mis Comprobantes
+                </button>
+                <button class="menu-btn ver-bienestar" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">
+                    👨‍🏫 Directorio Docentes
+                </button>
+                <button class="menu-btn ver-bienestar" id="btnContabilidad"
+                    onclick="mostrarSeccion('contabilidad', this)">
+                    💰 Registrar Pagos
+                </button>
+                <button class="menu-btn ver-bienestar" id="btnEgresos" onclick="mostrarSeccion('egresos', this)">
+                    📉 Registrar Egresos
+                </button>
+                <button class="menu-btn ver-bienestar" id="btnMatriz" onclick="mostrarSeccion('matriz', this)">
+                    🗓️ Matriz de Pagos
+                </button>
+                <button class="menu-btn solo-docente" id="btnNoticias" onclick="mostrarSeccion('noticias', this)">
+                    📢 Noticias y Eventos
+                </button>
+                <button class="menu-btn solo-superadmin" id="btnUsuarios" onclick="mostrarSeccion('usuarios', this)">
+                    ⚙️ Gestión Usuarios
+                </button>
+                <button class="menu-btn solo-superadmin" id="btnBuzon" onclick="mostrarSeccion('buzon', this)">
+                    📬 Buzón Mensajes
+                </button>
+            </nav>
         </div>
 
         <div class="sidebar-footer">
-            <a href="../index.html" class="link-web">🏠 Ver Sitio Web</a>
+            <a href="../index.html" class="link-web">🌐 Volver a la Web</a>
             <button class="btn-logout" id="btnCerrarSesion">Cerrar Sesión</button>
         </div>
     </aside>
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="main-content">
+        <header class="header-panel">
+            <h2 id="tituloVista">Panel Institucional</h2>
+        </header>
 
-        <div class="header-panel">
-            <h2 id="tituloVista">Panel Principal</h2>
-        </div>
-
-        <!-- Tarjetas Estadísticas (KPIs) -->
-        <div class="grid-stats" id="tarjetasEstadisticas">
-            <div class="stat-card solo-superadmin" id="cardBuzon">
-                <div class="stat-header">
-                    <h4>Mensajes en Buzón</h4>
-                    <span class="stat-icon">📩</span>
-                </div>
-                <div class="monto" id="contadorMensajes">0</div>
-            </div>
+        <!-- TARJETAS ESTADÍSTICAS (KPIs - INGRESO, EGRESO Y SALDO ACTUAL) -->
+        <section class="grid-stats" id="tarjetasEstadisticas">
             <div class="stat-card">
                 <div class="stat-header">
-                    <h4>Recaudo Total Cuotas</h4>
-                    <span class="stat-icon">💰</span>
+                    <h4>Total Ingresos Recaudados</h4>
+                    <span class="stat-icon">💵</span>
                 </div>
-                <div class="monto" id="totalRecaudado">$0</div>
+                <div class="monto" id="totalIngresos">$0</div>
             </div>
-        </div>
 
-        <!-- Bienvenido Docente -->
-        <section id="sec-docente-bienvenida" class="seccion-modulo" style="display: none;">
-            <h3 id="mensajeBienvenidaDocente">👋 Hola profe Bienvenid@ a la Plataforma Institucional</h3>
-            <p style="margin-top: 10px; line-height: 1.6; color: var(--texto-secundario);">
-                Desde este panel puedes acceder a la consulta de tus aportes y comprobantes de pago, o explorar y
-                descargar la documentación y formatos institucionales requeridos.
-            </p>
-            <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
-                <button class="btn-consulta" onclick="consultarReporteIndividualDocente()">🔍 Consultar reporte
-                    general de pagos individual
-                </button>
-                <button class="btn-descargar-comprobante"
-                    onclick="mostrarSeccion('mis-comprobantes', this);">
-                    🔍 Descargar los comprobantes de pago
-                </button>
-                <button class="btn-descargar-formatos" onclick="window.location.href='formatos.html'">📂 Ver Formatos
-                    Institucionales</button>
-                <button class="btn-noticias" id="btn-noticias" onclick="mostrarSeccion('noticias', this)">Publicar un
-                    evento en la pagina institucional</button>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h4>Total Egresos Registrados</h4>
+                    <span class="stat-icon">💸</span>
+                </div>
+                <div class="monto" id="totalEgresos" style="color: var(--rojo-alerta);">$0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h4>Saldo Actual en Caja</h4>
+                    <span class="stat-icon">🏦</span>
+                </div>
+                <div class="monto" id="saldoActual" style="color: var(--esmeralda-brillante);">$0</div>
             </div>
         </section>
 
-        <!-- Módulo: Comprobantes del Docente -->
-        <section id="sec-mis-comprobantes" class="seccion-modulo" style="display: none;">
-            <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 class="seccion-titulo" style="margin: 0;">📄 Mis Comprobantes de Pago</h3>
-                <button class="btn-pdf" id="btnDescargarReporteDocente" onclick="descargarReporteIndividualDocentePDF()" style="display:none;">📥 Descargar Reporte Individual PDF</button>
-            </div>
-            
-            <div id="contenedorReporteDocenteUI" style="display: none; margin-bottom: 20px; background: #ffffff; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; color: #1a202c;">
-                <!-- Se llena dinámicamente con JS al consultar reporte -->
+        <!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
+        <section class="seccion-modulo activa" id="sec-docente-bienvenida">
+            <h3 class="seccion-titulo" id="mensajeBienvenidaDocente">👋 Hola Profe, bienvenid@ a la Plataforma
+                Institucional</h3>
+            <p style="color: var(--texto-secundario); margin-bottom: 20px;">
+                Desde este panel podrás consultar tu estado de cuenta de aportes a bienestar docente, descargar tus
+                tickets de pago, publicar noticias  y eventos oficiales en la pagina oficial de nuestra institución.
+            </p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn-consulta btn-reporte-docente" type="button">📊 Consultar Estado de Cuenta</button>
+                <button class="btn-noticias solo-docente" type="button" onclick="mostrarSeccion('noticias', null)">📢Noticias y Eventos</button>
             </div>
 
-            <div class="tabla-contenedor">
-                <table>
+            <div id="contenedorReporteDocenteUI" style="margin-top: 25px; display: none;"></div>
+            <div style="margin-top: 15px;">
+                <button class="btn-descargar-comprobante" id="btnDescargarReporteDocente" style="display: none;"
+                    onclick="descargarReporteIndividualDocentePDF()">
+                    📄 Descargar Estado de Cuenta (PDF)
+                </button>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: MIS COMPROBANTES (DOCENTE) -->
+        <section class="seccion-modulo" id="sec-mis-comprobantes">
+            <h3 class="seccion-titulo">Mis Comprobantes de Pago Registrados</h3>
+            <div class="tabla-matriz-contenedor">
+                <table style="width: 100%;">
                     <thead>
                         <tr>
                             <th>Ticket</th>
                             <th>Fecha</th>
-                            <th>Detalle</th>
-                            <th>Monto</th>
-                            <th style="text-align:center;">Acción</th>
+                            <th>Detalle / Meses</th>
+                            <th>Valor Total</th>
+                            <th style="text-align: center;">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="cuerpoTablaPagosDocente">
-                        <!-- Se llena dinámicamente con JS -->
+                        <!-- Renderizado dinámico desde panel.js -->
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- Módulo 1: Buzón -->
-        <section id="sec-buzon" class="seccion-modulo">
-            <div class="modulo-header">
-                <button class="btn-act" onclick="cargarMensajes()">🔄 Actualizar Mensajes</button>
-            </div>
-            <div class="tabla-contenedor">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Remitente</th>
-                            <th>Correo</th>
-                            <th>Mensaje</th>
-                            <th class="col-accion">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cuerpoTablaBuzon"></tbody>
-                </table>
-            </div>
-        </section>
+        <!-- SECCIÓN: REGISTRO DE DOCENTES -->
+        <section class="seccion-modulo" id="sec-docentes">
+            <h3 class="seccion-titulo">Directorio General de Docentes</h3>
 
-        <!-- Módulo 2: Noticias -->
-        <section id="sec-noticias" class="seccion-modulo">
-            <div id="contenedorFormNoticia" class="form-contenedor solo-superadmin">
-                <h3 class="seccion-titulo">Publicar Evento o Noticia Oficial</h3>
-                <form id="formNoticia" class="form-grid">
-                    <div class="grupo col-span-2">
-                        <label>Título del Evento / Aviso</label>
-                        <input type="text" id="noticiaTitulo" placeholder="Ej: 🎉 Gran Bingo Familiar - IEAH" required>
-                    </div>
-                    <div class="grupo col-span-2">
-                        <label>Descripción / Detalle Resumido</label>
-                        <textarea id="noticiaDescripcion" rows="3" placeholder="Escribe el detalle breve del aviso..."
-                            required></textarea>
-                    </div>
-                    <div class="grupo">
-                        <label>Seleccionar Imagen desde el Equipo</label>
-                        <input type="file" id="noticiaImagenFile" accept="image/*" required>
-                    </div>
-                    <div class="grupo">
-                        <label>URL / Enlace Más Información (Opcional)</label>
-                        <input type="text" id="noticiaEnlace" placeholder="Ej: noticias/noticia2.html">
-                    </div>
-                    <div class="grupo col-span-2">
-                        <label>Desarrollo / Contenido Completo:</label>
-                        <textarea id="noticiaContenidoCompleto" rows="6"
-                            placeholder="Escribe aquí todo el desarrollo detallado de la noticia..."
-                            required></textarea>
-                    </div>
-                    <div class="col-span-2 btn-container-right">
-                        <button type="submit" class="btn-guardar">＋ Publicar Noticia</button>
+            <div class="form-contenedor" id="contenedorFormDocente">
+                <form id="formDocente">
+                    <div class="form-grid">
+                        <div class="grupo">
+                            <label>Nombre Completo</label>
+                            <input type="text" id="docNombre" required placeholder="Ej: Juan Pérez">
+                        </div>
+                        <div class="grupo">
+                            <label>Documento de Identidad</label>
+                            <input type="text" id="docDocumento" required placeholder="N° de Cédula">
+                        </div>
+                        <div class="grupo">
+                            <label>Teléfono de Contacto</label>
+                            <input type="text" id="docTelefono" placeholder="3000000000">
+                        </div>
+                        <div class="grupo">
+                            <label>Dirección / Sede</label>
+                            <input type="text" id="docDireccion" placeholder="Vereda Alto Horizonte">
+                        </div>
+                        <div class="col-span-2 btn-container-right">
+                            <button type="submit" class="btn-guardar">💾 Guardar Docente</button>
+                        </div>
                     </div>
                 </form>
             </div>
 
-            <h3 class="seccion-titulo">Noticias Publicadas en la Web</h3>
-            <div class="tabla-contenedor">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Título</th>
-                            <th>Descripción</th>
-                            <th>Enlace</th>
-                            <th class="col-accion">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cuerpoTablaNoticias"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Módulo 3: Gestión de Usuarios -->
-        <section id="sec-usuarios" class="seccion-modulo">
-            <div id="contenedorFormUsuario" class="form-contenedor">
-                <h3 id="tituloFormUsuario" class="seccion-titulo">Registrar Nuevo Usuario del Sistema</h3>
-                <form id="formUsuario" class="form-grid">
-                    <input type="hidden" id="usrDocId">
-                    <div class="grupo">
-                        <label>Nombre Completo</label>
-                        <input type="text" id="usrNombre" placeholder="Ej: María López" required>
-                    </div>
-                    <div class="grupo">
-                        <label>Correo Electrónico</label>
-                        <input type="email" id="usrCorreo" placeholder="correo@ieah.edu.co" required>
-                    </div>
-                    <div class="grupo">
-                        <label>Contraseña Acceso</label>
-                        <input type="password" id="usrClave" placeholder="Mínimo 6 caracteres" required>
-                    </div>
-                    <div class="grupo">
-                        <label>Rol / Permiso</label>
-                        <select id="usrRol" required>
-                            <option value="superadmin">Superadmin (Acceso Total)</option>
-                            <option value="bienestar">Bienestar (Pagos y Matriz)</option>
-                            <option value="docente">Docente (Solo Consultas)</option>
-                        </select>
-                    </div>
-                    <div class="col-span-2 btn-container-right">
-                        <button type="button" id="btnCancelarEditUsr" class="btn-cancelar"
-                            style="display:none;">Cancelar</button>
-                        <button type="submit" class="btn-guardar" id="btnSubmitUsr">＋ Crear Usuario</button>
-                    </div>
-                </form>
-            </div>
-
-            <h3 class="seccion-titulo">Cuentas Registradas en el Sistema</h3>
-            <div class="tabla-contenedor">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Correo Electrónico</th>
-                            <th>Rol</th>
-                            <th class="col-accion">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cuerpoTablaUsuarios"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Módulo 4: Directorio Docentes -->
-        <section id="sec-docentes" class="seccion-modulo">
-            <div id="contenedorFormDocente" class="form-contenedor">
-                <h3 class="seccion-titulo">Registrar Nuevo Docente / Personal</h3>
-                <form id="formDocente" class="form-grid">
-                    <div class="grupo">
-                        <label>Nombre Completo</label>
-                        <input type="text" id="docNombre" placeholder="Ej: Jose Pérez" required>
-                    </div>
-                    <div class="grupo">
-                        <label>Documento / Cédula</label>
-                        <input type="text" id="docDocumento" placeholder="Ej: 1012365478" required>
-                    </div>
-                    <div class="grupo">
-                        <label>Teléfono</label>
-                        <input type="text" id="docTelefono" placeholder="Ej: 3101234567" required>
-                    </div>
-                    <div class="grupo">
-                        <label>Sede / Dirección</label>
-                        <select id="docDireccion" required>
-                            <option value="">-- Seleccionar Vereda/Sede --</option>
-                            <option value="Horizonte">Horizonte</option>
-                            <option value="Fátima">Fátima</option>
-                            <option value="Perlas">Perlas</option>
-                            <option value="Divino Niño">Divino Niño</option>
-                            <option value="Bajo Horizonte">Bajo Horizonte</option>
-                            <option value="Las Delicias">Las Delicias</option>
-                            <option value="Medio Delicias">Medio Delicias</option>
-                            <option value="Alto delicias">Alto delicias</option>
-                        </select>
-                    </div>
-                    <div class="col-span-2 btn-container-right">
-                        <button type="submit" class="btn-guardar">＋ Guardar Docente</button>
-                    </div>
-                </form>
-            </div>
-
-            <h3 class="seccion-titulo">Directorio de Docentes Guardados</h3>
-            <div class="tabla-contenedor">
-                <table>
+            <div class="tabla-matriz-contenedor">
+                <table style="width: 100%;">
                     <thead>
                         <tr>
                             <th>Documento</th>
                             <th>Nombre</th>
                             <th>Teléfono</th>
                             <th>Dirección</th>
-                            <th class="col-accion">Acciones</th>
+                            <th class="col-accion">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="cuerpoTablaDocentes"></tbody>
@@ -308,89 +206,78 @@
             </div>
         </section>
 
-        <!-- Módulo 5: Contabilidad -->
-        <section id="sec-contabilidad" class="seccion-modulo">
-            <div id="contenedorFormPago" class="solo-superadmin form-contenedor">
-                <h3 class="seccion-titulo">Registrar Nuevo Pago de Cuota</h3>
-                <form id="formPago" class="form-grid">
-                    <div class="grupo">
-                        <label>Seleccionar Docente</label>
-                        <select id="pagoSelectDocente" required>
-                            <option value="">-- Seleccionar --</option>
-                        </select>
-                    </div>
-                    <div class="grupo">
-                        <label>Documento ID</label>
-                        <input type="text" id="pagoDocumento" readonly placeholder="Se autocompleta">
-                    </div>
+        <!-- SECCIÓN: REGISTRAR PAGOS DE CUOTAS (CONTABILIDAD) -->
+        <section class="seccion-modulo" id="sec-contabilidad">
+            <h3 class="seccion-titulo">Módulo de Recaudo y Registro de Pagos</h3>
 
-                    <div class="grupo col-span-2">
-                        <label>Seleccionar Meses a Pagar ($35.000 c/u):</label>
-                        <div class="meses-selector">
-                            <label><input type="checkbox" class="chk-mes" value="1 Enero"> 1 Enero</label>
-                            <label><input type="checkbox" class="chk-mes" value="2 Febrero"> 2 Febrero</label>
-                            <label><input type="checkbox" class="chk-mes" value="3 Marzo"> 3 Marzo</label>
-                            <label><input type="checkbox" class="chk-mes" value="4 Abril"> 4 Abril</label>
-                            <label><input type="checkbox" class="chk-mes" value="5 Mayo"> 5 Mayo</label>
-                            <label><input type="checkbox" class="chk-mes" value="6 Junio"> 6 Junio</label>
-                            <label><input type="checkbox" class="chk-mes" value="7 Julio"> 7 Julio</label>
-                            <label><input type="checkbox" class="chk-mes" value="8 Agosto"> 8 Agosto</label>
-                            <label><input type="checkbox" class="chk-mes" value="9 Septiembre"> 9 Septiembre</label>
-                            <label><input type="checkbox" class="chk-mes" value="10 Octubre"> 10 Octubre</label>
-                            <label><input type="checkbox" class="chk-mes" value="11 Noviembre"> 11 Noviembre</label>
-                            <label><input type="checkbox" class="chk-mes" value="12 Diciembre"> 12 Diciembre</label>
+            <div class="form-contenedor" id="contenedorFormPago">
+                <form id="formPago">
+                    <div class="form-grid">
+                        <div class="grupo col-span-2">
+                            <label>Seleccionar Docente</label>
+                            <select id="pagoSelectDocente" required>
+                                <option value="">-- Seleccionar Docente --</option>
+                            </select>
                         </div>
-                    </div>
 
-                    <div class="previsualizacion-box col-span-2">
-                        <strong>Previsualización del Pago:</strong>
-                        <div id="prevDocente" class="prev-docente-lbl">Docente: No seleccionado</div>
-                        <div class="tabla-contenedor" style="margin-top: 10px;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Mes</th>
-                                        <th>Valor Cuota</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="cuerpoPrevisTabla">
-                                    <tr>
-                                        <td colspan="2" style="text-align:center;">Ningún mes seleccionado</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="grupo" style="display: none;">
+                            <input type="text" id="pagoDocumento" readonly>
                         </div>
-                        <div class="total-previs-lbl">
-                            Total a Pagar: $<span id="lblTotalCalculado">0</span>
+
+                        <div class="grupo col-span-2">
+                            <label>Meses a Pagar ($35,000 COP c/u)</label>
+                            <div
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 8px;">
+                                <label><input type="checkbox" class="chk-mes" value="Enero"> Enero</label>
+                                <label><input type="checkbox" class="chk-mes" value="Febrero"> Febrero</label>
+                                <label><input type="checkbox" class="chk-mes" value="Marzo"> Marzo</label>
+                                <label><input type="checkbox" class="chk-mes" value="Abril"> Abril</label>
+                                <label><input type="checkbox" class="chk-mes" value="Mayo"> Mayo</label>
+                                <label><input type="checkbox" class="chk-mes" value="Junio"> Junio</label>
+                                <label><input type="checkbox" class="chk-mes" value="Julio"> Julio</label>
+                                <label><input type="checkbox" class="chk-mes" value="Agosto"> Agosto</label>
+                                <label><input type="checkbox" class="chk-mes" value="Septiembre"> Septiembre</label>
+                                <label><input type="checkbox" class="chk-mes" value="Octubre"> Octubre</label>
+                                <label><input type="checkbox" class="chk-mes" value="Noviembre"> Noviembre</label>
+                                <label><input type="checkbox" class="chk-mes" value="Diciembre"> Diciembre</label>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="grupo">
-                        <label>Valor Recibido ($)</label>
-                        <input type="number" id="pagoValorRecibido" placeholder="Ej: 35000" min="0" required>
-                    </div>
-                    <div class="grupo">
-                        <label>Cambio / Devuelto ($)</label>
-                        <input type="text" id="pagoCambio" readonly value="$0">
-                    </div>
+                        <div class="grupo">
+                            <label>Valor Recibido ($)</label>
+                            <input type="number" id="pagoValorRecibido" placeholder="Ej: 35000" required>
+                        </div>
 
-                    <div class="col-span-2 btn-container-right">
-                        <button type="submit" class="btn-guardar">＋ Generar Ticket y Guardar</button>
+                        <div class="grupo">
+                            <label>Cambio / Devuelta ($)</label>
+                            <input type="text" id="pagoCambio" readonly placeholder="$0">
+                        </div>
+
+                        <div class="col-span-2"
+                            style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px;">
+                            <div id="prevDocente" style="font-weight: bold; margin-bottom: 6px;">Docente: No
+                                seleccionado</div>
+                            <div>Total a Pagar: <strong>$<span id="lblTotalCalculado">0</span></strong></div>
+                        </div>
+
+                        <div class="col-span-2 btn-container-right">
+                            <button type="submit" class="btn-guardar">🎟️ Registrar y Generar Ticket</button>
+                        </div>
                     </div>
                 </form>
             </div>
 
-            <h3 class="seccion-titulo">Historial de Pagos y Recibos</h3>
-            <div class="tabla-contenedor">
-                <table>
+            <h4 style="margin: 20px 0 10px 0;">Historial General de Recaudos</h4>
+            <div class="tabla-matriz-contenedor">
+                <table style="width: 100%;">
                     <thead>
                         <tr>
-                            <th>Ticket N°</th>
+                            <th>Ticket</th>
                             <th>Fecha</th>
                             <th>Docente</th>
-                            <th>Meses Pagados</th>
-                            <th>Total Pago</th>
-                            <th>Imprimir Ticket</th>
+                            <th>Meses</th>
+                            <th>Total</th>
+                            <th>Ticket PDF</th>
                             <th class="col-accion">Acción</th>
                         </tr>
                     </thead>
@@ -399,125 +286,208 @@
             </div>
         </section>
 
-        <!-- Módulo 6: Matriz Anual -->
-        <section id="sec-matriz" class="seccion-modulo">
-            <div class="modulo-header">
-                <h3 class="seccion-titulo" style="margin:0;">Matriz General de Control - Cuotas 2026</h3>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-act" onclick="renderizarMatrizPagos()">🔄 Actualizar</button>
-                    <button class="btn-pdf" onclick="descargarMatrizPDF()">📥 Descargar PDF</button>
+        <!-- SECCIÓN: REGISTRAR EGRESOS -->
+        <section class="seccion-modulo" id="sec-egresos">
+            <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 class="seccion-titulo" style="margin: 0;">Módulo de Gestión de Egresos y Gastos</h3>
+                <button class="btn-descargar-comprobante" id="btnDescargarEgresos" onclick="descargarEgresosPDF()">📄 Descargar Registro Egresos (PDF)</button>
+            </div>
+
+            <!-- Resumen Financiero en Egresos -->
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+                <div style="flex: 1; min-width: 180px; background-color: #2e7d32; color: #ffffff; padding: 12px 16px; border-radius: 8px; font-weight: bold;">
+                    <div style="font-size: 11px; text-transform: uppercase; opacity: 0.9;">Total Ingresos</div>
+                    <div id="egresosTotalIngresos" style="font-size: 18px; margin-top: 4px;">$0</div>
+                </div>
+                <div style="flex: 1; min-width: 180px; background-color: #d32f2f; color: #ffffff; padding: 12px 16px; border-radius: 8px; font-weight: bold;">
+                    <div style="font-size: 11px; text-transform: uppercase; opacity: 0.9;">Total Egresos</div>
+                    <div id="egresosTotalEgresos" style="font-size: 18px; margin-top: 4px;">$0</div>
+                </div>
+                <div style="flex: 1; min-width: 180px; background-color: #ef6c00; color: #ffffff; padding: 12px 16px; border-radius: 8px; font-weight: bold;">
+                    <div style="font-size: 11px; text-transform: uppercase; opacity: 0.9;">Saldo Actual</div>
+                    <div id="egresosSaldoActual" style="font-size: 18px; margin-top: 4px;">$0</div>
+                </div>
+            </div>
+
+            <div class="form-contenedor" id="contenedorFormEgreso">
+                <form id="formEgreso">
+                    <div class="form-grid">
+                        <div class="grupo col-span-2">
+                            <label>Concepto del Gasto / Egreso</label>
+                            <input type="text" id="egresoConcepto" required
+                                placeholder="Ej: Compra de insumos para evento institucional">
+                        </div>
+                        <div class="grupo">
+                            <label>Valor del Egreso ($)</label>
+                            <input type="number" id="egresoValor" required placeholder="0">
+                        </div>
+                        <div class="grupo">
+                            <label>Fecha del Gasto</label>
+                            <input type="date" id="egresoFecha">
+                        </div>
+                        <div class="col-span-2 btn-container-right">
+                            <button type="submit" class="btn-guardar">💸 Registrar Egreso</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <h4 style="margin: 20px 0 10px 0;">Historial General de Egresos</h4>
+            <div class="tabla-matriz-contenedor">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Concepto / Descripción</th>
+                            <th>Valor Total</th>
+                            <th class="col-accion" style="text-align: center;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaEgresos"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: MATRIZ DE PAGOS -->
+        <section class="seccion-modulo" id="sec-matriz">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 class="seccion-titulo" style="margin: 0;">Matriz Anual de Recaudos por Docente</h3>
+                <div>
+                    <button class="btn-consulta" id="btnActualizarMatriz" style="margin-right: 8px;">🔄 Actualizar
+                        Matriz</button>
+                    <button class="btn-descargar-comprobante" id="btnDescargarMatriz">📄 Descargar Matriz General (PDF)</button>
                 </div>
             </div>
 
             <div class="tabla-matriz-contenedor">
-                <table class="tabla-matriz" id="tablaMatrizPDF">
-                    <thead>
-                        <tr>
-                            <th>Identificación</th>
-                            <th>Nombre</th>
-                            <th>Enero</th>
-                            <th>Febrero</th>
-                            <th>Marzo</th>
-                            <th>Abril</th>
-                            <th>Mayo</th>
-                            <th>Junio</th>
-                            <th>Julio</th>
-                            <th>Agosto</th>
-                            <th>Septiembre</th>
-                            <th>Octubre</th>
-                            <th>Noviembre</th>
-                            <th>Diciembre</th>
-                            <th>Total Pagado</th>
-                            <th>Estado</th>
-                            <th>Saldo Pendiente a la Fecha</th>
-                            <th>Saldo Pendiente en el Año</th>
-                        </tr>
-                    </thead>
+                <table class="tabla-matriz" id="tablaMatriz" style="width: 100%;">
+                    <thead></thead>
                     <tbody id="cuerpoTablaMatriz"></tbody>
                 </table>
             </div>
         </section>
 
-        <!-- Módulo 7: Egresos -->
-        <section id="sec-egresos" class="seccion-modulo">
-            <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 class="seccion-titulo" style="margin:0;">📊 Control de Egresos y Balance General</h3>
-                <button id="btnDescargarPDFEgresos" class="btn-pdf">📄 Descargar Reporte PDF</button>
-            </div>
+        <!-- SECCIÓN: NOTICIAS Y EVENTOS -->
+        <section class="seccion-modulo" id="sec-noticias">
+            <h3 class="seccion-titulo">Noticias y Eventos Oficiales</h3>
 
-            <!-- Balance Financiero -->
-            <div class="grid-stats" style="margin-bottom: 25px;">
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <h4>Total Ingresos</h4>
-                        <span class="stat-icon">💰</span>
-                    </div>
-                    <div class="monto" id="lblIngresos">$0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <h4>Total Egresos</h4>
-                        <span class="stat-icon">📉</span>
-                    </div>
-                    <div class="monto" id="lblEgresos" style="color: #e53e3e;">$0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <h4>Saldo Actual</h4>
-                        <span class="stat-icon">🏦</span>
-                    </div>
-                    <div class="monto" id="lblSaldo">$0</div>
-                </div>
-            </div>
-
-            <!-- Formulario de Registro -->
-            <div id="contenedorFormEgreso" class="form-contenedor solo-superadmin">
-                <h3 class="seccion-titulo">💸 Registrar Nuevo Egreso</h3>
-                <form id="formEgreso" class="form-grid">
-                    <div class="grupo">
-                        <label>Fecha</label>
-                        <input type="date" id="fechaEgreso" required>
-                    </div>
-                    <div class="grupo">
-                        <label>Concepto / Motivo</label>
-                        <input type="text" id="conceptoEgreso" placeholder="Concepto (ej. Torta de cumpleaños)" required>
-                    </div>
-                    <div class="grupo col-span-2">
-                        <label>Valor ($)</label>
-                        <input type="number" id="valorEgreso" placeholder="Valor ($)" min="1" required>
-                    </div>
-                    <div class="col-span-2 btn-container-right">
-                        <button type="submit" class="btn-guardar">➕ Registrar Egreso</button>
+            <div class="form-contenedor" id="contenedorFormNoticia">
+                <form id="formNoticia">
+                    <div class="form-grid">
+                        <div class="grupo col-span-2">
+                            <label>Título de la Noticia / Evento</label>
+                            <input type="text" id="noticiaTitulo" required placeholder="Ej: Celebración Día del Docente">
+                        </div>
+                        <div class="grupo col-span-2">
+                            <label>Descripción Corta</label>
+                            <input type="text" id="noticiaDescripcion" required placeholder="Breve resumen para el inicio">
+                        </div>
+                        <div class="grupo col-span-2">
+                            <label>Contenido Completo de la Noticia</label>
+                            <textarea id="noticiaContenidoCompleto" rows="4" placeholder="Escriba aquí todo el detalle de la noticia..."></textarea>
+                        </div>
+                        <div class="grupo">
+                            <label>Imagen Destacada (Archivo Local)</label>
+                            <input type="file" id="noticiaImagenFile" accept="image/*">
+                        </div>
+                        <div class="grupo">
+                            <label>Enlace Externo (Opcional)</label>
+                            <input type="url" id="noticiaEnlace" placeholder="https://ejemplo.com">
+                        </div>
+                        <div class="col-span-2 btn-container-right">
+                            <button type="submit" class="btn-guardar">📢 Publicar Noticia</button>
+                        </div>
                     </div>
                 </form>
             </div>
 
-            <h3 class="seccion-titulo">📋 Descripción de Egresos</h3>
-            <div class="tabla-contenedor">
-                <table>
+            <h4 style="margin: 20px 0 10px 0;">Historial de Noticias Publicadas</h4>
+            <div class="tabla-matriz-contenedor">
+                <table style="width: 100%;">
                     <thead>
                         <tr>
-                            <th>Fecha</th>
-                            <th>Concepto</th>
-                            <th>Valor</th>
-                            <th class="col-accion">Acción</th>
+                            <th>Título</th>
+                            <th>Descripción</th>
+                            <th>Enlace</th>
+                            <th class="col-accion" style="text-align: center;">Acción</th>
                         </tr>
                     </thead>
-                    <tbody id="cuerpoTablaEgresos">
-                        <tr>
-                            <td colspan="4" style="text-align: center;">Cargando movimientos...</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="cuerpoTablaNoticias"></tbody>
                 </table>
             </div>
         </section>
 
+        <!-- SECCIÓN: GESTIÓN DE USUARIOS (SÓLO SUPERADMIN) -->
+        <section class="seccion-modulo" id="sec-usuarios">
+            <h3 class="seccion-titulo">Administración de Usuarios del Sistema</h3>
+
+            <div class="form-contenedor">
+                <form id="formUsuario">
+                    <input type="hidden" id="usrDocId">
+                    <div class="form-grid">
+                        <div class="grupo">
+                            <label>Nombre Completo</label>
+                            <input type="text" id="usrNombre" required placeholder="Ej: Laura Gómez">
+                        </div>
+                        <div class="grupo">
+                            <label>Correo Electrónico</label>
+                            <input type="email" id="usrCorreo" required placeholder="usuario@ieah.edu.co">
+                        </div>
+                        <div class="grupo">
+                            <label>Contraseña</label>
+                            <input type="password" id="usrClave" required placeholder="******">
+                        </div>
+                        <div class="grupo">
+                            <label>Rol asignado</label>
+                            <select id="usrRol" required>
+                                <option value="docente">Docente</option>
+                                <option value="bienestar">Bienestar (Gestión)</option>
+                                <option value="superadmin">Superadmin</option>
+                            </select>
+                        </div>
+                        <div class="col-span-2 btn-container-right">
+                            <button type="submit" class="btn-guardar">👤 Guardar Usuario</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <h4 style="margin: 20px 0 10px 0;">Usuarios Registrados</h4>
+            <div class="tabla-matriz-contenedor">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Rol</th>
+                            <th class="col-accion">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaUsuarios"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: BUZÓN DE MENSAJES (SÓLO SUPERADMIN) -->
+        <section class="seccion-modulo" id="sec-buzon">
+            <h3 class="seccion-titulo">Buzón de Mensajes Recibidos</h3>
+            <div class="tabla-matriz-contenedor">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Remitente</th>
+                            <th>Correo</th>
+                            <th>Mensaje / Consulta</th>
+                            <th class="col-accion">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaBuzon"></tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
-    <!-- Contenedor oculto para impresión de Tickets -->
-    <div id="contenedorPDF"></div>
-
-    <!-- Script Principal JS -->
+    <!-- Módulo de Javascript Principal -->
     <script type="module" src="js/panel.js"></script>
 </body>
 
