@@ -823,16 +823,17 @@ window.renderizarEgresos = async function () {
         await actualizarResumenFinanciero();
 
         if (egresosCache.length === 0) {
-            tabla.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay egresos registrados.</td></tr>";
+            tabla.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#a0aec0;'>No hay egresos registrados.</td></tr>";
             return;
         }
 
+        let htmlFilas = "";
         egresosCache.forEach(eg => {
             const btnAccion = (usuarioRolActual === 'superadmin')
                 ? `<button class="btn-del" onclick="window.eliminarEgreso('${eg.id}')">Eliminar</button>`
                 : '<span style="color:#a0aec0;">Lectura</span>';
 
-            tabla.innerHTML += `
+            htmlFilas += `
                 <tr>
                     <td>${eg.fecha || ''}</td>
                     <td><strong>${eg.concepto || ''}</strong></td>
@@ -841,6 +842,8 @@ window.renderizarEgresos = async function () {
                 </tr>
             `;
         });
+
+        tabla.innerHTML = htmlFilas;
     } catch (error) {
         console.error("Error al renderizar egresos:", error);
     }
@@ -873,14 +876,14 @@ window.descargarEgresosPDF = async function () {
 
     let filasEgresosHTML = "";
     if (egresosCache.length === 0) {
-        filasEgresosHTML = `<tr><td colspan="3" style="text-align: center; padding: 6px;">No hay egresos registrados.</td></tr>`;
+        filasEgresosHTML = `<tr><td colspan="3" style="text-align: center; padding: 10px;">No hay egresos registrados.</td></tr>`;
     } else {
         egresosCache.forEach(e => {
             filasEgresosHTML += `
                 <tr>
-                    <td style="border: 0.1px solid #d1d5db; padding: 4px; text-align: center;">${e.fecha || ''}</td>
-                    <td style="border: 0.1px solid #d1d5db; padding: 4px; text-align: left;">${e.concepto || ''}</td>
-                    <td style="border: 0.1px solid #d1d5db; padding: 4px; text-align: right;">$${(Number(e.valor) || 0).toLocaleString('es-CO')}</td>
+                    <td style="text-align: center;">${e.fecha || ''}</td>
+                    <td style="text-align: left;">${e.concepto || ''}</td>
+                    <td style="text-align: right; font-weight: bold;">$${(Number(e.valor) || 0).toLocaleString('es-CO')}</td>
                 </tr>
             `;
         });
@@ -895,23 +898,23 @@ window.descargarEgresosPDF = async function () {
         <div id="elementoEgresosAImprimir" style="width: 100%; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 9px !important; box-sizing: border-box; padding-bottom: 30px;">
             <div style="text-align: center; font-size: 11px !important; background: transparent !important; margin-bottom: 6px;">
                 <img src="../img/logo.png" alt="Escudo" style="width: 58px; height: auto; margin-bottom: 2px; display: block; margin-left: auto; margin-right: auto;" />
-                <span style="font-weight: bold; font-size: 15px !important; color: #2e7d32 !important;">INSTITUCION EDUCATIVA ALTO HORIZONTE</span><br>
+                <span style="font-weight: bold; font-size: 15px !important; color: #2e7d32 !important;">INSTITUCIÓN EDUCATIVA ALTO HORIZONTE</span><br>
                 <span style="font-weight: bold; font-size: 11px !important; color: #000000 !important;">REGISTRO GENERAL DE EGRESOS - BIENESTAR</span><br>
-                <span style="color: #6b7280 !important; font-size: 9.5px !important;">FECHA / HORA GENERACION: ${fechaHoraStr}</span>
+                <span style="color: #6b7280 !important; font-size: 9.5px !important;">FECHA / HORA GENERACIÓN: ${fechaHoraStr}</span>
             </div>
 
-            <div style="border-bottom: 0.5px solid #d1d5db; margin: 6px 0 12px 0;"></div>
+            <div style="border-bottom: 1px solid #d1d5db; margin: 6px 0 12px 0;"></div>
 
             <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <div style="flex: 1; background-color: #2e7d32; color: #ffffff; padding: 8px; border-radius: 4px; text-align: center;">
+                <div style="flex: 1; background-color: #2e7d32 !important; color: #ffffff !important; padding: 8px; border-radius: 4px; text-align: center;">
                     <div style="font-size: 9px; font-weight: bold;">TOTAL INGRESOS</div>
                     <div style="font-size: 13px; font-weight: bold;">$${totalIngresos.toLocaleString('es-CO')}</div>
                 </div>
-                <div style="flex: 1; background-color: #d32f2f; color: #ffffff; padding: 8px; border-radius: 4px; text-align: center;">
+                <div style="flex: 1; background-color: #d32f2f !important; color: #ffffff !important; padding: 8px; border-radius: 4px; text-align: center;">
                     <div style="font-size: 9px; font-weight: bold;">TOTAL EGRESOS</div>
                     <div style="font-size: 13px; font-weight: bold;">$${totalEgresos.toLocaleString('es-CO')}</div>
                 </div>
-                <div style="flex: 1; background-color: #ef6c00; color: #ffffff; padding: 8px; border-radius: 4px; text-align: center;">
+                <div style="flex: 1; background-color: #ef6c00 !important; color: #ffffff !important; padding: 8px; border-radius: 4px; text-align: center;">
                     <div style="font-size: 9px; font-weight: bold;">SALDO ACTUAL</div>
                     <div style="font-size: 13px; font-weight: bold;">$${saldoActual.toLocaleString('es-CO')}</div>
                 </div>
@@ -919,10 +922,10 @@ window.descargarEgresosPDF = async function () {
 
             <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                 <thead>
-                    <tr style="background-color: #1b5e20; color: #ffffff;">
-                        <th style="border: 0.1px solid #d1d5db; padding: 6px; width: 20%; text-align: center;">Fecha</th>
-                        <th style="border: 0.1px solid #d1d5db; padding: 6px; width: 55%; text-align: left;">Concepto</th>
-                        <th style="border: 0.1px solid #d1d5db; padding: 6px; width: 25%; text-align: right;">Valor</th>
+                    <tr>
+                        <th style="width: 20%; text-align: center;">Fecha</th>
+                        <th style="width: 55%; text-align: center;">Concepto / Descripción</th>
+                        <th style="width: 25%; text-align: center;">Valor Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -930,8 +933,8 @@ window.descargarEgresosPDF = async function () {
                 </tbody>
             </table>
 
-            <div style="text-align: center; font-size: 10px !important; margin-top: 30px; color: #212121 !important;">
-                <strong style="font-size: 11px; color: #000000;">¡GRACIAS POR SU GESTIÓN Y TRANS PARENCIA!</strong><br>
+            <div style="text-align: center; font-size: 10px !important; margin-top: 30px; color: #000000 !important;">
+                <strong style="font-size: 11px; color: #000000;">¡GRACIAS POR SU GESTIÓN Y TRANSPARENCIA!</strong><br>
                 <span style="font-weight: bold; margin-top: 4px; display: inline-block; color: #1b5e20;">Cemled corp 2026</span>
             </div>
         </div>

@@ -718,3 +718,131 @@ tr:hover td {
   font-weight: bold;
   text-transform: uppercase;
 }
+
+/* --- CORRECCIÓN EXCLUSIVA PARA EL PDF / IMPRESIÓN (TABLA DE EGRESOS) --- */
+
+/* Reglas que actúan únicamente durante la generación del PDF o la impresión */
+@media print {
+    /* Forzar fondo blanco y texto negro nítido en las celdas de la tabla de egresos */
+    #cuerpoTablaEgresos td,
+    #cuerpoTablaEgresos tr td,
+    #cuerpoTablaEgresos td * {
+        color: #000000 !important;
+        background-color: #FFFFFF !important;
+        opacity: 1 !important;
+        font-weight: 600 !important; /* Aumenta el grosor para evitar nitidez opaca */
+        text-shadow: none !important;
+        filter: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+
+/* Centrar los encabezados "Concepto" y "Valor Total" (Se mantiene en pantalla y PDF) */
+#sec-egresos table thead th:nth-child(2),
+#sec-egresos table thead th:nth-child(3) {
+    text-align: center !important;
+}
+
+/* --- CORRECCIÓN DEFINITIVA EXCLUSIVA PARA EL PDF DE EGRESOS --- */
+
+/* 1. Forzar texto negro visible en la tabla al momento de renderizar el PDF */
+#sec-egresos .tabla-matriz-contenedor td,
+#sec-egresos #cuerpoTablaEgresos td,
+#sec-egresos #cuerpoTablaEgresos tr td,
+#sec-egresos #cuerpoTablaEgresos tr td * {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+/* 2. Regla para html2pdf (cuando clona el nodo en un contenedor temporal) */
+div[style*="position: absolute"] #cuerpoTablaEgresos td,
+div[style*="position: absolute"] #cuerpoTablaEgresos td * {
+    color: #000000 !important;
+    opacity: 1 !important;
+}
+
+/* 3. Centrar columnas de la tabla */
+#sec-egresos table thead th:nth-child(2),
+#sec-egresos table thead th:nth-child(3) {
+    text-align: center !important;
+}
+
+/* ============================================================
+   CORRECCIÓN DEFINITIVA DE IMPRESIÓN Y PDF PARA EGRESOS
+   ============================================================ */
+
+/* Aislamiento completo del contenedor temporal generado para el PDF de egresos */
+/* ============================================================
+   CORRECCIÓN DEFINITIVA DE IMPRESIÓN Y PDF PARA EGRESOS
+   ============================================================ */
+
+/* Aislamiento completo del contenedor temporal generado para el PDF de egresos */
+#contenedorEgresosPDF,
+#elementoEgresosAImprimir {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    
+    /* AJUSTE DE TAMAÑO Y ESPACIADO */
+    min-height: 100% !important;
+    padding-bottom: 40px !important; /* Espacio extra para asegurar que el pie de página no se corte */
+    box-sizing: border-box !important;
+}
+
+#elementoEgresosAImprimir table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    margin-top: 10px !important;
+    margin-bottom: 20px !important; /* Separación con el texto final */
+}
+
+#elementoEgresosAImprimir th {
+    background-color: #1b5e20 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    border: 1px solid #d1d5db !important;
+    padding: 6px !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+}
+
+#elementoEgresosAImprimir td {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #e5e7eb !important;
+    padding: 6px 8px !important;
+    font-size: 9.5px !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+}
+
+#elementoEgresosAImprimir tr:nth-child(even) td {
+    background-color: #f9fafb !important;
+}
+
+/* Pie de página e identificación de la empresa en el PDF */
+#elementoEgresosAImprimir .pdf-footer,
+#elementoEgresosAImprimir .empresa-firma,
+#elementoEgresosAImprimir p:last-child {
+    display: block !important;
+    clear: both !important;
+    padding-top: 10px !important;
+    padding-bottom: 15px !important;
+    margin-bottom: 10px !important;
+    font-size: 10px !important;
+    line-height: 1.4 !important;
+    page-break-inside: avoid !important; /* Evita que el pie de página se divida en el borde */
+}
+
+/* Forzar impresión a color en navegadores y html2canvas */
+#elementoEgresosAImprimir * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
