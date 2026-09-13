@@ -37,10 +37,36 @@ if (formLogin) {
             btnIngresar.disabled = true;
             btnIngresar.innerText = "Cargando...";
 
-            await signInWithEmailAndPassword(auth, correo, clave);
+            // 1. Validar autenticación con Firebase
+            const userCredential = await signInWithEmailAndPassword(auth, correo, clave);
+            const user = userCredential.user;
+
+            // 2. Verificar estado en Firestore antes de redirigir
+            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+            const data = userDoc.exists() ? userDoc.data() : null;
+
+            const estaEliminado = !userDoc.exists() ||
+                data.isDeleted === true ||
+                data.eliminado === true ||
+                data.activo === false ||
+                data.estado === "inactivo";
+
+            if (estaEliminado) {
+                // Cerrar la sesión creada por Firebase para no dejar rastros
+                await signOut(auth);
+
+                // Restaurar botón y mostrar el mensaje solicitado en lblError
+                btnIngresar.disabled = false;
+                btnIngresar.innerText = "Ingresar al Sistema";
+                lblError.innerText = "⚠️ Estas credenciales no se encuentran en el sistema, por favor póngase en contacto con el administrador";
+                lblError.style.display = 'block';
+                return;
+            }
+
+            // Si está activo, redirige al panel
             window.location.href = "panel.html";
 
-        } catch (error) {
+   } catch (error) {
             btnIngresar.disabled = false;
             btnIngresar.innerText = "Ingresar al Sistema";
             lblError.style.display = 'block';
@@ -50,6 +76,9 @@ if (formLogin) {
                 case 'auth/wrong-password':
                 case 'auth/invalid-credential':
                     lblError.innerText = "⚠️ Credenciales incorrectas. Verifica el correo y la contraseña.";
+                    break;
+                case 'auth/email-already-in-use':
+                    lblError.innerText = "⚠️ Este correo electrónico ya está registrado en el sistema.";
                     break;
                 case 'auth/invalid-email':
                     lblError.innerText = "⚠️ Formato de correo electrónico no válido.";

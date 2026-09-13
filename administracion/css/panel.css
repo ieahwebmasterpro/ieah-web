@@ -846,3 +846,122 @@ div[style*="position: absolute"] #cuerpoTablaEgresos td * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
 }
+
+/* Estilo unificado para los botones (misma apariencia que el rol docente) */
+.dash-botonera-fija {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    background-color: transparent !important;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Botones compactos proporcionales al texto */
+.dash-botonera-fija .btn-noticias,
+.dash-botonera-fija .btn-consulta,
+.dash-botonera-fija .menu-btn {
+    width: auto !important; /* Ancho según el texto */
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap;
+}
+
+/* Ajustes para pantallas pequeñas / móviles (pantallas menores a 768px) */
+@media screen and (max-width: 768px) {
+    /* Menu superior fijo en celulares */
+    .dash-botonera-fija {
+        position: sticky !important;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        padding: 8px;
+        background-color: transparent !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        overflow-x: auto;
+        white-space: nowrap;
+        flex-wrap: nowrap !important;
+    }
+
+    /* Asegura que los módulos activos siempre muestren su contenido completo */
+    .seccion-modulo.activa, 
+    .contenedor-subvista .seccion-modulo {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        overflow-x: auto; /* Permite ver tablas grandes en celular */
+    }
+}
+
+/* Contenedor dinámico de contenidos */
+.contenedor-subvista {
+    width: 100%;
+    margin-top: 15px;
+    clear: both;
+}
+
+/* Forzar que las secciones incrustadas dentro de la subvista sean visibles */
+.contenedor-subvista .seccion-modulo {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+}
+
+/* Control en pantallas móviles */
+@media screen and (max-width: 768px) {
+    .dash-botonera-fija {
+        position: sticky !important;
+        top: 0;
+        z-index: 999;
+        background-color: var(--bg-modulo, #ffffff);
+        padding: 8px 4px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+        white-space: nowrap;
+        flex-wrap: nowrap !important;
+    }
+
+    /* Permite desplazamiento horizontal en tablas y formularios pesados */
+    .contenedor-subvista {
+        overflow-x: auto;
+    }
+}
+
+.btn-azul {
+    background-color: #1a56db !important; /* Azul */
+    color: #ffffff !important;
+}
+
+.btn-verde {
+    background-color: #059669 !important; /* Verde */
+    color: #ffffff !important;
+}
+
+.btn-rojo {
+    background-color: #dc2626 !important; /* Rojo */
+    color: #ffffff !important;
+}
+
+.btn-verde-claro {
+    background-color: #8df504 !important; /* Morado */
+    color: #ffffff !important;
+}
+
+.btn-naranja {
+    background-color: #d97706 !important; /* Naranja */
+    color: #ffffff !important;
+}
+
+/* Efecto visual al pasar el cursor */
+.btn-azul:hover, .btn-verde:hover, .btn-rojo:hover, .btn-morado:hover, .btn-naranja:hover {
+    filter: brightness(0.9);
+    cursor: pointer;
+}

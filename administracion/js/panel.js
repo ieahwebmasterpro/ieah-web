@@ -117,74 +117,78 @@ const CONVENCIONES_HTML = `
 // NAVEGACIÓN Y SECCIONES
 // ----------------------------------------------------
 window.mostrarSeccion = async function (seccion, elemento) {
-    if (usuarioRolActual === 'docente') {
-        const secBienvenida = document.getElementById('sec-docente-bienvenida');
-        if (secBienvenida) {
-            secBienvenida.style.setProperty('display', 'block', 'important');
-            secBienvenida.classList.add('activa');
-        }
+    // 1. Ocultamos todas las secciones del módulo por defecto
+    document.querySelectorAll('.seccion-modulo').forEach(s => {
+        s.classList.remove('activa');
+        s.style.setProperty('display', 'none', 'important');
+    });
 
-        document.querySelectorAll('.seccion-modulo:not(#sec-docente-bienvenida)').forEach(s => {
-            s.classList.remove('activa');
-            s.style.display = 'none';
-        });
-    } else {
-        document.querySelectorAll('.seccion-modulo').forEach(s => {
-            s.classList.remove('activa');
-            s.style.display = 'none';
-        });
-    }
-
+    // 2. Quitamos el estado activo de todos los botones del menú
     document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('activo'));
 
     let secTarget = null;
 
-    if (seccion === 'docente-bienvenida') {
-        secTarget = document.getElementById('sec-docente-bienvenida');
-        if (secTarget) document.getElementById('tituloVista').innerText = "Panel del Docente";
+    // 3. Mapeo de secciones según el identificador
+    if (seccion === 'docente-bienvenida' || seccion === 'inicio') {
+        if (usuarioRolActual === 'docente') {
+            secTarget = document.getElementById('sec-docente-bienvenida');
+            if (secTarget) document.getElementById('tituloVista').innerText = "Panel del Docente";
+        } else if (usuarioRolActual === 'bienestar') {
+            secTarget = document.getElementById('sec-bienestar-bienvenida');
+            if (secTarget) document.getElementById('tituloVista').innerText = "Panel de Gestión - Bienestar";
+        } else {
+            secTarget = document.getElementById('sec-superadmin-bienvenida');
+            if (secTarget) document.getElementById('tituloVista').innerText = "Panel de Administración General";
+        }
     } else if (seccion === 'mis-comprobantes') {
         secTarget = document.getElementById('sec-mis-comprobantes') || document.getElementById('sec-contabilidad');
-        document.getElementById('tituloVista').innerText = "Mis Comprobantes de Pago";
-        await window.renderizarPagosDocente();
-    } else if (seccion === 'buzon') {
-        secTarget = document.getElementById('sec-buzon');
-        document.getElementById('tituloVista').innerText = "Buzón de Mensajes";
+        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Mis Comprobantes de Pago";
+        if (typeof window.renderizarPagosDocente === 'function') await window.renderizarPagosDocente();
+    } else if (seccion === 'buzon' || seccion === 'mensajes') {
+        secTarget = document.getElementById('sec-buzon') || document.getElementById('sec-mensajes');
+        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Buzón de Mensajes";
+        if (typeof window.cargarMensajes === 'function') await window.cargarMensajes();
     } else if (seccion === 'noticias') {
         secTarget = document.getElementById('sec-noticias');
-        document.getElementById('tituloVista').innerText = "Noticias y Eventos Oficiales";
-        await window.renderizarNoticias();
+        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Noticias y Eventos Oficiales";
+        if (typeof window.renderizarNoticias === 'function') await window.renderizarNoticias();
     } else if (seccion === 'usuarios') {
         secTarget = document.getElementById('sec-usuarios');
-        document.getElementById('tituloVista').innerText = "Gestión de Usuarios del Sistema";
-        await window.renderizarUsuarios();
+        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Gestión de Usuarios del Sistema";
+        if (typeof window.renderizarUsuarios === 'function') await window.renderizarUsuarios();
     } else if (seccion === 'docentes') {
         secTarget = document.getElementById('sec-docentes');
-        document.getElementById('tituloVista').innerText = "Directorio Docentes";
-        await window.renderizarDocentes();
-    } else if (seccion === 'contabilidad') {
-        secTarget = document.getElementById('sec-contabilidad');
-        document.getElementById('tituloVista').innerText = "Gestión Contable & Recibos";
-        await window.renderizarPagos();
+        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Directorio Docentes";
+        if (typeof window.renderizarDocentes === 'function') await window.renderizarDocentes();
+    } else if (seccion === 'contabilidad' || seccion === 'pagos') {
+        secTarget = document.getElementById('sec-contabilidad') || document.getElementById('sec-pagos');
+        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Gestión Contable & Recibos";
+        if (typeof window.renderizarPagos === 'function') await window.renderizarPagos();
     } else if (seccion === 'egresos') {
         secTarget = document.getElementById('sec-egresos');
         if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Gestión de Egresos";
-        await window.renderizarEgresos();
+        if (typeof window.renderizarEgresos === 'function') await window.renderizarEgresos();
     } else if (seccion === 'matriz') {
         secTarget = document.getElementById('sec-matriz');
-        document.getElementById('tituloVista').innerText = "Matriz General de Pagos";
-        await window.renderizarMatrizPagos();
+        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Matriz General de Pagos";
+        if (typeof window.renderizarMatrizPagos === 'function') await window.renderizarMatrizPagos();
     }
 
+    // 4. Mostrar la sección objetivo seleccionada
     if (secTarget) {
         secTarget.classList.add('activa');
         secTarget.style.setProperty('display', 'block', 'important');
     }
 
+    // 5. Marcar como activo el botón del menú pulsado
     if (elemento && elemento.classList) {
         elemento.classList.add('activo');
     }
 
-    await actualizarResumenFinanciero();
+    // 6. Actualizar balance general financiero si la función existe
+    if (typeof actualizarResumenFinanciero === 'function') {
+        await actualizarResumenFinanciero();
+    }
 };
 
 window.consultarReporteIndividualDocente = async function () {
@@ -451,14 +455,24 @@ onAuthStateChanged(auth, async (user) => {
 
     try {
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        if (userDoc.exists()) {
-            const data = userDoc.data();
-            usuarioRolActual = (data.rol || "docente").toLowerCase().trim();
-            usuarioDocenteActual = { uid: user.uid, email: user.email, ...data };
-        } else {
-            usuarioDocenteActual = { uid: user.uid, correo: user.email, email: user.email, nombre: user.displayName || user.email };
-            usuarioRolActual = "docente";
+        
+        // --- CAMBIO AQUÍ: Validación de usuario eliminado o inexistente ---
+        const data = userDoc.exists() ? userDoc.data() : null;
+        const estaEliminado = !userDoc.exists() || 
+                              data.isDeleted === true || 
+                              data.eliminado === true || 
+                              data.activo === false || 
+                              data.estado === "inactivo";
+
+        if (estaEliminado) {
+            await signOut(auth);
+            window.location.href = "login.html";
+            return;
         }
+        // -----------------------------------------------------------------
+
+        usuarioRolActual = (data.rol || "docente").toLowerCase().trim();
+        usuarioDocenteActual = { uid: user.uid, email: user.email, ...data };
 
         const docentesSnap = await getDocs(collection(db, "docentes"));
         docentesCache = [];
@@ -504,13 +518,25 @@ async function aplicarPermisosRol(rol) {
 
     const menuAdmin = document.getElementById('menuAdministrativo');
     const gridStats = document.getElementById('tarjetasEstadisticas');
-    const secBienvenida = document.getElementById('sec-docente-bienvenida');
+    
+    // Contenedores de Bienvenida según el Rol
+    const secBienvenidaDocente = document.getElementById('sec-docente-bienvenida');
+    const secBienvenidaBienestar = document.getElementById('sec-bienestar-bienvenida');
+    const secBienvenidaSuperadmin = document.getElementById('sec-superadmin-bienvenida');
+
     const btnInicioPanel = document.getElementById('inicio-panel');
     
+    // Control de visibilidad para elementos exclusivos de docente (.solo-docente)
     if (rolLimpio === "bienestar" || rolLimpio === "superadmin") {
         document.querySelectorAll('.solo-docente').forEach(el => el.style.setProperty('display', 'none', 'important'));
     } else {
-        document.querySelectorAll('.solo-docente').forEach(el => el.style.setProperty('display', 'block', 'important'));
+        document.querySelectorAll('.solo-docente').forEach(el => {
+            if (el.tagName === 'A' || el.tagName === 'BUTTON') {
+                el.style.setProperty('display', 'inline-flex', 'important');
+            } else {
+                el.style.setProperty('display', 'block', 'important');
+            }
+        });
     }
 
     // Visibilidad del botón inicio-panel (solo visible para docente)
@@ -522,12 +548,28 @@ async function aplicarPermisosRol(rol) {
         }
     }
 
+    // Ocultamos primero todas las secciones de bienvenida para evitar solapamientos
+    if (secBienvenidaDocente) {
+        secBienvenidaDocente.style.setProperty('display', 'none', 'important');
+        secBienvenidaDocente.classList.remove('activa');
+    }
+    if (secBienvenidaBienestar) {
+        secBienvenidaBienestar.style.setProperty('display', 'none', 'important');
+        secBienvenidaBienestar.classList.remove('activa');
+    }
+    if (secBienvenidaSuperadmin) {
+        secBienvenidaSuperadmin.style.setProperty('display', 'none', 'important');
+        secBienvenidaSuperadmin.classList.remove('activa');
+    }
+
     if (rolLimpio === "docente") {
         if (gridStats) gridStats.style.setProperty('display', 'none', 'important');
-        if (secBienvenida) {
-            secBienvenida.style.setProperty('display', 'block', 'important');
-            secBienvenida.classList.add('activa');
+
+        if (secBienvenidaDocente) {
+            secBienvenidaDocente.style.setProperty('display', 'block', 'important');
+            secBienvenidaDocente.classList.add('activa');
         }
+
         if (menuAdmin) menuAdmin.style.display = "block";
 
         document.getElementById('tituloVista').innerText = "Panel del Docente";
@@ -542,7 +584,12 @@ async function aplicarPermisosRol(rol) {
 
     } else if (rolLimpio === "bienestar") {
         if (gridStats) gridStats.style.display = "grid";
-        if (secBienvenida) secBienvenida.style.display = "none";
+
+        if (secBienvenidaBienestar) {
+            secBienvenidaBienestar.style.setProperty('display', 'block', 'important');
+            secBienvenidaBienestar.classList.add('activa');
+        }
+
         if (menuAdmin) menuAdmin.style.display = "block";
 
         document.getElementById('tituloVista').innerText = "Panel de Gestión - Bienestar";
@@ -563,12 +610,16 @@ async function aplicarPermisosRol(rol) {
         await window.renderizarPagos();
         await window.renderizarEgresos();
 
-        window.mostrarSeccion('docentes', document.getElementById('btnDocentes'));
+        // Se remueve la redirección automática a 'docentes' para mantener visible el Dashboard inicial
 
     } else {
         if (menuAdmin) menuAdmin.style.display = "block";
         if (gridStats) gridStats.style.display = "grid";
-        if (secBienvenida) secBienvenida.style.display = "none";
+
+        if (secBienvenidaSuperadmin) {
+            secBienvenidaSuperadmin.style.setProperty('display', 'block', 'important');
+            secBienvenidaSuperadmin.classList.add('activa');
+        }
 
         document.getElementById('tituloVista').innerText = "Panel de Administración General";
 
@@ -587,7 +638,8 @@ async function aplicarPermisosRol(rol) {
         await window.renderizarPagos();
         await window.renderizarEgresos();
         await window.renderizarUsuarios();
-        window.mostrarSeccion('docentes', document.getElementById('btnDocentes'));
+
+        // Se remueve la redirección automática a 'docentes' para mantener visible el Dashboard inicial
     }
 }
 
@@ -1711,7 +1763,71 @@ document.getElementById('formPago')?.addEventListener('submit', async (e) => {
     } catch (error) {
         alert("Error al registrar el pago: " + error.message);
     }
+    
 });
+// Función global para mantener visibles los botones superiores tanto en PC como en móviles
+window.cargarSubContenido = async function (subseccion) {
+    let contenedor = null;
+    let secBienvenidaPadre = null;
+
+    // 1. Identificar el contenedor dinámico y la sección padre según el rol
+    if (usuarioRolActual === 'bienestar') {
+        contenedor = document.getElementById('subvista-bienestar');
+        secBienvenidaPadre = document.getElementById('sec-bienestar-bienvenida');
+    } else if (usuarioRolActual === 'superadmin') {
+        contenedor = document.getElementById('subvista-superadmin');
+        secBienvenidaPadre = document.getElementById('sec-superadmin-bienvenida');
+    }
+
+    // Si no existen los contenedores por rol, usar comportamiento estándar
+    if (!contenedor || !secBienvenidaPadre) {
+        if (typeof window.mostrarSeccion === 'function') {
+            await window.mostrarSeccion(subseccion, null);
+        }
+        return;
+    }
+
+    // 2. Garantizar que la sección de bienvenida permanezca visible con su botonera fija
+    secBienvenidaPadre.style.setProperty('display', 'block', 'important');
+    secBienvenidaPadre.classList.add('activa');
+
+    // Ocultar otras secciones principales para no duplicar vistas
+    document.querySelectorAll('.seccion-modulo').forEach(sec => {
+        if (sec !== secBienvenidaPadre && !contenedor.contains(sec)) {
+            sec.style.setProperty('display', 'none', 'important');
+            sec.classList.remove('activa');
+        }
+    });
+
+    // 3. Mapear el módulo solicitado
+    let targetElement = null;
+    if (subseccion === 'docentes') targetElement = document.getElementById('sec-docentes');
+    else if (subseccion === 'pagos') targetElement = document.getElementById('sec-contabilidad') || document.getElementById('sec-pagos');
+    else if (subseccion === 'egresos') targetElement = document.getElementById('sec-egresos');
+    else if (subseccion === 'usuarios') targetElement = document.getElementById('sec-usuarios');
+    else if (subseccion === 'mensajes') targetElement = document.getElementById('sec-buzon');
+
+    if (targetElement) {
+        // Renderizar los datos de la base de datos
+        if (subseccion === 'docentes' && typeof window.renderizarDocentes === 'function') await window.renderizarDocentes();
+        if (subseccion === 'pagos' && typeof window.renderizarPagos === 'function') await window.renderizarPagos();
+        if (subseccion === 'egresos' && typeof window.renderizarEgresos === 'function') await window.renderizarEgresos();
+        if (subseccion === 'usuarios' && typeof window.renderizarUsuarios === 'function') await window.renderizarUsuarios();
+        if (subseccion === 'mensajes' && typeof window.cargarMensajes === 'function') await window.cargarMensajes();
+
+        // 4. Mover el módulo dentro del contenedor desplegable debajo de los botones
+        contenedor.innerHTML = '';
+        contenedor.appendChild(targetElement);
+        targetElement.style.setProperty('display', 'block', 'important');
+        targetElement.classList.add('activa');
+
+        // Desplazamiento suave para visualizar el contenido en móviles
+        if (window.innerWidth <= 768) {
+            contenedor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+};
+
 
 // Exposición global estricta
 window.renderizarNoticias = window.renderizarNoticias;

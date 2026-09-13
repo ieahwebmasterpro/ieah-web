@@ -53,6 +53,7 @@
                     onclick="mostrarSeccion('mis-comprobantes', this)">
                     🧾 Mis Comprobantes
                 </button>
+                <a href="formatos.html" class="menu-btn solo-docente" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">📁 Formatos Institucionales</a>
                 <button class="menu-btn ver-bienestar" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">
                     👨‍🏫 Directorio Docentes
                 </button>
@@ -117,27 +118,123 @@
             </div>
         </section>
 
-        <!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
-        <section class="seccion-modulo activa" id="sec-docente-bienvenida">
-            <h3 class="seccion-titulo" id="mensajeBienvenidaDocente">👋 Hola Profe, bienvenid@ a la Plataforma
-                Institucional</h3>
-            <p style="color: var(--texto-secundario); margin-bottom: 20px;">
-                Desde este panel podrás consultar tu estado de cuenta de aportes a bienestar docente, descargar tus
-                tickets de pago, publicar noticias  y eventos oficiales en la pagina oficial de nuestra institución.
-            </p>
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <button class="btn-consulta btn-reporte-docente" type="button">📊 Consultar Estado de Cuenta</button>
-                <button class="btn-noticias solo-docente" type="button" onclick="mostrarSeccion('noticias', null)">📢Noticias y Eventos</button>
-            </div>
+       
+<!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
+<!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
+<!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
+<section class="seccion-modulo activa" id="sec-docente-bienvenida">
+    <h3 class="seccion-titulo" id="mensajeBienvenidaDocente">👋 Hola Profe, bienvenid@ a la Plataforma Institucional</h3>
+    <p style="color: var(--texto-secundario); margin-bottom: 15px;">
+        Desde este panel podrás consultar tu estado de cuenta, tickets de pago y publicar noticias oficiales.
+    </p>
 
-            <div id="contenedorReporteDocenteUI" style="margin-top: 25px; display: none;"></div>
-            <div style="margin-top: 15px;">
-                <button class="btn-descargar-comprobante" id="btnDescargarReporteDocente" style="display: none;"
-                    onclick="descargarReporteIndividualDocentePDF()">
-                    📄 Descargar Estado de Cuenta (PDF)
-                </button>
-            </div>
-        </section>
+    <!-- Botonera Fija Superior Docente -->
+    <div class="dash-botonera-fija">
+        <button class="btn-noticias btn-verde" type="button" onclick="cargarSubContenido('mis-comprobantes')">📊 Estado de Cuenta</button>
+        <button class="btn-noticias btn-azul" type="button" onclick="cargarSubContenido('noticias')">📢 Noticias y Eventos</button>
+        <a href="formatos.html" class="btn-noticias btn-morado" style="text-decoration: none; text-align: center;">📁 Formatos Institucionales</a>
+    </div>
+
+    <!-- Contenedor dinámico desplegable para el Docente -->
+    <div class="contenedor-subvista" id="subvista-docente" style="margin-top: 15px;"></div>
+</section>
+
+<!-- SECCIÓN: INICIO / ACCESOS RÁPIDOS BIENESTAR -->
+<section class="seccion-modulo" id="sec-bienestar-bienvenida" style="display: none;">
+    <h3 class="seccion-titulo">👋 Panel de Gestión - Bienestar</h3>
+    <p style="color: var(--texto-secundario); margin-bottom: 15px;">
+        Acceso rápido a los módulos de consulta y supervisión institucional:
+    </p>
+
+    <!-- Botonera Fija Superior -->
+    <div class="dash-botonera-fija">
+        <button class="btn-noticias btn-azul" type="button" onclick="cargarSubContenido('docentes')">👥 Ver Docentes</button>
+        <button class="btn-noticias btn-verde" type="button" onclick="cargarSubContenido('pagos')">💰 Ver Pagos</button>
+        <button class="btn-noticias btn-rojo" type="button" onclick="cargarSubContenido('egresos')">💸 Ver Egresos</button>
+    </div>
+
+    <!-- Contenido Dinámico desplegable debajo de los botones -->
+    <div class="contenedor-subvista" id="subvista-bienestar" style="margin-top: 15px;"></div>
+</section>
+
+<!-- SECCIÓN: INICIO / ACCESOS RÁPIDOS SUPERADMIN -->
+<section class="seccion-modulo" id="sec-superadmin-bienvenida" style="display: none;">
+    <h3 class="seccion-titulo">👋 Panel de Administración General</h3>
+    <p style="color: var(--texto-secundario); margin-bottom: 15px;">
+        Acceso rápido a todos los módulos de gestión y configuración general:
+    </p>
+
+    <!-- Botonera Fija Superior -->
+    <div class="dash-botonera-fija">
+        <button class="btn-noticias btn-azul" type="button" onclick="cargarSubContenido('docentes')">👥 Docentes</button>
+        <button class="btn-noticias btn-verde" type="button" onclick="cargarSubContenido('pagos')">💰 Pagos</button>
+        <button class="btn-noticias btn-rojo" type="button" onclick="cargarSubContenido('egresos')">💸 Egresos</button>
+        <button class="btn-noticias btn-naranja" type="button" onclick="cargarSubContenido('usuarios')">⚙️ Usuarios</button>
+        <button class="btn-noticias btn-verde-claro" type="button" onclick="cargarSubContenido('mensajes')">📬 Mensajes</button>
+    </div>
+
+    <!-- Contenido Dinámico desplegable debajo de los botones -->
+    <div class="contenedor-subvista" id="subvista-superadmin" style="margin-top: 15px;"></div>
+</section>
+
+<!-- SECCIÓN: INICIO / ACCESOS RÁPIDOS BIENESTAR -->
+<section class="seccion-modulo" id="sec-bienestar-bienvenida" style="display: none;">
+    <h3 class="seccion-titulo">👋 Panel de Gestión - Bienestar</h3>
+    <p style="color: var(--texto-secundario); margin-bottom: 15px;">
+        Acceso rápido a los módulos de consulta y supervisión institucional:
+    </p>
+
+    <!-- Botonera Fija -->
+    <div class="dash-botonera-fija">
+        <button class="dash-btn btn-azul" type="button" onclick="mostrarSeccion('docentes', document.getElementById('btnDocentes'))">👥 Ver Docentes</button>
+        <button class="dash-btn btn-verde" type="button" onclick="mostrarSeccion('pagos', document.getElementById('btnPagos'))">💰 Ver Pagos</button>
+        <button class="dash-btn btn-rojo" type="button" onclick="mostrarSeccion('egresos', document.getElementById('btnEgresos'))">💸 Ver Egresos</button>
+    </div>
+</section>
+
+<!-- SECCIÓN: INICIO / ACCESOS RÁPIDOS SUPERADMIN -->
+<section class="seccion-modulo" id="sec-superadmin-bienvenida" style="display: none;">
+    <h3 class="seccion-titulo">👋 Panel de Administración General</h3>
+    <p style="color: var(--texto-secundario); margin-bottom: 15px;">
+        Acceso rápido a todos los módulos de gestión y configuración general:
+    </p>
+
+    <!-- Botonera Fija -->
+    <div class="dash-botonera-fija">
+        <button class="dash-btn btn-azul" type="button" onclick="mostrarSeccion('docentes', document.getElementById('btnDocentes'))">👥 Docentes</button>
+        <button class="dash-btn btn-verde" type="button" onclick="mostrarSeccion('pagos', document.getElementById('btnPagos'))">💰 Pagos</button>
+        <button class="dash-btn btn-rojo" type="button" onclick="mostrarSeccion('egresos', document.getElementById('btnEgresos'))">💸 Egresos</button>
+        <button class="dash-btn btn-morado" type="button" onclick="mostrarSeccion('usuarios', document.getElementById('btnUsuarios'))">⚙️ Usuarios</button>
+        <button class="dash-btn btn-naranja" type="button" onclick="mostrarSeccion('mensajes', document.getElementById('btnMensajes'))">📬 Mensajes</button>
+    </div>
+</section>
+<!-- SECCIÓN: INICIO / ACCESOS RÁPIDOS BIENESTAR -->
+<section class="seccion-modulo" id="sec-bienestar-bienvenida" style="display: none;">
+    <h3 class="seccion-titulo">👋 Panel de Gestión - Bienestar</h3>
+    <p style="color: var(--texto-secundario); margin-bottom: 20px;">
+        Acceso rápido a los módulos de consulta y supervisión institucional:
+    </p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="menu-btn" type="button" onclick="mostrarSeccion('docentes', document.getElementById('btnDocentes'))" style="background-color: var(--azul-primario, #1a56db); color: #fff; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">👥 Ver Docentes</button>
+        <button class="menu-btn" type="button" onclick="mostrarSeccion('pagos', document.getElementById('btnPagos'))" style="background-color: #059669; color: #fff; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">💰 Ver Pagos</button>
+        <button class="menu-btn" type="button" onclick="mostrarSeccion('egresos', document.getElementById('btnEgresos'))" style="background-color: #dc2626; color: #fff; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">💸 Ver Egresos</button>
+    </div>
+</section>
+
+<!-- SECCIÓN: INICIO / ACCESOS RÁPIDOS SUPERADMIN -->
+<section class="seccion-modulo" id="sec-superadmin-bienvenida" style="display: none;">
+    <h3 class="seccion-titulo">👋 Panel de Administración General</h3>
+    <p style="color: var(--texto-secundario); margin-bottom: 20px;">
+        Acceso rápido a todos los módulos de gestión y configuración general del sistema:
+    </p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="menu-btn" type="button" onclick="mostrarSeccion('docentes', document.getElementById('btnDocentes'))" style="background-color: var(--azul-primario, #1a56db); color: #fff; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">👥 Docentes</button>
+        <button class="menu-btn" type="button" onclick="mostrarSeccion('pagos', document.getElementById('btnPagos'))" style="background-color: #059669; color: #fff; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">💰 Pagos</button>
+        <button class="menu-btn" type="button" onclick="mostrarSeccion('egresos', document.getElementById('btnEgresos'))" style="background-color: #dc2626; color: #fff; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">💸 Egresos</button>
+        <button class="menu-btn" type="button" onclick="mostrarSeccion('usuarios', document.getElementById('btnUsuarios'))" style="background-color: #7c3aed; color: #fff; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">⚙️ Usuarios</button>
+        <button class="menu-btn" type="button" onclick="mostrarSeccion('mensajes', document.getElementById('btnMensajes'))" style="background-color: #d97706; color: #fff; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">📬 Mensajes</button>
+    </div>
+</section>
 
         <!-- SECCIÓN: MIS COMPROBANTES (DOCENTE) -->
         <section class="seccion-modulo" id="sec-mis-comprobantes">
