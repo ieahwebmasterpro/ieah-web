@@ -484,11 +484,14 @@ async function aplicarPermisosRol(rol) {
     const formPagoBox = document.getElementById('contenedorFormPago');
     const formEgresoBox = document.getElementById('contenedorFormEgreso');
     const formNoticiaBox = document.getElementById('contenedorFormNoticia');
-    const formUsuarioBox = document.getElementById('contenedorFormUsuario'); // Opciones de Usuario
+    const formUsuarioBox = document.getElementById('contenedorFormUsuario');
 
     const menuAdmin = document.getElementById('menuAdministrativo');
     const gridStats = document.getElementById('tarjetasEstadisticas');
     
+    // Referencia a la botonera global de administración
+    const botoneraGlobal = document.querySelector('.dash-botonera-global');
+
     // Contenedores de Bienvenida según el Rol
     const secBienvenidaDocente = document.getElementById('sec-docente-bienvenida');
     const secBienvenidaBienestar = document.getElementById('sec-bienestar-bienvenida');
@@ -533,6 +536,8 @@ async function aplicarPermisosRol(rol) {
     }
 
     if (rolLimpio === "docente") {
+        // OCULTAR BOTONERA GLOBAL EN DOCENTE
+        if (botoneraGlobal) botoneraGlobal.style.setProperty('display', 'none', 'important');
         if (gridStats) gridStats.style.setProperty('display', 'none', 'important');
 
         if (secBienvenidaDocente) {
@@ -553,6 +558,8 @@ async function aplicarPermisosRol(rol) {
         await window.renderizarNoticias();
 
     } else if (rolLimpio === "bienestar") {
+        // MOSTRAR BOTONERA GLOBAL EN BIENESTAR
+        if (botoneraGlobal) botoneraGlobal.style.setProperty('display', 'flex', 'important');
         if (gridStats) gridStats.style.display = "grid";
 
         if (secBienvenidaBienestar) {
@@ -567,22 +574,22 @@ async function aplicarPermisosRol(rol) {
         document.querySelectorAll('.ver-bienestar').forEach(el => el.style.setProperty('display', 'block', 'important'));
         document.querySelectorAll('.solo-superadmin').forEach(el => el.style.setProperty('display', 'none', 'important'));
 
-        // ROL BIENESTAR: SOLO VISUALIZACIÓN (se ocultan todos los formularios de creación/registro)
         if (formDocenteBox) formDocenteBox.style.setProperty('display', 'none', 'important');
         if (formPagoBox) formPagoBox.style.setProperty('display', 'none', 'important');
         if (formEgresoBox) formEgresoBox.style.setProperty('display', 'none', 'important');
         if (formNoticiaBox) formNoticiaBox.style.setProperty('display', 'none', 'important');
-        if (formUsuarioBox) formUsuarioBox.style.setProperty('display', 'none', 'important'); // Ocultar registro de usuarios
+        if (formUsuarioBox) formUsuarioBox.style.setProperty('display', 'none', 'important');
 
-        // Ocultar acciones de registro/eliminación/edición en tablas
         document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'none', 'important'));
 
         await window.renderizarDocentes();
         await window.renderizarPagos();
         await window.renderizarEgresos();
-        await window.renderizarUsuarios(); // Permitir ver la lista de usuarios registrados
+        await window.renderizarUsuarios();
 
     } else {
+        // MOSTRAR BOTONERA GLOBAL EN SUPERADMIN
+        if (botoneraGlobal) botoneraGlobal.style.setProperty('display', 'flex', 'important');
         if (menuAdmin) menuAdmin.style.display = "block";
         if (gridStats) gridStats.style.display = "grid";
 
@@ -599,7 +606,7 @@ async function aplicarPermisosRol(rol) {
         if (formDocenteBox) formDocenteBox.style.cssText = "display: block !important;";
         if (formPagoBox) formPagoBox.style.cssText = "display: block !important;";
         if (formEgresoBox) formEgresoBox.style.cssText = "display: block !important;";
-        if (formUsuarioBox) formUsuarioBox.style.cssText = "display: block !important;"; // Formulario visible para Superadmin
+        if (formUsuarioBox) formUsuarioBox.style.cssText = "display: block !important;";
         if (formNoticiaBox) formNoticiaBox.style.setProperty('display', 'none', 'important');
 
         document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'table-cell', 'important'));
@@ -1808,6 +1815,355 @@ document.addEventListener('click', (event) => {
         }
     }
 });
+
+// ==========================================
+// NAVEGACIÓN ISOLADA Y EXCLUSIVA PARA EL DOCENTE
+// ==========================================
+window.navegarDocente = function (idSeccion, elementoBtn) {
+    const secBienvenida = document.getElementById('sec-docente-bienvenida');
+
+    // 1. Ocultar todos los submódulos dinámicos del docente
+    const modulosDocente = [
+        'sec-matriz-docente', 
+        'sec-mis-comprobantes', 
+        'sec-noticias', 
+        'sec-formatos', 
+        'contenedorFormNoticia'
+    ];
+    
+    modulosDocente.forEach(id => {
+        const mod = document.getElementById(id);
+        if (mod) {
+            mod.style.setProperty('display', 'none', 'important');
+        }
+    });
+
+    // 2. Mostrar la sección seleccionada
+    let target = document.getElementById(idSeccion) || document.getElementById(`sec-${idSeccion}`);
+    if (target) {
+        target.style.setProperty('display', 'block', 'important');
+    }
+
+    // 3. Casos especiales: Si es Noticias, forzar que se vea el formulario de publicar noticia
+    if (idSeccion === 'sec-noticias') {
+        const formNoticiaBox = document.getElementById('contenedorFormNoticia');
+        if (formNoticiaBox) {
+            formNoticiaBox.style.setProperty('display', 'block', 'important');
+        }
+    }
+
+    // 4. Asegurar que la cabecera de bienvenida persista siempre arriba
+    const fijarCabecera = () => {
+        if (secBienvenida) {
+            secBienvenida.style.setProperty('display', 'block', 'important');
+            secBienvenida.classList.add('activa');
+        }
+    };
+
+    fijarCabecera();
+    setTimeout(fijarCabecera, 50);
+
+    // 5. Destacar botón activo
+    document.querySelectorAll('#sec-docente-bienvenida .dash-btn-fijo').forEach(b => {
+        b.classList.remove('activo');
+    });
+    if (elementoBtn) {
+        elementoBtn.classList.add('activo');
+    }
+
+    // 6. Ejecución de lógica según el botón presionado
+    if (idSeccion === 'sec-matriz-docente' && typeof window.renderizarEstadoCuentaDocente === 'function') {
+        window.renderizarEstadoCuentaDocente();
+    } else if (idSeccion === 'sec-noticias' && typeof window.renderizarNoticias === 'function') {
+        window.renderizarNoticias();
+    } else if ((idSeccion === 'sec-mis-comprobantes' || idSeccion === 'pagos') && typeof window.renderizarPagosDocente === 'function') {
+        window.renderizarPagosDocente();
+    }
+};
+window.renderizarEstadoCuentaDocente = async function () {
+    const tabla = document.getElementById('cuerpoMatrizDocente');
+    if (!tabla) return;
+
+    tabla.innerHTML = "<tr><td colspan='14' style='text-align:center;'>Cargando estado de cuenta...</td></tr>";
+
+    try {
+        // 1. Obtener datos del docente desde la variable global o la sesión activa
+        let docID = String(usuarioDocenteActual?.documento || usuarioDocenteActual?.cedula || "").trim();
+        let nomDoc = String(usuarioDocenteActual?.nombre || "Docente").trim();
+        let correoDoc = String(usuarioDocenteActual?.correo || usuarioDocenteActual?.email || usuarioCorreoActual || "").toLowerCase().trim();
+
+        // 2. Obtener los pagos registrados en Firestore
+        const querySnapshot = await getDocs(collection(db, "pagos"));
+        const mesesPagados = new Set();
+
+        querySnapshot.forEach(docSnap => {
+            const p = docSnap.data();
+            const pCorreo = String(p.correo || p.email || "").toLowerCase().trim();
+            const pDoc = String(p.documento || "").trim();
+            const pNom = String(p.docente || "").toLowerCase().trim();
+
+            const coincideDocumento = docID !== "" && pDoc === docID;
+            const coincideCorreo = correoDoc !== "" && pCorreo === correoDoc;
+            const coincideNombre = nomDoc !== "" && pNom === nomDoc.toLowerCase();
+
+            // Si el pago pertenece al docente autenticado
+            if (coincideDocumento || coincideCorreo || coincideNombre) {
+                if (Array.isArray(p.meses)) {
+                    p.meses.forEach(m => mesesPagados.add(String(m).toLowerCase().trim()));
+                } else if (p.mes) {
+                    mesesPagados.add(String(p.mes).toLowerCase().trim());
+                }
+            }
+        });
+
+        // 3. Mapeo de meses del año
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        
+        let celdasMeses = "";
+        meses.forEach(mes => {
+            if (mesesPagados.has(mes)) {
+                celdasMeses += `<td style="background-color: #dcfce7; color: #15803d; text-align:center; font-weight:bold;">Al día</td>`;
+            } else {
+                celdasMeses += `<td style="background-color: #fee2e2; color: #b91c1c; text-align:center;">Pendiente</td>`;
+            }
+        });
+
+        // 4. Renderizar la fila del docente
+        tabla.innerHTML = `
+            <tr>
+                <td><strong>${nomDoc}</strong></td>
+                <td>${docID || 'N/A'}</td>
+                ${celdasMeses}
+            </tr>
+        `;
+
+    } catch (error) {
+        console.error("Error al generar Estado de Cuenta Docente:", error);
+        tabla.innerHTML = "<tr><td colspan='14' style='text-align:center; color:red;'>Error al cargar el estado de cuenta. Revisa la consola.</td></tr>";
+    }
+};
+// ==========================================
+// ESTADO DE CUENTA INDIVIDUAL DEL DOCENTE
+// ==========================================
+
+window.renderizarEstadoCuentaDocente = async function () {
+    const tbody = document.getElementById('cuerpoMatrizDocente');
+    const thead = document.querySelector('#tablaMatrizDocente thead') || document.querySelector('#sec-matriz-docente table thead');
+
+    if (thead) {
+        thead.innerHTML = `
+            <tr style="background-color: #1b5e20 !important; color: #ffffff !important;">
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Identificación</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Nombre</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Enero</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Febrero</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Marzo</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Abril</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Mayo</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Junio</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Julio</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Agosto</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Septiembre</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Octubre</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Noviembre</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Diciembre</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Total Pagado</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Estado</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente a la Fecha</th>
+                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente en el Año</th>
+            </tr>
+        `;
+    }
+
+    if (!tbody) return;
+
+    try {
+        if (typeof window.renderizarPagos === "function") {
+            await window.renderizarPagos();
+        }
+        tbody.innerHTML = "";
+
+        const VALOR_CUOTA = 35000; // Cuota fija $35.000
+        const mesActualIndex = new Date().getMonth(); // Mes actual del sistema (Septiembre = 8)
+        const listaMeses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+        // Datos del docente logueado
+        const docObj = window.usuarioDocenteActual || window.usuarioActual || {};
+        let docNum = String(docObj.documento || docObj.cedula || docObj.identificacion || "").trim();
+        let docNom = String(docObj.nombre || docObj.docente || "").trim();
+        let correoDoc = String(docObj.correo || docObj.email || window.usuarioCorreoActual || "").toLowerCase().trim();
+
+        // Si no hay objeto en sesión, busca el primer registro disponible del docente
+        const todosLosPagos = window.pagosCache || [];
+        
+        if (!docNum && !docNom && todosLosPagos.length > 0) {
+            const pRef = todosLosPagos[0];
+            docNum = String(pRef.documento || pRef.cedula || "").trim();
+            docNom = String(pRef.docente || pRef.nombre || "Docente").trim();
+            correoDoc = String(pRef.correo || pRef.email || "").toLowerCase().trim();
+        }
+
+        // Obtener pagos correspondientes
+        const pagosDocente = todosLosPagos.filter(p => {
+            const pCorreo = String(p.correo || p.email || "").toLowerCase().trim();
+            const pDoc = String(p.documento || p.cedula || "").trim();
+            const pNom = String(p.docente || p.nombre || "").toLowerCase().trim();
+
+            return (docNum !== "" && pDoc === docNum) ||
+                   (correoDoc !== "" && pCorreo === correoDoc) ||
+                   (docNom !== "" && pNom.length > 2 && (pNom.includes(docNom.toLowerCase()) || docNom.toLowerCase().includes(pNom)));
+        });
+
+        // Registrar qué meses están pagados
+        let mesesPagadosSet = new Set();
+        pagosDocente.forEach(p => {
+            let arregloMeses = [];
+            if (p.meses && Array.isArray(p.meses)) arregloMeses = p.meses;
+            else if (p.mes) arregloMeses = [p.mes];
+
+            arregloMeses.forEach(m => {
+                const mesLimpio = String(m).toLowerCase().trim();
+                mesesPagadosSet.add(mesLimpio);
+            });
+        });
+
+        let totalPagadoDocente = 0;
+        let mesesPendientesFecha = 0;
+        let mesesFaltantesAnio = 0;
+        let celdasMesesHTML = "";
+
+        listaMeses.forEach((mesNombre, index) => {
+            // Evaluamos si el mes de la iteración está dentro del conjunto de meses pagados
+            let estaPagado = false;
+            for (let mPagado of mesesPagadosSet) {
+                if (mPagado.includes(mesNombre) || mesNombre.includes(mPagado)) {
+                    estaPagado = true;
+                    break;
+                }
+            }
+
+            if (estaPagado) {
+                totalPagadoDocente += VALOR_CUOTA;
+                // SI ESTÁ PAGADO: Texto "$35.000" (sin guiones) y Fondo Verde (#2e7d32)
+                celdasMesesHTML += `<td class="celda-pagado" style="background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff; padding: 6px;">$${VALOR_CUOTA.toLocaleString('es-CO')}</td>`;
+            } else if (index <= mesActualIndex) {
+                mesesPendientesFecha++;
+                // PENDIENTE A LA FECHA: Texto "-$35.000-" y Fondo Rojo (#d32f2f)
+                celdasMesesHTML += `<td class="celda-pendiente" style="background-color: #d32f2f !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff; padding: 6px;">-$${VALOR_CUOTA.toLocaleString('es-CO')}-</td>`;
+            } else {
+                mesesFaltantesAnio++;
+                // MES FUTURO POR PAGAR: Texto "-$35.000-" y Fondo Naranja (#ef6c00)
+                celdasMesesHTML += `<td class="celda-futuro" style="background-color: #ef6c00 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff; padding: 6px;">-$${VALOR_CUOTA.toLocaleString('es-CO')}-</td>`;
+            }
+        });
+
+        // Cálculos Matematicos
+        const saldoPendienteFecha = mesesPendientesFecha * VALOR_CUOTA;
+        const saldoPendienteAnio = (mesesPendientesFecha + mesesFaltantesAnio) * VALOR_CUOTA;
+        const estadoGeneral = mesesPendientesFecha === 0 ? "AL DIA" : "PENDIENTE";
+
+        const bgEstado = estadoGeneral === 'AL DIA' ? '#2e7d32' : '#d32f2f';
+        const bgSaldoFecha = saldoPendienteFecha === 0 ? '#2e7d32' : '#d32f2f';
+
+        tbody.innerHTML = `
+            <tr>
+                <td class="col-identificacion" style="color: #333333 !important; font-weight: normal; text-align: center; border: 0.1px solid #e5e7eb; padding: 6px;">${docNum || 'N/A'}</td>
+                <td class="col-nombre" style="color: #333333 !important; font-weight: normal; border: 0.1px solid #e5e7eb; padding: 6px;">${docNom || 'Docente'}</td>
+                ${celdasMesesHTML}
+                <td class="col-total" style="font-weight: bold; text-align: center; color: #333333 !important; border: 0.1px solid #e5e7eb; padding: 6px;">$${totalPagadoDocente.toLocaleString('es-CO')}</td>
+                <td style="font-weight: bold; text-align: center; background-color: ${bgEstado} !important; color: #ffffff !important; border: 0.1px solid #ffffff; padding: 6px;">${estadoGeneral}</td>
+                <td style="font-weight: bold; text-align: center; background-color: ${bgSaldoFecha} !important; color: #ffffff !important; border: 0.1px solid #ffffff; padding: 6px;">$${saldoPendienteFecha.toLocaleString('es-CO')}</td>
+                <td style="font-weight: bold; text-align: center; background-color: #ef6c00 !important; color: #ffffff !important; border: 0.1px solid #ffffff; padding: 6px;">$${saldoPendienteAnio.toLocaleString('es-CO')}</td>
+            </tr>
+        `;
+    } catch (error) {
+        console.error("Error al renderizar Estado de Cuenta Docente:", error);
+        tbody.innerHTML = "<tr><td colspan='18' style='text-align:center; color:red;'>Error al cargar el estado de cuenta.</td></tr>";
+    }
+};
+
+// ==========================================
+// DESCARGAR PDF ESTADO DE CUENTA DOCENTE
+// ==========================================
+
+window.descargarEstadoCuentaDocentePDF = async function () {
+    await window.renderizarEstadoCuentaDocente();
+
+    let contenedor = document.getElementById('contenedorEstadoCuentaPDF');
+    if (!contenedor) {
+        contenedor = document.createElement('div');
+        contenedor.id = 'contenedorEstadoCuentaPDF';
+        document.body.appendChild(contenedor);
+    }
+
+    const tablaOriginal = document.getElementById('tablaMatrizDocente');
+    const contenidoTablaHTML = tablaOriginal ? tablaOriginal.outerHTML : '';
+
+    const ahora = new Date();
+    const fechaHoraStr = `${ahora.toLocaleDateString('es-CO')} ${ahora.toLocaleTimeString('es-CO')}`;
+    const docNom = String(usuarioDocenteActual?.nombre || "Docente").toUpperCase();
+
+    contenedor.style.cssText = "position: absolute; top: 0; left: 0; width: 100%; background: #ffffff !important; z-index: 99999; display: block; padding: 10px;";
+
+    contenedor.innerHTML = `
+        <div id="elementoEstadoCuentaAImprimir" style="width: 100%; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 8.5px !important; box-sizing: border-box; padding-bottom: 40px;">
+            
+            <div style="text-align: center; font-size: 11px !important; background: transparent !important; margin-bottom: 6px;">
+                <img src="../img/logo.png" alt="Escudo Institucional" style="width: 58px; height: auto; margin-bottom: 2px; display: block; margin-left: auto; margin-right: auto;" />
+                <span style="font-weight: bold; font-size: 15px !important; color: #2e7d32 !important;">INSTITUCION EDUCATIVA ALTO HORIZONTE</span><br>
+                <span style="font-weight: bold; font-size: 11px !important; color: #000000 !important;">GRUPO BIENESTAR 2026 - Estado de Cuenta Individual</span><br>
+                <span style="color: #6b7280 !important; font-size: 9.5px !important;">DOCENTE: ${docNom} | FECHA / HORA: ${fechaHoraStr}</span>
+            </div>
+
+            <div style="border-bottom: 0.5px solid #d1d5db; margin: 4px 0 10px 0;"></div>
+
+            <!-- Leyenda de Convenciones en Colores -->
+            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 12px; font-weight: bold; font-size: 9px;">
+                <span style="background-color: #2e7d32; color: #ffffff; padding: 3px 8px; border-radius: 3px;">■ Meses Pagados</span>
+                <span style="background-color: #d32f2f; color: #ffffff; padding: 3px 8px; border-radius: 3px;">■ Meses que debe a la Fecha</span>
+                <span style="background-color: #ef6c00; color: #ffffff; padding: 3px 8px; border-radius: 3px;">■ Meses que aún faltan por pagar / Saldo Año</span>
+            </div>
+
+            <style>
+                #elementoEstadoCuentaAImprimir table { width: 100%; border-collapse: collapse; font-size: 8px; color: #000000 !important; }
+                #elementoEstadoCuentaAImprimir th { background-color: #1b5e20 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #d1d5db !important; padding: 4px 2px; }
+                #elementoEstadoCuentaAImprimir td { border: 0.1px solid #e5e7eb !important; padding: 4px 2px; text-align: center; }
+                #elementoEstadoCuentaAImprimir .celda-pagado { background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; }
+                #elementoEstadoCuentaAImprimir .celda-pendiente { background-color: #d32f2f !important; color: #ffffff !important; font-weight: bold; }
+                #elementoEstadoCuentaAImprimir .celda-futuro { background-color: #ef6c00 !important; color: #ffffff !important; font-weight: bold; }
+            </style>
+
+            <div style="margin-bottom: 10px;">
+                ${contenidoTablaHTML}
+            </div>
+
+            <div style="text-align: center; font-size: 10px !important; line-height: 1.5; font-weight: normal; margin-top: 20px; color: #212121 !important;">
+                Estimad@ profesor@ - Administrativ@ - rector@<br>
+                con su aporte contribuye al bienestar de todo el talento humano de nuestra institución.<br>
+                <strong style="font-size: 11px; color: #000000;">¡GRACIAS POR SU APORTE!</strong><br>
+                <span style="font-weight: bold; margin-top: 4px; display: inline-block; color: #1b5e20; font-size: 10px;">Cemled corp 2026</span>
+            </div>
+        </div>
+    `;
+
+    setTimeout(() => {
+        const elemento = document.getElementById('elementoEstadoCuentaAImprimir');
+        const opt = {
+            margin: [5, 5, 10, 5],
+            filename: `ESTADO_DE_CUENTA_${docNom.replace(/\s+/g, '_')}_2026.pdf`,
+            image: { type: 'jpeg', quality: 1.0 },
+            html2canvas: { scale: 2, logging: false, useCORS: true, backgroundColor: '#ffffff' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().set(opt).from(elemento).save().then(() => {
+            contenedor.innerHTML = "";
+        }).catch(err => {
+            console.error("Error al generar PDF Docente:", err);
+            contenedor.innerHTML = "";
+        });
+    }, 400);
+};
 
 // Exposición global estricta
 window.renderizarNoticias = window.renderizarNoticias;

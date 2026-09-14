@@ -1022,3 +1022,96 @@ div[style*="position: absolute"] #cuerpoTablaEgresos td * {
     margin-bottom: 20px !important;
     padding: 10px 0 !important;
 }
+
+/* ==========================================
+   ESTILOS EXCLUSIVOS PARA LA CABECERA DOCENTE
+   ========================================== */
+/* ===================================================
+   DISEÑO MEJORADO Y MODERNO PARA LA BOTONERA DOCENTE
+   =================================================== */
+/* =========================================================
+   ESTILOS CON MÁXIMA ESPECIFICIDAD PARA LA BOTONERA DOCENTE
+   ========================================================= */
+
+/* Tarjeta principal contenedora */
+div#sec-docente-bienvenida {
+    background: #1e293b !important; /* Gris oscuro elegante */
+    border: 1px solid #334155 !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    margin-bottom: 25px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Título de la sección */
+div#sec-docente-bienvenida h2 {
+    color: #ffffff !important;
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 15px !important;
+}
+
+/* Contenedor gris medio donde flotan los botones */
+div#sec-docente-bienvenida .dash-botonera-bienvenida {
+    display: flex !important;
+    gap: 12px !important;
+    background: #0f172a !important; /* Fondo azul noche profundo */
+    padding: 10px !important;
+    border-radius: 10px !important;
+    border: 1px solid #334155 !important;
+}
+
+/* Estado Normal de los Botones (Fondo Oscuro Suave) */
+#sec-docente-bienvenida .dash-botonera-bienvenida button.dash-btn-fijo {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 18px !important;
+    background-color: #334155 !important; /* Botón oscuro, elimina el blanco */
+    color: #f1f5f9 !important; /* Texto claro */
+    border: 1px solid #475569 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Estado Hover (Al pasar el cursor) */
+#sec-docente-bienvenida .dash-botonera-bienvenida button.dash-btn-fijo:hover {
+    background-color: #475569 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Estado Activo (Botón Seleccionado - Azul Vibrante) */
+#sec-docente-bienvenida .dash-botonera-bienvenida button.dash-btn-fijo.activo {
+    background-color: #2563eb !important; /* Azul primario */
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.5) !important;
+}
+
+.btn-descargar-pdf {
+    background-color: #b4ae0a;
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn-descargar-pdf:hover {
+    background-color: #bbc642;
+    transform: translateY(-1px);
+}
+
+.btn-descargar-pdf:active {
+    transform: translateY(0);
+}
