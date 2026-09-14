@@ -117,78 +117,47 @@ const CONVENCIONES_HTML = `
 // NAVEGACIÓN Y SECCIONES
 // ----------------------------------------------------
 window.mostrarSeccion = async function (seccion, elemento) {
-    // 1. Ocultamos todas las secciones del módulo por defecto
-    document.querySelectorAll('.seccion-modulo').forEach(s => {
+    // 1. Ocultar únicamente las secciones de contenido dinámico
+    const secciones = document.querySelectorAll('.seccion-modulo');
+    secciones.forEach(s => {
+        s.style.display = 'none';
         s.classList.remove('activa');
-        s.style.setProperty('display', 'none', 'important');
     });
 
-    // 2. Quitamos el estado activo de todos los botones del menú
-    document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('activo'));
+    // 2. Mapear la sección a mostrar
+    const mapaSecciones = {
+        'docentes': 'sec-docentes',
+        'pagos': 'sec-contabilidad',
+        'contabilidad': 'sec-contabilidad',
+        'egresos': 'sec-egresos',
+        'usuarios': 'sec-usuarios',
+        'mensajes': 'sec-mensajes',
+        'buzon': 'sec-mensajes',
+        'matriz': 'sec-matriz',
+        'inicio': usuarioRolActual === 'bienestar' ? 'sec-bienestar-bienvenida' : 'sec-superadmin-bienvenida'
+    };
 
-    let secTarget = null;
+    const targetId = mapaSecciones[seccion] || `sec-${seccion}`;
+    const targetEl = document.getElementById(targetId);
 
-    // 3. Mapeo de secciones según el identificador
-    if (seccion === 'docente-bienvenida' || seccion === 'inicio') {
-        if (usuarioRolActual === 'docente') {
-            secTarget = document.getElementById('sec-docente-bienvenida');
-            if (secTarget) document.getElementById('tituloVista').innerText = "Panel del Docente";
-        } else if (usuarioRolActual === 'bienestar') {
-            secTarget = document.getElementById('sec-bienestar-bienvenida');
-            if (secTarget) document.getElementById('tituloVista').innerText = "Panel de Gestión - Bienestar";
-        } else {
-            secTarget = document.getElementById('sec-superadmin-bienvenida');
-            if (secTarget) document.getElementById('tituloVista').innerText = "Panel de Administración General";
+    // 3. Mostrar la sección seleccionada sin afectar la botonera superior
+    if (targetEl) {
+        targetEl.style.display = 'block';
+        targetEl.classList.add('activa');
+    }
+
+    // 4. Renderizado asíncrono seguro
+    setTimeout(async () => {
+        try {
+            if (seccion === 'docentes' && typeof renderizarDocentes === 'function') await renderizarDocentes();
+            if ((seccion === 'pagos' || seccion === 'contabilidad') && typeof renderizarPagos === 'function') await renderizarPagos();
+            if (seccion === 'egresos' && typeof renderizarEgresos === 'function') await renderizarEgresos();
+            if (seccion === 'usuarios' && typeof renderizarUsuarios === 'function') await renderizarUsuarios();
+            if ((seccion === 'mensajes' || seccion === 'buzon') && typeof cargarMensajes === 'function') await cargarMensajes();
+        } catch (e) {
+            console.error("Error al cargar la vista:", e);
         }
-    } else if (seccion === 'mis-comprobantes') {
-        secTarget = document.getElementById('sec-mis-comprobantes') || document.getElementById('sec-contabilidad');
-        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Mis Comprobantes de Pago";
-        if (typeof window.renderizarPagosDocente === 'function') await window.renderizarPagosDocente();
-    } else if (seccion === 'buzon' || seccion === 'mensajes') {
-        secTarget = document.getElementById('sec-buzon') || document.getElementById('sec-mensajes');
-        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Buzón de Mensajes";
-        if (typeof window.cargarMensajes === 'function') await window.cargarMensajes();
-    } else if (seccion === 'noticias') {
-        secTarget = document.getElementById('sec-noticias');
-        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Noticias y Eventos Oficiales";
-        if (typeof window.renderizarNoticias === 'function') await window.renderizarNoticias();
-    } else if (seccion === 'usuarios') {
-        secTarget = document.getElementById('sec-usuarios');
-        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Gestión de Usuarios del Sistema";
-        if (typeof window.renderizarUsuarios === 'function') await window.renderizarUsuarios();
-    } else if (seccion === 'docentes') {
-        secTarget = document.getElementById('sec-docentes');
-        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Directorio Docentes";
-        if (typeof window.renderizarDocentes === 'function') await window.renderizarDocentes();
-    } else if (seccion === 'contabilidad' || seccion === 'pagos') {
-        secTarget = document.getElementById('sec-contabilidad') || document.getElementById('sec-pagos');
-        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Gestión Contable & Recibos";
-        if (typeof window.renderizarPagos === 'function') await window.renderizarPagos();
-    } else if (seccion === 'egresos') {
-        secTarget = document.getElementById('sec-egresos');
-        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Gestión de Egresos";
-        if (typeof window.renderizarEgresos === 'function') await window.renderizarEgresos();
-    } else if (seccion === 'matriz') {
-        secTarget = document.getElementById('sec-matriz');
-        if (document.getElementById('tituloVista')) document.getElementById('tituloVista').innerText = "Matriz General de Pagos";
-        if (typeof window.renderizarMatrizPagos === 'function') await window.renderizarMatrizPagos();
-    }
-
-    // 4. Mostrar la sección objetivo seleccionada
-    if (secTarget) {
-        secTarget.classList.add('activa');
-        secTarget.style.setProperty('display', 'block', 'important');
-    }
-
-    // 5. Marcar como activo el botón del menú pulsado
-    if (elemento && elemento.classList) {
-        elemento.classList.add('activo');
-    }
-
-    // 6. Actualizar balance general financiero si la función existe
-    if (typeof actualizarResumenFinanciero === 'function') {
-        await actualizarResumenFinanciero();
-    }
+    }, 0);
 };
 
 window.consultarReporteIndividualDocente = async function () {
@@ -515,6 +484,7 @@ async function aplicarPermisosRol(rol) {
     const formPagoBox = document.getElementById('contenedorFormPago');
     const formEgresoBox = document.getElementById('contenedorFormEgreso');
     const formNoticiaBox = document.getElementById('contenedorFormNoticia');
+    const formUsuarioBox = document.getElementById('contenedorFormUsuario'); // Opciones de Usuario
 
     const menuAdmin = document.getElementById('menuAdministrativo');
     const gridStats = document.getElementById('tarjetasEstadisticas');
@@ -597,20 +567,20 @@ async function aplicarPermisosRol(rol) {
         document.querySelectorAll('.ver-bienestar').forEach(el => el.style.setProperty('display', 'block', 'important'));
         document.querySelectorAll('.solo-superadmin').forEach(el => el.style.setProperty('display', 'none', 'important'));
 
-        // ROL BIENESTAR: SOLO VISUALIZACIÓN
+        // ROL BIENESTAR: SOLO VISUALIZACIÓN (se ocultan todos los formularios de creación/registro)
         if (formDocenteBox) formDocenteBox.style.setProperty('display', 'none', 'important');
         if (formPagoBox) formPagoBox.style.setProperty('display', 'none', 'important');
         if (formEgresoBox) formEgresoBox.style.setProperty('display', 'none', 'important');
         if (formNoticiaBox) formNoticiaBox.style.setProperty('display', 'none', 'important');
+        if (formUsuarioBox) formUsuarioBox.style.setProperty('display', 'none', 'important'); // Ocultar registro de usuarios
 
-        // Ocultar acciones de registro/eliminación en tablas
+        // Ocultar acciones de registro/eliminación/edición en tablas
         document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'none', 'important'));
 
         await window.renderizarDocentes();
         await window.renderizarPagos();
         await window.renderizarEgresos();
-
-        // Se remueve la redirección automática a 'docentes' para mantener visible el Dashboard inicial
+        await window.renderizarUsuarios(); // Permitir ver la lista de usuarios registrados
 
     } else {
         if (menuAdmin) menuAdmin.style.display = "block";
@@ -629,6 +599,7 @@ async function aplicarPermisosRol(rol) {
         if (formDocenteBox) formDocenteBox.style.cssText = "display: block !important;";
         if (formPagoBox) formPagoBox.style.cssText = "display: block !important;";
         if (formEgresoBox) formEgresoBox.style.cssText = "display: block !important;";
+        if (formUsuarioBox) formUsuarioBox.style.cssText = "display: block !important;"; // Formulario visible para Superadmin
         if (formNoticiaBox) formNoticiaBox.style.setProperty('display', 'none', 'important');
 
         document.querySelectorAll('.col-accion').forEach(el => el.style.setProperty('display', 'table-cell', 'important'));
@@ -638,8 +609,6 @@ async function aplicarPermisosRol(rol) {
         await window.renderizarPagos();
         await window.renderizarEgresos();
         await window.renderizarUsuarios();
-
-        // Se remueve la redirección automática a 'docentes' para mantener visible el Dashboard inicial
     }
 }
 
@@ -1828,6 +1797,17 @@ window.cargarSubContenido = async function (subseccion) {
     }
 };
 
+// AGREGAR AL FINAL DE panel.js
+document.addEventListener('click', (event) => {
+    const btn = event.target.closest('.menu-btn');
+    if (btn) {
+        event.preventDefault();
+        const seccion = btn.getAttribute('data-seccion') || btn.dataset.seccion;
+        if (seccion) {
+            window.mostrarSeccion(seccion, btn);
+        }
+    }
+});
 
 // Exposición global estricta
 window.renderizarNoticias = window.renderizarNoticias;

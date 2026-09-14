@@ -965,3 +965,60 @@ div[style*="position: absolute"] #cuerpoTablaEgresos td * {
     filter: brightness(0.9);
     cursor: pointer;
 }
+
+/* Estilos para evitar la deformación de accesos rápidos */
+.dash-contenedor-botones {
+    display: flex !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 20px !important;
+}
+
+.dash-btn-fijo {
+    width: auto !important; /* Evita que ocupen el 100% del ancho */
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    transition: transform 0.15s ease, opacity 0.15s ease !important;
+}
+
+.dash-btn-fijo:hover {
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Colores de botones */
+.btn-azul { background-color: #1a56db !important; }
+.btn-verde { background-color: #059669 !important; }
+.btn-rojo { background-color: #dc2626 !important; }
+.btn-morado { background-color: #7c3aed !important; }
+.btn-naranja { background-color: #d97706 !important; }
+
+.dash-botonera-global {
+    display: flex !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    padding: 15px !important;
+    background-color: transparent!important;
+    border-bottom: 1px solid #e5e7eb !important;
+    margin-bottom: 20px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+}
+
+.dash-botonera-global {
+    display: flex !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 20px !important;
+    padding: 10px 0 !important;
+}
