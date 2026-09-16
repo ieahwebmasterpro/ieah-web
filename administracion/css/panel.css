@@ -596,6 +596,7 @@ tr:hover td {
     max-width: 100%;
     border: 1px solid var(--glass-border);
     border-radius: 12px;
+    
 }
 
 .tabla-matriz th {
@@ -1114,4 +1115,96 @@ div#sec-docente-bienvenida .dash-botonera-bienvenida {
 
 .btn-descargar-pdf:active {
     transform: translateY(0);
+}
+
+/* Color para Identificación, Nombre, Total y Estado en la Matriz */
+table#tablaMatriz td.col-identificacion,
+table#tablaMatriz td.col-nombre,
+table#tablaMatriz td.col-total,
+table#tablaMatriz td.col-estado,
+#elementoMatrizAImprimir td.col-identificacion,
+#elementoMatrizAImprimir td.col-nombre,
+#elementoMatrizAImprimir td.col-total,
+#elementoMatrizAImprimir td.col-estado {
+    background-color: #1b5e20 !important; /* Verde oscuro (o cambia por #000000 para negro) */
+    color: #ffffff !important;            /* Texto blanco */
+    font-weight: bold !important;
+}
+
+.col-identificacion{
+    background-color: #000000;
+}
+
+
+
+/* ==========================================================================
+   ESTILOS DUPLICADOS Y AISLADOS PARA MATRIZ GENERAL, DOCENTE Y EXPORTACIÓN PDF
+   ========================================================================== */
+
+/* 1. Estructura general de las tablas */
+#tablaMatriz,
+#tablaMatrizDocente,
+#elementoMatrizAImprimir table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 8.5px !important;
+}
+
+/* 2. Encabezados por defecto de la matriz */
+#tablaMatriz th,
+#tablaMatrizDocente th,
+#elementoMatrizAImprimir th {
+    background-color: #1b5e20 !important; /* Verde oscuro institucional */
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    border: 0.1px solid #d1d5db !important;
+    padding: 6px 4px !important;
+}
+
+/* 3. Columnas específicas: Identificación, Nombre, Total Pagado y Estado */
+#tablaMatriz .col-identificacion,
+#tablaMatriz .col-nombre,
+#tablaMatriz .col-total,
+#tablaMatriz .col-estado,
+#tablaMatrizDocente .col-identificacion,
+#tablaMatrizDocente .col-nombre,
+#tablaMatrizDocente .col-total,
+#tablaMatrizDocente .col-estado,
+#elementoMatrizAImprimir .col-identificacion,
+#elementoMatrizAImprimir .col-nombre,
+#elementoMatrizAImprimir .col-total,
+#elementoMatrizAImprimir .col-estado {
+    background-color: #1b5e20 !important; /* Fondo verde oscuro */
+    color: #ffffff !important;            /* Texto blanco obligatorio */
+    font-weight: bold !important;
+    text-align: center !important;
+}
+
+/* 4. Celdas de estado mensual (Pagado, Pendiente, Futuro) */
+#tablaMatriz .celda-pagado,
+#tablaMatrizDocente .celda-pagado,
+#elementoMatrizAImprimir .celda-pagado {
+    background-color: #2e7d32 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-align: center !important;
+}
+
+#tablaMatriz .celda-pendiente,
+#tablaMatrizDocente .celda-pendiente,
+#elementoMatrizAImprimir .celda-pendiente {
+    background-color: #d32f2f !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-align: center !important;
+}
+
+#tablaMatriz .celda-futuro,
+#tablaMatrizDocente .celda-futuro,
+#elementoMatrizAImprimir .celda-futuro {
+    background-color: #ef6c00 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-align: center !important;
 }

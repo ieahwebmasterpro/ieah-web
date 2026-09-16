@@ -161,22 +161,54 @@ window.mostrarSeccion = async function (seccion, elemento) {
 };
 
 window.consultarReporteIndividualDocente = async function () {
-    await window.renderizarPagosDocente();
-    window.mostrarSeccion('mis-comprobantes', null);
+    // 1. Si los pagos aún no se han cargado en memoria, forzamos su carga si existe la función
+    if ((!window.pagosCache || window.pagosCache.length === 0) && typeof window.cargarPagos === 'function') {
+        await window.cargarPagos();
+    } else if ((!window.pagosCache || window.pagosCache.length === 0) && typeof window.obtenerPagos === 'function') {
+        await window.obtenerPagos();
+    }
 
-    const docID = String(usuarioDocenteActual?.documento || usuarioDocenteActual?.cedula || "").trim();
-    const nomDoc = String(usuarioDocenteActual?.nombre || "").toLowerCase().trim();
+    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual) 
+        ? usuarioDocenteActual 
+        : (window.usuarioActual || JSON.parse(sessionStorage.getItem('usuario') || sessionStorage.getItem('user') || '{}'));
 
-    const pagosDoc = pagosCache.filter(p => {
-        const pDoc = String(p.documento || "").trim();
-        const pNom = String(p.docente || "").toLowerCase().trim();
-        return (docID !== "" && pDoc === docID) || (nomDoc !== "" && (pNom.includes(nomDoc) || nomDoc.includes(pNom)));
+    const docID = String(usuarioSesion?.documento || usuarioSesion?.cedula || usuarioSesion?.id || usuarioSesion?.dni || "").trim();
+    const nomDoc = String(usuarioSesion?.nombre || usuarioSesion?.usuario || usuarioSesion?.nombreCompleto || "").trim();
+
+    const limpiar = (txt) => {
+        if (!txt) return "";
+        return String(txt).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    };
+
+    const nomDocLimpio = limpiar(nomDoc);
+    const listaPagos = window.pagosCache || pagosCache || [];
+
+    // 2. Filtrar pagos del docente
+    const pagosDoc = listaPagos.filter(p => {
+        const pDoc = String(p.documento || p.cedula || p.docenteId || p.usuarioId || p.identificacion || "").trim();
+        const pNom = limpiar(p.docente || p.nombre || p.usuario || p.nombreDocente);
+        const pEmail = limpiar(p.correo || p.email);
+
+        const coincideID = docID !== "" && pDoc === docID;
+        const coincideNombre = nomDocLimpio !== "" && (pNom.includes(nomDocLimpio) || nomDocLimpio.includes(pNom));
+        const coincideEmail = usuarioSesion?.email && pEmail === limpiar(usuarioSesion.email);
+
+        return coincideID || coincideNombre || coincideEmail;
     });
 
+    // 3. Extraer meses pagados
     let mesesPagados = [];
     pagosDoc.forEach(p => {
-        if (p.meses && Array.isArray(p.meses)) mesesPagados.push(...p.meses);
-        else if (p.mes) mesesPagados.push(p.mes);
+        const estado = limpiar(p.estado || p.estadoAprobacion || "aprobado");
+        if (!estado.includes("rechaz") && !estado.includes("pendient")) {
+            if (p.meses && Array.isArray(p.meses)) {
+                p.meses.forEach(m => mesesPagados.push(limpiar(m)));
+            } else if (p.mes) {
+                mesesPagados.push(limpiar(p.mes));
+            } else if (p.concepto) {
+                mesesPagados.push(limpiar(p.concepto));
+            }
+        }
     });
 
     const mesActualIndex = new Date().getMonth();
@@ -185,232 +217,183 @@ window.consultarReporteIndividualDocente = async function () {
     let mesesFaltantesAnio = 0;
     let celdasMesesHTML = "";
 
-    MESES_ANIO.forEach((mesNombre, index) => {
-        const pagado = mesesPagados.some(m => String(m).toLowerCase().includes(mesNombre.toLowerCase()));
+    const MESES_LISTA = typeof MESES_ANIO !== 'undefined' ? MESES_ANIO : [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    const CUOTA = typeof VALOR_CUOTA_FIJA !== 'undefined' ? VALOR_CUOTA_FIJA : 35000;
+
+    // 4. Pintar las celdas con sus estilos
+    MESES_LISTA.forEach((mesNombre, index) => {
+        const mesLimpio = limpiar(mesNombre);
+        const pagado = mesesPagados.some(m => m.includes(mesLimpio) || mesLimpio.includes(m));
+
         if (pagado) {
-            totalPagado += VALOR_CUOTA_FIJA;
-            celdasMesesHTML += `<td class="celda-pagado" style="background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}</td>`;
+            totalPagado += CUOTA;
+            // Verde: Mes Pagado
+            celdasMesesHTML += `<td class="celda-pagado text-center" style="background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; border: 0.1px solid #ffffff;">$${CUOTA.toLocaleString('es-CO')}</td>`;
         } else if (index <= mesActualIndex) {
             mesesPendientesFecha++;
-            celdasMesesHTML += `<td class="celda-pendiente" style="background-color: #d32f2f !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff;">-$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}-</td>`;
+            // Rojo: Deuda
+            celdasMesesHTML += `<td class="celda-pendiente text-center" style="background-color: #d32f2f !important; color: #ffffff !important; font-weight: bold; border: 0.1px solid #ffffff;">-$${CUOTA.toLocaleString('es-CO')}-</td>`;
         } else {
             mesesFaltantesAnio++;
-            celdasMesesHTML += `<td class="celda-futuro" style="background-color: #ef6c00 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff;">-$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}-</td>`;
+            // Naranja: Meses Futuros
+            celdasMesesHTML += `<td class="celda-futuro text-center" style="background-color: #ef6c00 !important; color: #ffffff !important; font-weight: bold; border: 0.1px solid #ffffff;">-$${CUOTA.toLocaleString('es-CO')}-</td>`;
         }
     });
 
-    const saldoPendienteFecha = mesesPendientesFecha * VALOR_CUOTA_FIJA;
-    const saldoPendienteAnio = (mesesPendientesFecha + mesesFaltantesAnio) * VALOR_CUOTA_FIJA;
+    const saldoPendienteFecha = mesesPendientesFecha * CUOTA;
+    const saldoPendienteAnio = (mesesPendientesFecha + mesesFaltantesAnio) * CUOTA;
     const estadoGeneral = mesesPendientesFecha === 0 ? "AL DIA" : "PENDIENTE";
 
-    const bgEstado = estadoGeneral === 'AL DIA' ? '#2e7d32' : '#d32f2f';
-    const bgSaldoFecha = saldoPendienteFecha === 0 ? '#2e7d32' : '#d32f2f';
+    const badgeEstado = estadoGeneral === 'AL DIA' 
+        ? `<span class="badge badge-exito" style="background-color: #2e7d32 !important; color: #ffffff !important; padding: 4px 8px; border-radius: 4px; font-weight: bold;">AL DIA</span>` 
+        : `<span class="badge badge-alerta" style="background-color: #d32f2f !important; color: #ffffff !important; padding: 4px 8px; border-radius: 4px; font-weight: bold;">PENDIENTE</span>`;
 
-    const boxReporte = document.getElementById('contenedorReporteDocenteUI');
-    const btnPDF = document.getElementById('btnDescargarReporteDocente');
+    // 5. Inyectar HTML
+    const tbody = document.getElementById('cuerpoMatrizDocente');
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+                <td class="col-identificacion text-center">${docID || 'Sin dato'}</td>
+                <td class="col-nombre">${nomDoc || 'Docente'}</td>
+                ${celdasMesesHTML}
+                <td class="col-total text-right" style="font-weight: bold;">$${totalPagado.toLocaleString('es-CO')}</td>
+                <td class="text-center">${badgeEstado}</td>
+                <td class="text-right" style="font-weight: bold; background-color: ${saldoPendienteFecha === 0 ? '#2e7d32' : '#d32f2f'} !important; color: #ffffff !important;">$${saldoPendienteFecha.toLocaleString('es-CO')}</td>
+                <td class="text-right" style="font-weight: bold; background-color: #ef6c00 !important; color: #ffffff !important;">$${saldoPendienteAnio.toLocaleString('es-CO')}</td>
+            </tr>
+        `;
+    }
+};
 
-    if (boxReporte) {
-        boxReporte.style.display = 'block';
-        boxReporte.innerHTML = `
-            <div style="border-bottom: 2px solid #1b5e20; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                <h4 style="margin: 0; color: #1b5e20; font-size: 16px;">📊 Reporte General Individual de Aportes - 2026</h4>
-            </div>
-            ${CONVENCIONES_HTML}
-            <div class="tabla-matriz-contenedor" style="overflow-x: auto;">
-                <table class="tabla-matriz" style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background-color: #1b5e20 !important; color: #ffffff !important;">
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Identificación</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Nombre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Enero</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Febrero</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Marzo</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Abril</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Mayo</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Junio</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Julio</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Agosto</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Septiembre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Octubre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Noviembre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Diciembre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Total Pagado</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Estado</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente a la Fecha</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente en el Año</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="color: #1a202c; font-weight: normal; text-align: center; border: 0.1px solid #e5e7eb;">${usuarioDocenteActual?.documento || 'Sin dato'}</td>
-                            <td style="color: #1a202c; font-weight: normal; border: 0.1px solid #e5e7eb;">${usuarioDocenteActual?.nombre || 'Docente'}</td>
-                            ${celdasMesesHTML}
-                            <td style="font-weight: normal; text-align: center; color: #1a202c; border: 0.1px solid #e5e7eb;">$${totalPagado.toLocaleString('es-CO')}</td>
-                            <td style="font-weight: bold; text-align: center; background-color: ${bgEstado} !important; color: #ffffff !important; border: 0.1px solid #ffffff;">${estadoGeneral}</td>
-                            <td style="font-weight: bold; text-align: center; background-color: ${bgSaldoFecha} !important; color: #ffffff !important; border: 0.1px solid #ffffff;">$${saldoPendienteFecha.toLocaleString('es-CO')}</td>
-                            <td style="font-weight: bold; text-align: center; background-color: #ef6c00 !important; color: #ffffff !important; border: 0.1px solid #ffffff;">$${saldoPendienteAnio.toLocaleString('es-CO')}</td>
-                        </tr>
-                    </tbody>
-                </table>
+window.renderizarEstadoCuentaDocente = async function () {
+    await window.consultarReporteIndividualDocente();
+};
+
+window.consultarReporteIndividualDocente = async function () {
+    // 1. Cargar pagos si están en caché
+    if (!pagosCache || pagosCache.length === 0) {
+        const queryPagos = await getDocs(collection(db, "pagos"));
+        pagosCache = [];
+        queryPagos.forEach(d => pagosCache.push({ id: d.id, ...d.data() }));
+        window.pagosCache = pagosCache;
+    }
+
+    // 2. Obtener datos del docente en sesión
+    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual && usuarioDocenteActual.documento) 
+        ? usuarioDocenteActual 
+        : (window.usuarioActual || JSON.parse(sessionStorage.getItem('usuario') || sessionStorage.getItem('user') || '{}'));
+
+    const docID = String(usuarioSesion?.documento || usuarioSesion?.cedula || usuarioSesion?.id || "").trim();
+    const nomDoc = String(usuarioSesion?.nombre || usuarioSesion?.usuario || "").trim().toUpperCase();
+
+    const limpiar = (txt) => txt ? String(txt).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
+    const nomDocLimpio = limpiar(nomDoc);
+
+    // 3. Filtrar pagos
+    const pagosDoc = pagosCache.filter(p => {
+        const pDoc = String(p.documento || p.cedula || p.docenteId || "").trim();
+        const pNom = limpiar(p.docente || p.nombre || p.nombreDocente);
+        const pEmail = limpiar(p.correo || p.email);
+
+        return (docID !== "" && pDoc === docID) || 
+               (nomDocLimpio !== "" && (pNom.includes(nomDocLimpio) || nomDocLimpio.includes(pNom))) || 
+               (usuarioSesion?.email && pEmail === limpiar(usuarioSesion.email));
+    });
+
+    let mesesPagados = [];
+    pagosDoc.forEach(p => {
+        const estado = limpiar(p.estado || p.estadoAprobacion || "aprobado");
+        if (!estado.includes("rechaz") && !estado.includes("pendient")) {
+            if (p.meses && Array.isArray(p.meses)) p.meses.forEach(m => mesesPagados.push(limpiar(m)));
+            else if (p.mes) mesesPagados.push(limpiar(p.mes));
+            else if (p.concepto) mesesPagados.push(limpiar(p.concepto));
+        }
+    });
+
+    const mesActualIndex = new Date().getMonth();
+    let totalPagado = 0;
+    let mesesPendientesFecha = 0;
+    let mesesFaltantesAnio = 0;
+    let celdasMesesHTML = "";
+
+    const MESES_LISTA = typeof MESES_ANIO !== 'undefined' ? MESES_ANIO : [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    const CUOTA = typeof VALOR_CUOTA_FIJA !== 'undefined' ? VALOR_CUOTA_FIJA : 35000;
+
+    // 4. Generar celdas con colores idénticos al PDF
+    MESES_LISTA.forEach((mesNombre, index) => {
+        const mesLimpio = limpiar(mesNombre);
+        const pagado = mesesPagados.some(m => m.includes(mesLimpio) || mesLimpio.includes(m));
+
+        if (pagado) {
+            totalPagado += CUOTA;
+            celdasMesesHTML += `<td class="text-center" style="background-color: #28a745 !important; color: #ffffff !important; font-weight: bold; border: 1px solid #dee2e6;">$${CUOTA.toLocaleString('es-CO')}</td>`;
+        } else if (index <= mesActualIndex) {
+            mesesPendientesFecha++;
+            celdasMesesHTML += `<td class="text-center" style="background-color: #dc3545 !important; color: #ffffff !important; font-weight: bold; border: 1px solid #dee2e6;">-$${CUOTA.toLocaleString('es-CO')}-</td>`;
+        } else {
+            mesesFaltantesAnio++;
+            celdasMesesHTML += `<td class="text-center" style="background-color: #fd7e14 !important; color: #ffffff !important; font-weight: bold; border: 1px solid #dee2e6;">-$${CUOTA.toLocaleString('es-CO')}-</td>`;
+        }
+    });
+
+    const saldoPendienteFecha = mesesPendientesFecha * CUOTA;
+    const saldoPendienteAnio = (mesesPendientesFecha + mesesFaltantesAnio) * CUOTA;
+    const estadoGeneral = mesesPendientesFecha === 0 ? "AL DIA" : "PENDIENTE";
+
+    const badgeEstado = estadoGeneral === 'AL DIA' 
+        ? `<span class="badge" style="background-color: transparent!important; color: #fbf7f7 !important; padding: 5px 10px; border-radius: 4px; font-weight: bold;">AL DIA</span>` 
+        : `<span class="badge" style="background-color: #dc3545 !important; color: #ffffff !important; padding: 5px 10px; border-radius: 4px; font-weight: bold;">PENDIENTE</span>`;
+
+    const tbody = document.getElementById('cuerpoMatrizDocente');
+    if (!tbody) return;
+
+    // 5. Inyectar Fila de Datos
+    tbody.innerHTML = `
+        <tr>
+            <td class="text-center font-weight-bold" style="border: 1px solid #dee2e6;">${docID || 'N/A'}</td>
+            <td class="font-weight-bold text-uppercase" style="border: 1px solid #dee2e6;">${nomDoc}</td>
+            ${celdasMesesHTML}
+            <td class="text-right font-weight-bold" style="border: 1px solid #dee2e6;">$${totalPagado.toLocaleString('es-CO')}</td>
+            <td class="text-center" style="border: 1px solid #dee2e6;">${badgeEstado}</td>
+            <td class="text-right font-weight-bold" style="background-color: ${saldoPendienteFecha === 0 ? '#28a745' : '#dc3545'} !important; color: #ffffff !important; border: 1px solid #dee2e6;">$${saldoPendienteFecha.toLocaleString('es-CO')}</td>
+            <td class="text-right font-weight-bold" style="background-color: #fd7e14 !important; color: #ffffff !important; border: 1px solid #dee2e6;">$${saldoPendienteAnio.toLocaleString('es-CO')}</td>
+        </tr>
+    `;
+
+    // 6. Inyectar Encabezado y Convenciones justo encima de la tabla de forma automática
+    const tabla = tbody.closest('table');
+    if (tabla) {
+        let contenedorEstilos = document.getElementById('estiloReporteInyectado');
+        if (!contenedorEstilos) {
+            contenedorEstilos = document.createElement('div');
+            contenedorEstilos.id = 'estiloReporteInyectado';
+            tabla.parentNode.insertBefore(contenedorEstilos, tabla);
+        }
+
+        const fechaHoy = new Date().toLocaleDateString('es-CO') + " " + new Date().toLocaleTimeString('es-CO');
+
+        contenedorEstilos.innerHTML = `
+            <div style="background: black; padding: 20px; border-radius: 8px; border: 1px solid #e3e6f0; margin-bottom: 20px; text-align: center;">
+                <h3 style="color: #28a745; font-weight: bold; margin-bottom: 2px;">INSTITUCION EDUCATIVA ALTO HORIZONTE</h3>
+                <h5 style="color: #FFD700; font-weight: bold; margin-bottom: 10px;">GRUPO BIENESTAR 2026 - Estado de Cuenta Individual</h5>
+                <div style="background: transparent; padding: 8px; border-radius: 5px; font-size: 14px; font-weight: bold; margin-bottom: 15px; border: 1px solid #e3e6f0;">
+                    DOCENTE: <span style="color: #2e59d9;">${nomDoc}</span> | FECHA/HORA: <span style="color: #858796;">${fechaHoy}</span>
+                </div>
+                
+                <div style="display: flex; justify-content: center; gap: 20px; font-size: 13px; font-weight: 600;">
+                    <div style="display: flex; align-items: center;"><span style="width: 14px; height: 14px; background: #28a745; display: inline-block; margin-right: 6px; border-radius: 3px;"></span> Meses Pagados</div>
+                    <div style="display: flex; align-items: center;"><span style="width: 14px; height: 14px; background: #dc3545; display: inline-block; margin-right: 6px; border-radius: 3px;"></span> Meses que debe a la Fecha</div>
+                    <div style="display: flex; align-items: center;"><span style="width: 14px; height: 14px; background: #fd7e14; display: inline-block; margin-right: 6px; border-radius: 3px;"></span> Meses que aún faltan por pagar / Saldo Año</div>
+                </div>
             </div>
         `;
     }
-
-    if (btnPDF) btnPDF.style.display = 'inline-block';
-};
-
-window.descargarReporteIndividualDocentePDF = async function () {
-    let contenedor = document.getElementById('contenedorReporteIndividualPDF');
-    if (!contenedor) {
-        contenedor = document.createElement('div');
-        contenedor.id = 'contenedorReporteIndividualPDF';
-        document.body.appendChild(contenedor);
-    }
-
-    const docID = String(usuarioDocenteActual?.documento || usuarioDocenteActual?.cedula || "").trim();
-    const nomDoc = String(usuarioDocenteActual?.nombre || "").toLowerCase().trim();
-
-    const pagosDoc = pagosCache.filter(p => {
-        const pDoc = String(p.documento || "").trim();
-        const pNom = String(p.docente || "").toLowerCase().trim();
-        return (docID !== "" && pDoc === docID) || (nomDoc !== "" && (pNom.includes(nomDoc) || nomDoc.includes(pNom)));
-    });
-
-    let mesesPagados = [];
-    pagosDoc.forEach(p => {
-        if (p.meses && Array.isArray(p.meses)) mesesPagados.push(...p.meses);
-        else if (p.mes) mesesPagados.push(p.mes);
-    });
-
-    const mesActualIndex = new Date().getMonth();
-    let totalPagado = 0;
-    let mesesPendientesFecha = 0;
-    let mesesFaltantesAnio = 0;
-    let celdasMesesHTML = "";
-
-    MESES_ANIO.forEach((mesNombre, index) => {
-        const pagado = mesesPagados.some(m => String(m).toLowerCase().includes(mesNombre.toLowerCase()));
-        if (pagado) {
-            totalPagado += VALOR_CUOTA_FIJA;
-            celdasMesesHTML += `<td class="celda-pagado" style="background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}</td>`;
-        } else if (index <= mesActualIndex) {
-            mesesPendientesFecha++;
-            celdasMesesHTML += `<td class="celda-pendiente" style="background-color: #d32f2f !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff;">-$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}-</td>`;
-        } else {
-            mesesFaltantesAnio++;
-            celdasMesesHTML += `<td class="celda-futuro" style="background-color: #ef6c00 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff;">-$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}-</td>`;
-        }
-    });
-
-    const saldoPendienteFecha = mesesPendientesFecha * VALOR_CUOTA_FIJA;
-    const saldoPendienteAnio = (mesesPendientesFecha + mesesFaltantesAnio) * VALOR_CUOTA_FIJA;
-    const estadoGeneral = mesesPendientesFecha === 0 ? "AL DIA" : "PENDIENTE";
-
-    const bgEstado = estadoGeneral === 'AL DIA' ? '#2e7d32' : '#d32f2f';
-    const bgSaldoFecha = saldoPendienteFecha === 0 ? '#2e7d32' : '#d32f2f';
-
-    const ahora = new Date();
-    const fechaHoraStr = `${ahora.toLocaleDateString('es-CO')} ${ahora.toLocaleTimeString('es-CO')}`;
-
-    contenedor.style.cssText = "position: absolute; top: 0; left: 0; width: 100%; background: #ffffff !important; z-index: 99999; display: block; padding: 10px;";
-
-    contenedor.innerHTML = `
-        <div id="elementoReporteIndividualAImprimir" style="width: 100%; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 8.5px !important; box-sizing: border-box; padding-bottom: 60px;">
-            
-            <div style="text-align: center; font-size: 11px !important; background: transparent !important; margin-bottom: 6px;">
-                <img src="../img/logo.png" alt="Escudo Institucional" style="width: 58px; height: auto; margin-bottom: 2px; display: block; margin-left: auto; margin-right: auto;" />
-                <span style="font-weight: bold; font-size: 15px !important; color: #2e7d32 !important;">INSTITUCION EDUCATIVA ALTO HORIZONTE</span><br>
-                <span style="font-weight: bold; font-size: 11px !important; color: #000000 !important;">REPORTE INDIVIDUAL DE APORTES - 2026</span><br>
-                <span style="color: #6b7280 !important; font-size: 9.5px !important;">FECHA / HORA GENERACION: ${fechaHoraStr}</span>
-            </div>
-
-            <div style="border-bottom: 0.5px solid #d1d5db; margin: 4px 0 10px 0;"></div>
-
-            ${CONVENCIONES_HTML}
-
-            <style>
-                #elementoReporteIndividualAImprimir table { width: 100%; border-collapse: collapse; font-size: 8px; color: #000000 !important; }
-                #elementoReporteIndividualAImprimir th { background-color: #1b5e20 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #d1d5db !important; padding: 4px 2px; }
-                #elementoReporteIndividualAImprimir td { border: 0.1px solid #e5e7eb !important; padding: 2.5px 2px; text-align: center; }
-                
-                #elementoReporteIndividualAImprimir .col-identificacion, 
-                #elementoReporteIndividualAImprimir .col-nombre { color: #000000 !important; font-weight: normal !important; }
-                #elementoReporteIndividualAImprimir .col-total { color: #000000 !important; font-weight: normal !important; }
-
-                #elementoReporteIndividualAImprimir .celda-pagado { background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; border: 0.1px solid #ffffff !important; }
-                #elementoReporteIndividualAImprimir .celda-pendiente { background-color: #d32f2f !important; color: #ffffff !important; font-weight: bold; border: 0.1px solid #ffffff !important; }
-                #elementoReporteIndividualAImprimir .celda-futuro { background-color: #ef6c00 !important; color: #ffffff !important; font-weight: bold; border: 0.1px solid #ffffff !important; }
-            </style>
-
-            <div style="margin-bottom: 10px;">
-                <table>
-                    <thead>
-                        <tr style="background-color: #1b5e20 !important; color: #ffffff !important;">
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Identificación</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Nombre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Enero</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Febrero</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Marzo</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Abril</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Mayo</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Junio</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Julio</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Agosto</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Septiembre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Octubre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Noviembre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Diciembre</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Total Pagado</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Estado</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente a la Fecha</th>
-                            <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente en el Año</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="col-identificacion" style="color: #000000; font-weight: normal; text-align: center; border: 0.1px solid #e5e7eb;">${usuarioDocenteActual?.documento || 'Sin dato'}</td>
-                            <td class="col-nombre" style="color: #000000; font-weight: normal; border: 0.1px solid #e5e7eb;">${usuarioDocenteActual?.nombre || 'Docente'}</td>
-                            ${celdasMesesHTML}
-                            <td class="col-total" style="font-weight: normal; text-align: center; color: #000000; border: 0.1px solid #e5e7eb;">$${totalPagado.toLocaleString('es-CO')}</td>
-                            <td style="font-weight: bold; text-align: center; background-color: ${bgEstado} !important; color: #ffffff !important; border: 0.1px solid #ffffff;">${estadoGeneral}</td>
-                            <td style="font-weight: bold; text-align: center; background-color: ${bgSaldoFecha} !important; color: #ffffff !important; border: 0.1px solid #ffffff;">$${saldoPendienteFecha.toLocaleString('es-CO')}</td>
-                            <td style="font-weight: bold; text-align: center; background-color: #ef6c00 !important; color: #ffffff !important; border: 0.1px solid #ffffff;">$${saldoPendienteAnio.toLocaleString('es-CO')}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div style="text-align: center; font-size: 10px !important; line-height: 1.5; font-weight: normal; margin-top: 25px; padding: 15px 10px 30px 10px; color: #212121 !important; page-break-inside: avoid; display: block; clear: both; width: 100%;">
-                Estimad@ profesor@ - Administrativ@ - rector@<br>
-                con su aporte contribuye al bienestar de todo el talento humano de nuestra institución.<br>
-                <strong style="font-size: 11px; color: #000000; letter-spacing: 0.5px;">¡GRACIAS POR SU APORTE!</strong><br>
-                <span style="font-weight: bold; margin-top: 6px; display: inline-block; color: #1b5e20; font-size: 10.5px;">Cemled corp 2026</span>
-            </div>
-        </div>
-    `;
-
-    setTimeout(() => {
-        const elemento = document.getElementById('elementoReporteIndividualAImprimir');
-        if (typeof html2pdf === "undefined") {
-            alert("La librería html2pdf no está cargada.");
-            return;
-        }
-
-        const opt = {
-            margin: [5, 5, 15, 5],
-            filename: `REPORTE_INDIVIDUAL_${usuarioDocenteActual?.documento || 'DOCENTE'}.pdf`,
-            image: { type: 'jpeg', quality: 1.0 },
-            html2canvas: { scale: 2, logging: false, useCORS: true, backgroundColor: '#ffffff' },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(elemento).save().then(() => {
-            contenedor.innerHTML = "";
-        }).catch(err => {
-            console.error("Error generando PDF individual:", err);
-            contenedor.innerHTML = "";
-        });
-    }, 400);
 };
 
 // ----------------------------------------------------
@@ -648,7 +631,7 @@ window.renderizarPagosDocente = async function () {
 
     tabla.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Cargando comprobantes...</td></tr>";
 
-    try {
+try {
         const querySnapshot = await getDocs(collection(db, "pagos"));
         pagosCache = [];
 
@@ -670,6 +653,9 @@ window.renderizarPagosDocente = async function () {
 
         pagosCache.sort((a, b) => (b.numTicket || b.idFecha || 0) - (a.numTicket || a.idFecha || 0));
 
+        // --- LÍNEA CLAVE: Hacer que pagosCache sea accesible globalmente para el reporte ---
+        window.pagosCache = pagosCache;
+
         tabla.innerHTML = "";
 
         if (pagosCache.length === 0) {
@@ -678,7 +664,7 @@ window.renderizarPagosDocente = async function () {
         }
 
         pagosCache.forEach(p => {
-            const textoMeses = p.meses ? p.meses.join(', ') : p.mes;
+            const textoMeses = p.meses ? (Array.isArray(p.meses) ? p.meses.join(', ') : p.meses) : p.mes;
             tabla.innerHTML += `
                 <tr>
                     <td><strong>#${p.numTicket || ''}</strong></td>
@@ -1523,8 +1509,31 @@ window.descargarMatrizPDF = async function () {
         document.body.appendChild(contenedor);
     }
 
+    // 1. Obtener la tabla original y clonarla para manipular sus estilos sin afectar la pantalla
     const tablaOriginal = document.getElementById('tablaMatriz') || document.querySelector('#sec-matriz table');
-    const contenidoTablaHTML = tablaOriginal ? tablaOriginal.outerHTML : '';
+    let contenidoTablaHTML = '';
+
+    if (tablaOriginal) {
+        const tablaClon = tablaOriginal.cloneNode(true);
+        const filas = tablaClon.querySelectorAll('tr');
+
+        // 2. Forzar el estilo inline directo en las celdas de Identificación, Nombre, Total y Estado
+        filas.forEach(fila => {
+            const celdas = fila.children;
+            if (celdas.length >= 16) {
+                // Posiciones: 0=Identificación, 1=Nombre, 14=Total Pagado, 15=Estado
+                [0, 1, 14, 15].forEach(index => {
+                    if (celdas[index] && celdas[index].tagName === 'TD') {
+                        celdas[index].setAttribute(
+                            'style', 
+                            'background-color: #1b5e20 !important; color: #ffffff !important; font-weight: bold !important; text-align: center; border: 0.1px solid #ffffff !important;'
+                        );
+                    }
+                });
+            }
+        });
+        contenidoTablaHTML = tablaClon.outerHTML;
+    }
 
     const ahora = new Date();
     const fechaHoraStr = `${ahora.toLocaleDateString('es-CO')} ${ahora.toLocaleTimeString('es-CO')}`;
@@ -1549,11 +1558,8 @@ window.descargarMatrizPDF = async function () {
                 #elementoMatrizAImprimir table { width: 100%; border-collapse: collapse; font-size: 8px; color: #000000 !important; }
                 #elementoMatrizAImprimir th { background-color: #1b5e20 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #d1d5db !important; padding: 4px 2px; }
                 #elementoMatrizAImprimir td { border: 0.1px solid #e5e7eb !important; padding: 2.5px 2px; text-align: center; }
-                
-                #elementoMatrizAImprimir .col-identificacion, 
-                #elementoMatrizAImprimir .col-nombre { color: #000000 !important; font-weight: normal !important; }
-                #elementoMatrizAImprimir .col-total { color: #000000 !important; font-weight: normal !important; }
 
+                /* Estilos para celdas de meses */
                 #elementoMatrizAImprimir .celda-pagado { background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; border: 0.1px solid #ffffff !important; }
                 #elementoMatrizAImprimir .celda-pendiente { background-color: #d32f2f !important; color: #ffffff !important; font-weight: bold; border: 0.1px solid #ffffff !important; }
                 #elementoMatrizAImprimir .celda-futuro { background-color: #ef6c00 !important; color: #ffffff !important; font-weight: bold; border: 0.1px solid #ffffff !important; }
@@ -1872,223 +1878,33 @@ window.navegarDocente = function (idSeccion, elementoBtn) {
     }
 
     // 6. Ejecución de lógica según el botón presionado
-    if (idSeccion === 'sec-matriz-docente' && typeof window.renderizarEstadoCuentaDocente === 'function') {
-        window.renderizarEstadoCuentaDocente();
+    if (idSeccion === 'sec-matriz-docente' && typeof window.consultarReporteIndividualDocente === 'function') {
+        window.consultarReporteIndividualDocente();
     } else if (idSeccion === 'sec-noticias' && typeof window.renderizarNoticias === 'function') {
         window.renderizarNoticias();
     } else if ((idSeccion === 'sec-mis-comprobantes' || idSeccion === 'pagos') && typeof window.renderizarPagosDocente === 'function') {
         window.renderizarPagosDocente();
     }
 };
-window.renderizarEstadoCuentaDocente = async function () {
-    const tabla = document.getElementById('cuerpoMatrizDocente');
-    if (!tabla) return;
-
-    tabla.innerHTML = "<tr><td colspan='14' style='text-align:center;'>Cargando estado de cuenta...</td></tr>";
-
-    try {
-        // 1. Obtener datos del docente desde la variable global o la sesión activa
-        let docID = String(usuarioDocenteActual?.documento || usuarioDocenteActual?.cedula || "").trim();
-        let nomDoc = String(usuarioDocenteActual?.nombre || "Docente").trim();
-        let correoDoc = String(usuarioDocenteActual?.correo || usuarioDocenteActual?.email || usuarioCorreoActual || "").toLowerCase().trim();
-
-        // 2. Obtener los pagos registrados en Firestore
-        const querySnapshot = await getDocs(collection(db, "pagos"));
-        const mesesPagados = new Set();
-
-        querySnapshot.forEach(docSnap => {
-            const p = docSnap.data();
-            const pCorreo = String(p.correo || p.email || "").toLowerCase().trim();
-            const pDoc = String(p.documento || "").trim();
-            const pNom = String(p.docente || "").toLowerCase().trim();
-
-            const coincideDocumento = docID !== "" && pDoc === docID;
-            const coincideCorreo = correoDoc !== "" && pCorreo === correoDoc;
-            const coincideNombre = nomDoc !== "" && pNom === nomDoc.toLowerCase();
-
-            // Si el pago pertenece al docente autenticado
-            if (coincideDocumento || coincideCorreo || coincideNombre) {
-                if (Array.isArray(p.meses)) {
-                    p.meses.forEach(m => mesesPagados.add(String(m).toLowerCase().trim()));
-                } else if (p.mes) {
-                    mesesPagados.add(String(p.mes).toLowerCase().trim());
-                }
-            }
-        });
-
-        // 3. Mapeo de meses del año
-        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-        
-        let celdasMeses = "";
-        meses.forEach(mes => {
-            if (mesesPagados.has(mes)) {
-                celdasMeses += `<td style="background-color: #dcfce7; color: #15803d; text-align:center; font-weight:bold;">Al día</td>`;
-            } else {
-                celdasMeses += `<td style="background-color: #fee2e2; color: #b91c1c; text-align:center;">Pendiente</td>`;
-            }
-        });
-
-        // 4. Renderizar la fila del docente
-        tabla.innerHTML = `
-            <tr>
-                <td><strong>${nomDoc}</strong></td>
-                <td>${docID || 'N/A'}</td>
-                ${celdasMeses}
-            </tr>
-        `;
-
-    } catch (error) {
-        console.error("Error al generar Estado de Cuenta Docente:", error);
-        tabla.innerHTML = "<tr><td colspan='14' style='text-align:center; color:red;'>Error al cargar el estado de cuenta. Revisa la consola.</td></tr>";
-    }
-};
-// ==========================================
-// ESTADO DE CUENTA INDIVIDUAL DEL DOCENTE
-// ==========================================
-
-window.renderizarEstadoCuentaDocente = async function () {
-    const tbody = document.getElementById('cuerpoMatrizDocente');
-    const thead = document.querySelector('#tablaMatrizDocente thead') || document.querySelector('#sec-matriz-docente table thead');
-
-    if (thead) {
-        thead.innerHTML = `
-            <tr style="background-color: #1b5e20 !important; color: #ffffff !important;">
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Identificación</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Nombre</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Enero</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Febrero</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Marzo</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Abril</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Mayo</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Junio</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Julio</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Agosto</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Septiembre</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Octubre</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Noviembre</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Diciembre</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Total Pagado</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Estado</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente a la Fecha</th>
-                <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente en el Año</th>
-            </tr>
-        `;
-    }
-
-    if (!tbody) return;
-
-    try {
-        if (typeof window.renderizarPagos === "function") {
-            await window.renderizarPagos();
-        }
-        tbody.innerHTML = "";
-
-        const VALOR_CUOTA = 35000; // Cuota fija $35.000
-        const mesActualIndex = new Date().getMonth(); // Mes actual del sistema (Septiembre = 8)
-        const listaMeses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-
-        // Datos del docente logueado
-        const docObj = window.usuarioDocenteActual || window.usuarioActual || {};
-        let docNum = String(docObj.documento || docObj.cedula || docObj.identificacion || "").trim();
-        let docNom = String(docObj.nombre || docObj.docente || "").trim();
-        let correoDoc = String(docObj.correo || docObj.email || window.usuarioCorreoActual || "").toLowerCase().trim();
-
-        // Si no hay objeto en sesión, busca el primer registro disponible del docente
-        const todosLosPagos = window.pagosCache || [];
-        
-        if (!docNum && !docNom && todosLosPagos.length > 0) {
-            const pRef = todosLosPagos[0];
-            docNum = String(pRef.documento || pRef.cedula || "").trim();
-            docNom = String(pRef.docente || pRef.nombre || "Docente").trim();
-            correoDoc = String(pRef.correo || pRef.email || "").toLowerCase().trim();
-        }
-
-        // Obtener pagos correspondientes
-        const pagosDocente = todosLosPagos.filter(p => {
-            const pCorreo = String(p.correo || p.email || "").toLowerCase().trim();
-            const pDoc = String(p.documento || p.cedula || "").trim();
-            const pNom = String(p.docente || p.nombre || "").toLowerCase().trim();
-
-            return (docNum !== "" && pDoc === docNum) ||
-                   (correoDoc !== "" && pCorreo === correoDoc) ||
-                   (docNom !== "" && pNom.length > 2 && (pNom.includes(docNom.toLowerCase()) || docNom.toLowerCase().includes(pNom)));
-        });
-
-        // Registrar qué meses están pagados
-        let mesesPagadosSet = new Set();
-        pagosDocente.forEach(p => {
-            let arregloMeses = [];
-            if (p.meses && Array.isArray(p.meses)) arregloMeses = p.meses;
-            else if (p.mes) arregloMeses = [p.mes];
-
-            arregloMeses.forEach(m => {
-                const mesLimpio = String(m).toLowerCase().trim();
-                mesesPagadosSet.add(mesLimpio);
-            });
-        });
-
-        let totalPagadoDocente = 0;
-        let mesesPendientesFecha = 0;
-        let mesesFaltantesAnio = 0;
-        let celdasMesesHTML = "";
-
-        listaMeses.forEach((mesNombre, index) => {
-            // Evaluamos si el mes de la iteración está dentro del conjunto de meses pagados
-            let estaPagado = false;
-            for (let mPagado of mesesPagadosSet) {
-                if (mPagado.includes(mesNombre) || mesNombre.includes(mPagado)) {
-                    estaPagado = true;
-                    break;
-                }
-            }
-
-            if (estaPagado) {
-                totalPagadoDocente += VALOR_CUOTA;
-                // SI ESTÁ PAGADO: Texto "$35.000" (sin guiones) y Fondo Verde (#2e7d32)
-                celdasMesesHTML += `<td class="celda-pagado" style="background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff; padding: 6px;">$${VALOR_CUOTA.toLocaleString('es-CO')}</td>`;
-            } else if (index <= mesActualIndex) {
-                mesesPendientesFecha++;
-                // PENDIENTE A LA FECHA: Texto "-$35.000-" y Fondo Rojo (#d32f2f)
-                celdasMesesHTML += `<td class="celda-pendiente" style="background-color: #d32f2f !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff; padding: 6px;">-$${VALOR_CUOTA.toLocaleString('es-CO')}-</td>`;
-            } else {
-                mesesFaltantesAnio++;
-                // MES FUTURO POR PAGAR: Texto "-$35.000-" y Fondo Naranja (#ef6c00)
-                celdasMesesHTML += `<td class="celda-futuro" style="background-color: #ef6c00 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff; padding: 6px;">-$${VALOR_CUOTA.toLocaleString('es-CO')}-</td>`;
-            }
-        });
-
-        // Cálculos Matematicos
-        const saldoPendienteFecha = mesesPendientesFecha * VALOR_CUOTA;
-        const saldoPendienteAnio = (mesesPendientesFecha + mesesFaltantesAnio) * VALOR_CUOTA;
-        const estadoGeneral = mesesPendientesFecha === 0 ? "AL DIA" : "PENDIENTE";
-
-        const bgEstado = estadoGeneral === 'AL DIA' ? '#2e7d32' : '#d32f2f';
-        const bgSaldoFecha = saldoPendienteFecha === 0 ? '#2e7d32' : '#d32f2f';
-
-        tbody.innerHTML = `
-            <tr>
-                <td class="col-identificacion" style="color: #333333 !important; font-weight: normal; text-align: center; border: 0.1px solid #e5e7eb; padding: 6px;">${docNum || 'N/A'}</td>
-                <td class="col-nombre" style="color: #333333 !important; font-weight: normal; border: 0.1px solid #e5e7eb; padding: 6px;">${docNom || 'Docente'}</td>
-                ${celdasMesesHTML}
-                <td class="col-total" style="font-weight: bold; text-align: center; color: #333333 !important; border: 0.1px solid #e5e7eb; padding: 6px;">$${totalPagadoDocente.toLocaleString('es-CO')}</td>
-                <td style="font-weight: bold; text-align: center; background-color: ${bgEstado} !important; color: #ffffff !important; border: 0.1px solid #ffffff; padding: 6px;">${estadoGeneral}</td>
-                <td style="font-weight: bold; text-align: center; background-color: ${bgSaldoFecha} !important; color: #ffffff !important; border: 0.1px solid #ffffff; padding: 6px;">$${saldoPendienteFecha.toLocaleString('es-CO')}</td>
-                <td style="font-weight: bold; text-align: center; background-color: #ef6c00 !important; color: #ffffff !important; border: 0.1px solid #ffffff; padding: 6px;">$${saldoPendienteAnio.toLocaleString('es-CO')}</td>
-            </tr>
-        `;
-    } catch (error) {
-        console.error("Error al renderizar Estado de Cuenta Docente:", error);
-        tbody.innerHTML = "<tr><td colspan='18' style='text-align:center; color:red;'>Error al cargar el estado de cuenta.</td></tr>";
-    }
-};
-
-// ==========================================
-// DESCARGAR PDF ESTADO DE CUENTA DOCENTE
-// ==========================================
 
 window.descargarEstadoCuentaDocentePDF = async function () {
-    await window.renderizarEstadoCuentaDocente();
+    // 1. Obtener la fila de datos calculada actualmente
+    const filaOriginal = document.getElementById('cuerpoMatrizDocente')?.innerHTML;
+    if (!filaOriginal) {
+        alert("No hay datos cargados para generar el PDF.");
+        return;
+    }
 
+    // 2. Resolver datos del docente en sesión para el encabezado
+    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual && usuarioDocenteActual.documento) 
+        ? usuarioDocenteActual 
+        : (window.usuarioActual || JSON.parse(sessionStorage.getItem('usuario') || sessionStorage.getItem('user') || '{}'));
+
+    const nomDoc = String(usuarioSesion?.nombre || usuarioSesion?.usuario || "DOCENTE").toUpperCase();
+    const docID = String(usuarioSesion?.documento || usuarioSesion?.cedula || usuarioSesion?.id || "").trim();
+    const fechaHoraStr = new Date().toLocaleDateString('es-CO') + " " + new Date().toLocaleTimeString('es-CO');
+
+    // 3. Crear contenedor temporal exclusivo para el PDF
     let contenedor = document.getElementById('contenedorEstadoCuentaPDF');
     if (!contenedor) {
         contenedor = document.createElement('div');
@@ -2096,74 +1912,139 @@ window.descargarEstadoCuentaDocentePDF = async function () {
         document.body.appendChild(contenedor);
     }
 
-    const tablaOriginal = document.getElementById('tablaMatrizDocente');
-    const contenidoTablaHTML = tablaOriginal ? tablaOriginal.outerHTML : '';
+    contenedor.style.cssText = "position: absolute; top: 0; left: 0; width: 1000px; background: #ffffff !important; z-index: 99999; padding: 20px;";
 
-    const ahora = new Date();
-    const fechaHoraStr = `${ahora.toLocaleDateString('es-CO')} ${ahora.toLocaleTimeString('es-CO')}`;
-    const docNom = String(usuarioDocenteActual?.nombre || "Docente").toUpperCase();
-
-    contenedor.style.cssText = "position: absolute; top: 0; left: 0; width: 100%; background: #ffffff !important; z-index: 99999; display: block; padding: 10px;";
-
+    // 4. Plantilla base
     contenedor.innerHTML = `
-        <div id="elementoEstadoCuentaAImprimir" style="width: 100%; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 8.5px !important; box-sizing: border-box; padding-bottom: 40px;">
+        <div id="elementoEstadoCuentaAImprimir" style="width: 100%; background: #ffffff !important; color: #000000 !important; font-family: Arial, sans-serif !important; font-size: 10px; padding: 10px;">
             
-            <div style="text-align: center; font-size: 11px !important; background: transparent !important; margin-bottom: 6px;">
-                <img src="../img/logo.png" alt="Escudo Institucional" style="width: 58px; height: auto; margin-bottom: 2px; display: block; margin-left: auto; margin-right: auto;" />
-                <span style="font-weight: bold; font-size: 15px !important; color: #2e7d32 !important;">INSTITUCION EDUCATIVA ALTO HORIZONTE</span><br>
-                <span style="font-weight: bold; font-size: 11px !important; color: #000000 !important;">GRUPO BIENESTAR 2026 - Estado de Cuenta Individual</span><br>
-                <span style="color: #6b7280 !important; font-size: 9.5px !important;">DOCENTE: ${docNom} | FECHA / HORA: ${fechaHoraStr}</span>
+            <!-- Encabezado Principal -->
+            <div style="text-align: center; margin-bottom: 15px;">
+                <img src="../img/logo.png" alt="Escudo" style="width: 60px; height: auto; margin-bottom: 5px;" />
+                <h3 style="margin: 0; font-size: 16px; font-weight: bold; color: #1b5e20;">INSTITUCION EDUCATIVA ALTO HORIZONTE</h3>
+                <h4 style="margin: 3px 0; font-size: 12px; font-weight: bold; color: #333333;">GRUPO BIENESTAR 2026 - Estado de Cuenta Individual</h4>
+                <!-- Contenedor Docente/Fecha TRANSPARENTE -->
+                <div style="background-color: transparent; border: none; padding: 6px; margin-top: 8px; font-weight: bold; font-size: 11px;">
+                    DOCENTE: ${nomDoc} &nbsp;|&nbsp; FECHA/HORA: ${fechaHoraStr}
+                </div>
             </div>
 
-            <div style="border-bottom: 0.5px solid #d1d5db; margin: 4px 0 10px 0;"></div>
-
-            <!-- Leyenda de Convenciones en Colores -->
-            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 12px; font-weight: bold; font-size: 9px;">
-                <span style="background-color: #2e7d32; color: #ffffff; padding: 3px 8px; border-radius: 3px;">■ Meses Pagados</span>
-                <span style="background-color: #d32f2f; color: #ffffff; padding: 3px 8px; border-radius: 3px;">■ Meses que debe a la Fecha</span>
-                <span style="background-color: #ef6c00; color: #ffffff; padding: 3px 8px; border-radius: 3px;">■ Meses que aún faltan por pagar / Saldo Año</span>
+            <!-- Bloque de Convenciones SIN BORDES -->
+            <div style="display: flex; justify-content: space-around; align-items: center; background-color: #ffffff; border: none; padding: 8px; margin-bottom: 15px; font-size: 10px; font-weight: bold;">
+                <div style="display: flex; align-items: center;">
+                    <span style="width: 14px; height: 14px; background-color: #2e7d32; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> Meses Pagados
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span style="width: 14px; height: 14px; background-color: #d32f2f; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> Meses que debe a la Fecha
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span style="width: 14px; height: 14px; background-color: #ef6c00; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> Meses que aún faltan por pagar / Saldo Año
+                </div>
             </div>
 
-            <style>
-                #elementoEstadoCuentaAImprimir table { width: 100%; border-collapse: collapse; font-size: 8px; color: #000000 !important; }
-                #elementoEstadoCuentaAImprimir th { background-color: #1b5e20 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #d1d5db !important; padding: 4px 2px; }
-                #elementoEstadoCuentaAImprimir td { border: 0.1px solid #e5e7eb !important; padding: 4px 2px; text-align: center; }
-                #elementoEstadoCuentaAImprimir .celda-pagado { background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; }
-                #elementoEstadoCuentaAImprimir .celda-pendiente { background-color: #d32f2f !important; color: #ffffff !important; font-weight: bold; }
-                #elementoEstadoCuentaAImprimir .celda-futuro { background-color: #ef6c00 !important; color: #ffffff !important; font-weight: bold; }
-            </style>
+            <!-- Tabla Matriz para PDF -->
+            <table style="width: 100%; border-collapse: collapse; font-size: 8.5px; text-align: center; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background-color: #1b5e20 !important;">
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Identificación</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Nombre</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Enero</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Febrero</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Marzo</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Abril</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Mayo</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Junio</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Julio</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Agosto</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Septiembre</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Octubre</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Noviembre</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Diciembre</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Total Pagado</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Estado</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Saldo Pendiente a la Fecha</th>
+                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; border: 0.5px solid #dcdcdc; padding: 6px 3px; font-weight: bold;">Saldo Pendiente en el Año</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTablaPDF">
+                    ${filaOriginal}
+                </tbody>
+            </table>
 
-            <div style="margin-bottom: 10px;">
-                ${contenidoTablaHTML}
-            </div>
-
-            <div style="text-align: center; font-size: 10px !important; line-height: 1.5; font-weight: normal; margin-top: 20px; color: #212121 !important;">
-                Estimad@ profesor@ - Administrativ@ - rector@<br>
-                con su aporte contribuye al bienestar de todo el talento humano de nuestra institución.<br>
-                <strong style="font-size: 11px; color: #000000;">¡GRACIAS POR SU APORTE!</strong><br>
-                <span style="font-weight: bold; margin-top: 4px; display: inline-block; color: #1b5e20; font-size: 10px;">Cemled corp 2026</span>
+            <!-- Mensaje Institucional de Cierre con Copyright -->
+            <div style="text-align: center; margin-top: 25px; border-top: 1px solid #dcdcdc; padding-top: 10px; font-size: 10px; color: #444444;">
+                <p style="margin: 2px 0;">Estimad@ profesor@ - Administrativ@ - rector@ con su aporte contribuye al bienestar de todo el talento humano de nuestra institución.</p>
+                <p style="margin: 2px 0; font-weight: bold; color: #1b5e20; font-size: 11px;">¡GRACIAS POR SU APORTE!</p>
+                <p style="margin: 5px 0 0 0; font-size: 9px; color: #777777;">© CEMLED CORP 2026</p>
             </div>
         </div>
     `;
 
+    // Centrar texto de los encabezados (th)
+    const encabezadosPDF = contenedor.querySelectorAll('table thead th');
+    encabezadosPDF.forEach(th => {
+        th.style.setProperty('text-align', 'center', 'important');
+        th.style.setProperty('vertical-align', 'middle', 'important');
+    });
+
+    // 5. Mapeo de estilos para texto dorado y blanco
+    const filasPDF = contenedor.querySelectorAll('#cuerpoTablaPDF tr');
+
+    filasPDF.forEach(fila => {
+        const celdas = fila.querySelectorAll('td');
+
+        celdas.forEach((td, index) => {
+            td.style.border = "0.2px solid #dcdcdc";
+            td.style.padding = "5px 3px";
+
+            // Evaluamos si es Identificación (0), Nombre (1), Total Pagado (14) o Estado (15)
+            const esColumnaDorada = index === 0 || index === 1 || index === 14 || index === 15 || 
+                                    td.classList.contains('col-total') || td.classList.contains('col-estado');
+
+            if (esColumnaDorada) {
+                td.style.setProperty('color', '#d4af37', 'important');
+                const internosDorado = td.querySelectorAll('*');
+                internosDorado.forEach(el => el.style.setProperty('color', '#d4af37', 'important'));
+            } 
+            else {
+                td.style.setProperty('color', '#ffffff', 'important');
+                const internosBlanco = td.querySelectorAll('*');
+                internosBlanco.forEach(el => el.style.setProperty('color', '#ffffff', 'important'));
+            }
+        });
+    });
+
+    // 6. Generar y exportar con html2pdf
     setTimeout(() => {
         const elemento = document.getElementById('elementoEstadoCuentaAImprimir');
-        const opt = {
-            margin: [5, 5, 10, 5],
-            filename: `ESTADO_DE_CUENTA_${docNom.replace(/\s+/g, '_')}_2026.pdf`,
-            image: { type: 'jpeg', quality: 1.0 },
+        if (typeof html2pdf === "undefined") {
+            alert("La librería html2pdf no está cargada.");
+            return;
+        }
+
+        const config = {
+            margin: [8, 5, 8, 5],
+            filename: `ESTADO_DE_CUENTA_${nomDoc.replace(/\s+/g, '_')}_2026.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, logging: false, useCORS: true, backgroundColor: '#ffffff' },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
         };
 
-        html2pdf().set(opt).from(elemento).save().then(() => {
+        html2pdf().set(config).from(elemento).save().then(() => {
             contenedor.innerHTML = "";
+            contenedor.style.display = "none";
         }).catch(err => {
-            console.error("Error al generar PDF Docente:", err);
+            console.error("Error al generar PDF:", err);
             contenedor.innerHTML = "";
+            contenedor.style.display = "none";
         });
-    }, 400);
+    }, 300);
 };
+// ==========================================
+// DESCARGAR PDF ESTADO DE CUENTA DOCENTE
+// ==========================================
+
+
 
 // Exposición global estricta
 window.renderizarNoticias = window.renderizarNoticias;

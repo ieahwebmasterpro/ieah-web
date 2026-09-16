@@ -120,8 +120,6 @@
             </div>
         </section>
 
-
-
         <!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
         <section class="seccion-modulo activa" id="sec-docente-bienvenida">
             <h3 class="seccion-titulo" id="mensajeBienvenidaDocente">
@@ -132,7 +130,6 @@
             </p>
 
             <!-- Botonera Fija Superior Docente -->
-            <!-- DENTRO DE sec-docente-bienvenida -->
             <div class="dash-botonera-bienvenida">
                 <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-matriz-docente', this)">
                     📋 Estado de Cuenta
@@ -143,68 +140,58 @@
                 <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-noticias', this)">
                     📰 Noticias y Eventos
                 </button>
-                <button class="dash-btn-fijo" type="button" onclick="avegarDocente('formatos.html', this)">
+                <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-formatos', this)">
                     📁 Formatos Institucionales
                 </button>
-                
             </div>
 
-            <!-- Contenedor dinámico desplegable para el Docente -->
+            <!-- Contenedor dinámico despejado -->
             <div class="contenedor-subvista" id="subvista-docente" style="margin-top: 15px;"></div>
         </section>
 
-        <!-- MÓDULO ESTADO DE CUENTA (MATRIZ INDIVIDUAL DOCENTE) -->
-        <div id="sec-matriz-docente" class="seccion-modulo" style="display: none;">
-    <div class="card-panel">
-        <div class="contenedor-acciones-docente" style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
-            <button onclick="descargarEstadoCuentaDocentePDF()" class="btn-descargar-pdf">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    style="margin-right: 8px;">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Descargar Estado de Cuenta (PDF)
-            </button>
-        </div>
-
-        <h3>📋 Estado de Cuenta (Matriz de Pagos)</h3>
-        <p>A continuación se muestra el estado detallado de sus cuotas y aportes por mes:</p>
-
-        <div class="table-responsive">
-            <table id="tablaMatrizDocente" class="tabla-general" style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #1b5e20 !important; color: #ffffff !important;">
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Identificación</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Nombre</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Enero</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Febrero</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Marzo</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Abril</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Mayo</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Junio</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Julio</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Agosto</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Septiembre</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Octubre</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Noviembre</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Diciembre</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Total Pagado</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Estado</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente a la Fecha</th>
-                        <th style="background-color: #1b5e20 !important; color: #ffffff !important; text-align: center; border: 0.1px solid #d1d5db; padding: 6px;">Saldo Pendiente en el Año</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoMatrizDocente">
-                    <tr>
-                        <td colspan="18" style="text-align:center; padding: 15px;">Cargando estado de cuenta...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- MÓDULO ESTADO DE CUENTA (MATRIZ INDIVIDUAL DOCENTE) CON ESTILOS IDÉNTICOS A SUPERADMIN -->
+       <!-- MÓDULO ESTADO DE CUENTA (MATRIZ INDIVIDUAL DOCENTE) -->
+<section id="sec-matriz-docente" class="seccion-modulo" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 class="seccion-titulo" style="margin: 0;">📋 Mi Estado de Cuenta (Matriz de Pagos)</h3>
+        <button onclick="descargarEstadoCuentaDocentePDF()" class="btn-descargar-comprobante">
+            📄 Descargar Estado de Cuenta (PDF)
+        </button>
     </div>
-</div>
+
+    <!-- CONTENEDOR UNIFICADO -->
+    <div class="tabla-matriz-contenedor" id="contenidoDinamico">
+        <table class="tabla-matriz" id="tablaMatrizDocente" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th class="col-identificacion">Identificación</th>
+                    <th class="col-nombre">Nombre</th>
+                    <th>Enero</th>
+                    <th>Febrero</th>
+                    <th>Marzo</th>
+                    <th>Abril</th>
+                    <th>Mayo</th>
+                    <th>Junio</th>
+                    <th>Julio</th>
+                    <th>Agosto</th>
+                    <th>Septiembre</th>
+                    <th>Octubre</th>
+                    <th>Noviembre</th>
+                    <th>Diciembre</th>
+                    <th class="col-total">Total Pagado</th>
+                    <th class="col-estado">Estado</th>
+                    <th>Saldo Pendiente Fecha</th>
+                    <th>Saldo Pendiente Año</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoMatrizDocente">
+                <tr>
+                    <td colspan="18" style="text-align:center; padding: 15px;">Cargando estado de cuenta...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
 
         <!-- BOTONERA PERMANENTE DE ACCESO RÁPIDO (BIENESTAR / SUPERADMIN) -->
         <div class="dash-botonera-global">
@@ -465,7 +452,7 @@
             </div>
         </section>
 
-        <!-- SECCIÓN: MATRIZ DE PAGOS -->
+        <!-- SECCIÓN: MATRIZ DE PAGOS (SUPERADMIN / GENERAL) -->
         <section class="seccion-modulo" id="sec-matriz">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 class="seccion-titulo" style="margin: 0;">Matriz Anual de Recaudos por Docente</h3>
@@ -543,7 +530,6 @@
         <section class="seccion-modulo" id="sec-usuarios">
             <h3 class="seccion-titulo">Administración de Usuarios del Sistema</h3>
 
-            <!-- AGREGADO id="contenedorFormUsuario" AQUÍ -->
             <div class="form-contenedor" id="contenedorFormUsuario">
                 <form id="formUsuario">
                     <input type="hidden" id="usrDocId">

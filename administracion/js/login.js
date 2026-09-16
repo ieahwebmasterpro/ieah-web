@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjZtbtNDCIQAh9OIQZ6bzMCX0QLQQQHe8",
@@ -13,10 +14,25 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app); // Inicialización de Firestore
 
 // Redirección si ya inició sesión
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (user) {
+        if (user.email) {
+            localStorage.setItem('correoDocenteLogueado', user.email.toLowerCase().trim());
+        }
+        
+        // Cargar también el documento si la sesión ya estaba activa
+        try {
+            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+            if (userDoc.exists() && userDoc.data().documento) {
+                localStorage.setItem('documentoDocenteLogueado', userDoc.data().documento.toString().trim());
+            }
+        } catch (e) {
+            console.error("Error al obtener documento en recarga:", e);
+        }
+
         window.location.href = "panel.html";
     }
 });
@@ -63,10 +79,17 @@ if (formLogin) {
                 return;
             }
 
+            // 3. Guardar el correo y el documento/cédula en localStorage justo antes de redirigir
+            localStorage.setItem('correoDocenteLogueado', correo.toLowerCase().trim());
+            
+            if (data && data.documento) {
+                localStorage.setItem('documentoDocenteLogueado', data.documento.toString().trim());
+            }
+
             // Si está activo, redirige al panel
             window.location.href = "panel.html";
 
-   } catch (error) {
+        } catch (error) {
             btnIngresar.disabled = false;
             btnIngresar.innerText = "Ingresar al Sistema";
             lblError.style.display = 'block';
