@@ -94,31 +94,36 @@
         </header>
 
         <!-- TARJETAS ESTADÍSTICAS (KPIs - INGRESO, EGRESO Y SALDO ACTUAL) -->
-        <section class="grid-stats" id="tarjetasEstadisticas">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <h4>Total Ingresos Recaudados</h4>
-                    <span class="stat-icon">💵</span>
-                </div>
-                <div class="monto" id="totalIngresos">$0</div>
-            </div>
+        <!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
+<section class="seccion-modulo activa" id="sec-docente-bienvenida">
+    <div class="bienvenida-box" style="background: var(--bg-tarjeta, #1e293b); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <h3 class="seccion-titulo" id="mensajeBienvenidaDocente" style="margin-top: 0;">
+            👋 Hola Profe, bienvenid@ a la Plataforma Institucional
+        </h3>
+        <p style="color: var(--texto-secundario); margin-bottom: 20px;">
+            Desde este panel podrás consultar tu estado de cuenta, tickets de pago y publicar noticias oficiales.
+        </p>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <h4>Total Egresos Registrados</h4>
-                    <span class="stat-icon">💸</span>
-                </div>
-                <div class="monto" id="totalEgresos" style="color: var(--rojo-alerta);">$0</div>
-            </div>
+        <!-- Botonera Fija Superior Docente (AHORA DENTRO DEL CONTENEDOR) -->
+        <div class="dash-botonera-bienvenida" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-matriz-docente', this)">
+                📋 Estado de Cuenta
+            </button>
+            <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-mis-comprobantes', this)">
+                📊 Comprobantes de Pago
+            </button>
+            <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-noticias', this)">
+                📰 Noticias y Eventos
+            </button>
+            <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-formatos', this)">
+                📁 Formatos Institucionales
+            </button>
+        </div>
+    </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <h4>Saldo Actual en Caja</h4>
-                    <span class="stat-icon">🏦</span>
-                </div>
-                <div class="monto" id="saldoActual" style="color: var(--esmeralda-brillante);">$0</div>
-            </div>
-        </section>
+    <!-- Contenedor dinámico despejado -->
+    <div class="contenedor-subvista" id="subvista-docente" style="margin-top: 15px;"></div>
+</section>
 
         <!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
         <section class="seccion-modulo activa" id="sec-docente-bienvenida">

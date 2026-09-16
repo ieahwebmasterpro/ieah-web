@@ -379,11 +379,11 @@ window.consultarReporteIndividualDocente = async function () {
         const fechaHoy = new Date().toLocaleDateString('es-CO') + " " + new Date().toLocaleTimeString('es-CO');
 
         contenedorEstilos.innerHTML = `
-            <div style="background: black; padding: 20px; border-radius: 8px; border: 1px solid #e3e6f0; margin-bottom: 20px; text-align: center;">
+            <div style="background: black; padding: 20px; border-radius: 8px; border: 1px solid transparent; margin-bottom: 20px; text-align: center;">
                 <h3 style="color: #28a745; font-weight: bold; margin-bottom: 2px;">INSTITUCION EDUCATIVA ALTO HORIZONTE</h3>
-                <h5 style="color: #FFD700; font-weight: bold; margin-bottom: 10px;">GRUPO BIENESTAR 2026 - Estado de Cuenta Individual</h5>
-                <div style="background: transparent; padding: 8px; border-radius: 5px; font-size: 14px; font-weight: bold; margin-bottom: 15px; border: 1px solid #e3e6f0;">
-                    DOCENTE: <span style="color: #2e59d9;">${nomDoc}</span> | FECHA/HORA: <span style="color: #858796;">${fechaHoy}</span>
+                <h5 style="color: #e3e6f0; font-weight: bold; margin-bottom: 10px;">GRUPO BIENESTAR 2026 - Estado de Cuenta Individual</h5>
+                <div style="background: transparent; padding: 8px; border-radius: 5px; font-size: 14px; font-weight: bold; margin-bottom: 15px; border: 1px solid transparent;">
+                    DOCENTE: <span style="color: #FFD700;">${nomDoc}</span> | FECHA/HORA: <span style="color: #858796;">${fechaHoy}</span>
                 </div>
                 
                 <div style="display: flex; justify-content: center; gap: 20px; font-size: 13px; font-weight: 600;">

@@ -1208,3 +1208,28 @@ table#tablaMatriz td.col-estado,
     font-weight: bold !important;
     text-align: center !important;
 }
+
+/* ===================================================
+  /* ===================================================
+   REGLAS ANTI-FLICKER
+   =================================================== */
+
+/* Ocultar elementos condicionales del menú lateral por defecto */
+.solo-docente,
+.ver-bienestar,
+.solo-superadmin {
+    display: none !important;
+}
+
+/* Ocultar la botonera global de admin/bienestar por defecto */
+.dash-botonera-global {
+    display: none !important;
+}
+
+/* Ocultar secciones exclusivas por defecto */
+#sec-docente-bienvenida,
+#sec-bienestar-bienvenida,
+#sec-superadmin-bienvenida,
+#tarjetasEstadisticas {
+    display: none;
+}
