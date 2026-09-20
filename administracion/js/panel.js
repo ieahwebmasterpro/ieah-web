@@ -124,15 +124,16 @@ window.mostrarSeccion = async function (seccion, elemento) {
         s.classList.remove('activa');
     });
 
-    // 2. Mapear la sección a mostrar
+    // 2. Mapear la sección a mostrar con los IDs exactos del HTML
     const mapaSecciones = {
         'docentes': 'sec-docentes',
         'pagos': 'sec-contabilidad',
         'contabilidad': 'sec-contabilidad',
         'egresos': 'sec-egresos',
         'usuarios': 'sec-usuarios',
-        'mensajes': 'sec-mensajes',
-        'buzon': 'sec-mensajes',
+        'mensajes': 'sec-buzon',      // <-- Corregido para apuntar a #sec-buzon
+        'buzon': 'sec-buzon',         // <-- Corregido para apuntar a #sec-buzon
+        'noticias': 'sec-noticias',   // <-- Agregado para el módulo de noticias
         'matriz': 'sec-matriz',
         'inicio': usuarioRolActual === 'bienestar' ? 'sec-bienestar-bienvenida' : 'sec-superadmin-bienvenida'
     };
@@ -144,6 +145,8 @@ window.mostrarSeccion = async function (seccion, elemento) {
     if (targetEl) {
         targetEl.style.display = 'block';
         targetEl.classList.add('activa');
+    } else {
+        console.warn(`No se encontró la sección HTML con el ID: ${targetId}`);
     }
 
     // 4. Renderizado asíncrono seguro
@@ -153,7 +156,15 @@ window.mostrarSeccion = async function (seccion, elemento) {
             if ((seccion === 'pagos' || seccion === 'contabilidad') && typeof renderizarPagos === 'function') await renderizarPagos();
             if (seccion === 'egresos' && typeof renderizarEgresos === 'function') await renderizarEgresos();
             if (seccion === 'usuarios' && typeof renderizarUsuarios === 'function') await renderizarUsuarios();
-            if ((seccion === 'mensajes' || seccion === 'buzon') && typeof cargarMensajes === 'function') await cargarMensajes();
+            
+            // Cargar Noticias
+            if (seccion === 'noticias' && typeof renderizarNoticias === 'function') await renderizarNoticias();
+
+            // Cargar Buzón / Mensajes (Soporta ambos nombres de función si difieren)
+            if (seccion === 'mensajes' || seccion === 'buzon') {
+                if (typeof renderizarBuzon === 'function') await renderizarBuzon();
+                else if (typeof cargarMensajes === 'function') await cargarMensajes();
+            }
         } catch (e) {
             console.error("Error al cargar la vista:", e);
         }
@@ -1249,28 +1260,59 @@ window.eliminarUsuario = async function (idDoc) {
 };
 
 window.cargarMensajes = async function () {
-    if (usuarioRolActual !== 'superadmin') return;
+    const tabla = document.getElementById('cuerpoTablaBuzon');
+    if (!tabla) return;
+
+    // Validación flexible de rol para evitar bloqueos por tiempo de carga
+    if (usuarioRolActual && usuarioRolActual !== 'superadmin') {
+        tabla.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Acceso restringido a administradores.</td></tr>";
+        return;
+    }
+
     try {
         const querySnapshot = await getDocs(collection(db, "mensajes"));
-        const tabla = document.getElementById('cuerpoTablaBuzon');
-        if (!tabla) return;
         tabla.innerHTML = "";
 
         querySnapshot.forEach((docSnap) => {
             const m = docSnap.data();
-            tabla.innerHTML += `
-                <tr>
-                    <td>${m.nombre || ''}</td>
-                    <td>${m.correo || ''}</td>
-                    <td>${m.contenido || ''}</td>
-                    <td class="col-accion">
-                        <button class="btn-del" onclick="window.eliminarMensaje('${docSnap.id}')">Eliminar</button>
-                    </td>
-                </tr>
+            const tr = document.createElement("tr");
+
+            // Evalúa el contenido del mensaje independientemente del nombre del campo en Firestore
+            const contenidoMensaje = m.contenido || m.mensaje || m.consulta || 'Sin texto';
+
+            tr.innerHTML = `
+                <td><strong>${m.nombre || m.remitente || 'Anónimo'}</strong></td>
+                <td>${m.correo || 'Sin correo'}</td>
+                <td>${contenidoMensaje}</td>
+                <td class="col-accion" style="text-align:center;">
+                    <button class="btn-del btn-eliminar-noticia" onclick="window.eliminarMensaje('${docSnap.id}')" style="background:#e53e3e; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">
+                        🗑️ Eliminar
+                    </button>
+                </td>
             `;
+            tabla.appendChild(tr);
         });
+
+        if (querySnapshot.empty) {
+            tabla.innerHTML = "<tr><td colspan='4' style='text-align:center; padding: 15px;'>No hay mensajes en el buzón.</td></tr>";
+        }
     } catch (error) {
-        console.error(error);
+        console.error("Error al cargar mensajes:", error);
+        tabla.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red;'>Error al cargar los mensajes. Revisa la consola.</td></tr>";
+    }
+};
+
+// Función para eliminar el mensaje de Firestore
+window.eliminarMensaje = async function (id) {
+    if (!confirm("¿Estás seguro de que deseas eliminar este mensaje?")) return;
+
+    try {
+        await deleteDoc(doc(db, "mensajes", id));
+        alert("Mensaje eliminado con éxito.");
+        await window.cargarMensajes(); // Recargar la tabla
+    } catch (error) {
+        console.error("Error al eliminar mensaje:", error);
+        alert("No se pudo eliminar el mensaje.");
     }
 };
 

@@ -46,34 +46,39 @@
 
 
                 <button class="menu-btn solo-docente" id="btnReporteDocente"
-                    onclick="consultarReporteIndividualDocente()">
+                    onclick="navegarDocente('sec-matriz-docente', this)">
                     📊 Mi Estado de Cuenta
                 </button>
                 <button class="menu-btn solo-docente" id="btnMisComprobantes"
-                    onclick="mostrarSeccion('mis-comprobantes', this)">
+                    onclick="navegarDocente('sec-mis-comprobantes', this)">
                     🧾 Mis Comprobantes
                 </button>
-                <a href="formatos.html" class="menu-btn solo-docente"
-                    style="text-decoration: none; display: flex; align-items: center; gap: 8px;">📁 Formatos
-                    Institucionales</a>
+                <button class="menu-btn solo-docente" id="btnNoticias" onclick="navegarDocente('sec-noticias', this)">
+                    📢 Noticias y Eventos
+                </button>
+                <a href="formatos.html" class="dash-btn-fijo solo-docente "
+                    style="text-decoration: none; color: aliceblue; display: inline-flex; align-items: center; justify-content: center;">
+                    📁 Formatos Institucionales
+                </a>
                 <button class="menu-btn ver-bienestar" id="btnDocentes" onclick="mostrarSeccion('docentes', this)">
                     👨‍🏫 Directorio Docentes
                 </button>
                 <button class="menu-btn ver-bienestar" id="btnContabilidad"
                     onclick="mostrarSeccion('contabilidad', this)">
-                    💰 Registrar Pagos
+                    💰 Pagos
                 </button>
                 <button class="menu-btn ver-bienestar" id="btnEgresos" onclick="mostrarSeccion('egresos', this)">
-                    📉 Registrar Egresos
+                    📉 Egresos
                 </button>
                 <button class="menu-btn ver-bienestar" id="btnMatriz" onclick="mostrarSeccion('matriz', this)">
                     🗓️ Matriz de Pagos
                 </button>
-                <button class="menu-btn solo-docente" id="btnNoticias" onclick="mostrarSeccion('noticias', this)">
-                    📢 Noticias y Eventos
-                </button>
                 <button class="menu-btn solo-superadmin" id="btnUsuarios" onclick="mostrarSeccion('usuarios', this)">
                     ⚙️ Gestión Usuarios
+                </button>
+                <button class="menu-btn solo-superadmin" id="btnNoticiasAdmin"
+                    onclick="mostrarSeccion('noticias', this)">
+                    📢 Noticias y Eventos
                 </button>
                 <button class="menu-btn solo-superadmin" id="btnBuzon" onclick="mostrarSeccion('buzon', this)">
                     📬 Buzón Mensajes
@@ -95,35 +100,38 @@
 
         <!-- TARJETAS ESTADÍSTICAS (KPIs - INGRESO, EGRESO Y SALDO ACTUAL) -->
         <!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
-<section class="seccion-modulo activa" id="sec-docente-bienvenida">
-    <div class="bienvenida-box" style="background: var(--bg-tarjeta, #1e293b); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-        <h3 class="seccion-titulo" id="mensajeBienvenidaDocente" style="margin-top: 0;">
-            👋 Hola Profe, bienvenid@ a la Plataforma Institucional
-        </h3>
-        <p style="color: var(--texto-secundario); margin-bottom: 20px;">
-            Desde este panel podrás consultar tu estado de cuenta, tickets de pago y publicar noticias oficiales.
-        </p>
+        <section class="seccion-modulo activa" id="sec-docente-bienvenida">
+            <div class="bienvenida-box"
+                style="background: var(--bg-tarjeta, #1e293b); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <h3 class="seccion-titulo" id="mensajeBienvenidaDocente" style="margin-top: 0;">
+                    👋 Hola Profe, bienvenid@ a la Plataforma Institucional
+                </h3>
+                <p style="color: var(--texto-secundario); margin-bottom: 20px;">
+                    Desde este panel podrás consultar tu estado de cuenta, tickets de pago y publicar noticias
+                    oficiales.
+                </p>
 
-        <!-- Botonera Fija Superior Docente (AHORA DENTRO DEL CONTENEDOR) -->
-        <div class="dash-botonera-bienvenida" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-matriz-docente', this)">
-                📋 Estado de Cuenta
-            </button>
-            <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-mis-comprobantes', this)">
-                📊 Comprobantes de Pago
-            </button>
-            <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-noticias', this)">
-                📰 Noticias y Eventos
-            </button>
-            <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-formatos', this)">
-                📁 Formatos Institucionales
-            </button>
-        </div>
-    </div>
+                <!-- Botonera Fija Superior Docente (AHORA DENTRO DEL CONTENEDOR) -->
+                <div class="dash-botonera-bienvenida" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-matriz-docente', this)">
+                        📋 Estado de Cuenta
+                    </button>
+                    <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-mis-comprobantes', this)">
+                        📊 Comprobantes de Pago
+                    </button>
+                    <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-noticias', this)">
+                        📰 Noticias y Eventos
+                    </button>
+                    <a href="formatos.html" class="dash-btn-fijo"
+                        style="text-decoration: none; color: aliceblue; display: inline-flex; align-items: center; justify-content: center;">
+                        📁 Formatos Institucionales
+                    </a>
+                </div>
+            </div>
 
-    <!-- Contenedor dinámico despejado -->
-    <div class="contenedor-subvista" id="subvista-docente" style="margin-top: 15px;"></div>
-</section>
+            <!-- Contenedor dinámico despejado -->
+            <div class="contenedor-subvista" id="subvista-docente" style="margin-top: 15px;"></div>
+        </section>
 
         <!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
         <section class="seccion-modulo activa" id="sec-docente-bienvenida">
@@ -155,74 +163,58 @@
         </section>
 
         <!-- MÓDULO ESTADO DE CUENTA (MATRIZ INDIVIDUAL DOCENTE) CON ESTILOS IDÉNTICOS A SUPERADMIN -->
-       <!-- MÓDULO ESTADO DE CUENTA (MATRIZ INDIVIDUAL DOCENTE) -->
-<section id="sec-matriz-docente" class="seccion-modulo" style="display: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 class="seccion-titulo" style="margin: 0;">📋 Mi Estado de Cuenta (Matriz de Pagos)</h3>
-        <button onclick="descargarEstadoCuentaDocentePDF()" class="btn-descargar-comprobante">
-            📄 Descargar Estado de Cuenta (PDF)
-        </button>
-    </div>
+        <!-- MÓDULO ESTADO DE CUENTA (MATRIZ INDIVIDUAL DOCENTE) -->
+        <section id="sec-matriz-docente" class="seccion-modulo" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 class="seccion-titulo" style="margin: 0;">📋 Mi Estado de Cuenta (Matriz de Pagos)</h3>
+                <button onclick="descargarEstadoCuentaDocentePDF()" class="btn-descargar-comprobante">
+                    📄 Descargar Estado de Cuenta (PDF)
+                </button>
+            </div>
 
-    <!-- CONTENEDOR UNIFICADO -->
-    <div class="tabla-matriz-contenedor" id="contenidoDinamico">
-        <table class="tabla-matriz" id="tablaMatrizDocente" style="width: 100%;">
-            <thead>
-                <tr>
-                    <th class="col-identificacion">Identificación</th>
-                    <th class="col-nombre">Nombre</th>
-                    <th>Enero</th>
-                    <th>Febrero</th>
-                    <th>Marzo</th>
-                    <th>Abril</th>
-                    <th>Mayo</th>
-                    <th>Junio</th>
-                    <th>Julio</th>
-                    <th>Agosto</th>
-                    <th>Septiembre</th>
-                    <th>Octubre</th>
-                    <th>Noviembre</th>
-                    <th>Diciembre</th>
-                    <th class="col-total">Total Pagado</th>
-                    <th class="col-estado">Estado</th>
-                    <th>Saldo Pendiente Fecha</th>
-                    <th>Saldo Pendiente Año</th>
-                </tr>
-            </thead>
-            <tbody id="cuerpoMatrizDocente">
-                <tr>
-                    <td colspan="18" style="text-align:center; padding: 15px;">Cargando estado de cuenta...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
+            <!-- CONTENEDOR UNIFICADO -->
+            <div class="tabla-matriz-contenedor" id="contenidoDinamico">
+                <table class="tabla-matriz" id="tablaMatrizDocente" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th class="col-identificacion">Identificación</th>
+                            <th class="col-nombre">Nombre</th>
+                            <th>Enero</th>
+                            <th>Febrero</th>
+                            <th>Marzo</th>
+                            <th>Abril</th>
+                            <th>Mayo</th>
+                            <th>Junio</th>
+                            <th>Julio</th>
+                            <th>Agosto</th>
+                            <th>Septiembre</th>
+                            <th>Octubre</th>
+                            <th>Noviembre</th>
+                            <th>Diciembre</th>
+                            <th class="col-total">Total Pagado</th>
+                            <th class="col-estado">Estado</th>
+                            <th>Saldo Pendiente Fecha</th>
+                            <th>Saldo Pendiente Año</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoMatrizDocente">
+                        <tr>
+                            <td colspan="18" style="text-align:center; padding: 15px;">Cargando estado de cuenta...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
 
         <!-- BOTONERA PERMANENTE DE ACCESO RÁPIDO (BIENESTAR / SUPERADMIN) -->
-        <div class="dash-botonera-global">
-            <button class="dash-btn-fijo btn-azul" type="button" onclick="mostrarSeccion('docentes', this)">
-                👥 Ver Docentes
-            </button>
-            <button class="dash-btn-fijo btn-verde" type="button" onclick="mostrarSeccion('pagos', this)">
-                💰 Ver Pagos
-            </button>
-            <button class="dash-btn-fijo btn-rojo" type="button" onclick="mostrarSeccion('egresos', this)">
-                💸 Ver Egresos
-            </button>
-            <button class="dash-btn-fijo btn-azul" type="button" onclick="mostrarSeccion('matriz', this)">
-                🗓️ Matriz de Pagos
-            </button>
-            <button class="dash-btn-fijo btn-morado solo-superadmin" type="button"
-                onclick="mostrarSeccion('usuarios', this)">
-                ⚙️ Usuarios
-            </button>
-            <button class="dash-btn-fijo btn-naranja solo-superadmin" type="button"
-                onclick="mostrarSeccion('mensajes', this)">
-                📬 Mensajes
-            </button>
-
-        </div>
-
+        <!-- SECCIÓN: INICIO / SUPERADMIN -->
+        <section class="seccion-modulo" id="sec-superadmin-bienvenida" style="display: none;">
+            <h3 class="seccion-titulo">👋 Panel de Administración General</h3>
+            <p style="color: var(--texto-secundario); margin-bottom: 20px;">
+                Acceso rápido a todos los módulos de gestión y configuración general del sistema.
+            </p>
+        </section>
         <!-- VISTAS INTERCAMBIABLES SEGUN EL ROL -->
         <div class="contenedor-secciones">
             <!-- SECCIÓN: INICIO / BIENESTAR -->
@@ -232,14 +224,35 @@
                     Acceso rápido a los módulos de consulta y supervisión institucional.
                 </p>
             </section>
+            <div class="dash-botonera-global">
 
-            <!-- SECCIÓN: INICIO / SUPERADMIN -->
-            <section class="seccion-modulo" id="sec-superadmin-bienvenida" style="display: none;">
-                <h3 class="seccion-titulo">👋 Panel de Administración General</h3>
-                <p style="color: var(--texto-secundario); margin-bottom: 20px;">
-                    Acceso rápido a todos los módulos de gestión y configuración general del sistema.
-                </p>
-            </section>
+
+                <button class="dash-btn-fijo btn-azul" type="button" onclick="mostrarSeccion('docentes', this)">
+                    👥 Ver Docentes
+                </button>
+                <button class="dash-btn-fijo btn-verde" type="button" onclick="mostrarSeccion('pagos', this)">
+                    💰 Ver Pagos
+                </button>
+                <button class="dash-btn-fijo btn-rojo" type="button" onclick="mostrarSeccion('egresos', this)">
+                    💸 Ver Egresos
+                </button>
+                <button class="dash-btn-fijo btn-azul" type="button" onclick="mostrarSeccion('matriz', this)">
+                    🗓️ Matriz de Pagos
+                </button>
+                <button class="dash-btn-fijo btn-morado solo-superadmin" type="button"
+                    onclick="mostrarSeccion('usuarios', this)">
+                    ⚙️ Usuarios
+                </button>
+                <button class="dash-btn-fijo btn-naranja solo-superadmin" type="button"
+                    onclick="mostrarSeccion('mensajes', this)">
+                    📬 Mensajes
+                </button>
+
+            </div>
+
+
+
+
         </div>
 
 
@@ -583,22 +596,44 @@
         </section>
 
         <!-- SECCIÓN: BUZÓN DE MENSAJES (SÓLO SUPERADMIN) -->
-        <section class="seccion-modulo" id="sec-buzon">
-            <h3 class="seccion-titulo">Buzón de Mensajes Recibidos</h3>
-            <div class="tabla-matriz-contenedor">
-                <table style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Remitente</th>
-                            <th>Correo</th>
-                            <th>Mensaje / Consulta</th>
-                            <th class="col-accion">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cuerpoTablaBuzon"></tbody>
-                </table>
-            </div>
-        </section>
+       <!-- SECCIÓN: BUZÓN DE MENSAJES (SÓLO SUPERADMIN) -->
+<section class="seccion-modulo" id="sec-buzon" style="display: none;">
+    <h3 class="seccion-titulo">Buzón de Mensajes Recibidos</h3>
+    <div class="tabla-matriz-contenedor">
+        <table style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Remitente</th>
+                    <th>Correo</th>
+                    <th>Mensaje / Consulta</th>
+                    <th class="col-accion" style="text-align: center;">Acción</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTablaBuzon">
+                <!-- Se llena dinámicamente desde JS -->
+            </tbody>
+        </table>
+    </div>
+</section>
+<section class="seccion-modulo" id="sec-buzon" style="display: none;">
+    <h3 class="seccion-titulo">Buzón de Mensajes Recibidos</h3>
+    <div class="tabla-matriz-contenedor">
+        <table style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Remitente</th>
+                    <th>Correo</th>
+                    <th>Mensaje / Consulta</th>
+                    <th class="col-accion" style="text-align: center;">Acción</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTablaBuzon">
+                <!-- panel.js generará las filas y el botón Eliminar -->
+            </tbody>
+        </table>
+    </div>
+</section>
     </main>
 
     <!-- Módulo de Javascript Principal -->
