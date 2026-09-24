@@ -1231,5 +1231,30 @@ table#tablaMatriz td.col-estado,
 #sec-bienestar-bienvenida,
 #sec-superadmin-bienvenida,
 #tarjetasEstadisticas {
-    display: none;
+    display: none !important;
+}
+
+/* Variantes de color para botones del dashboard */
+.dash-btn-fijo.btn-azul {
+    background-color: #2b6cb0 !important;
+    border-color: #2b6cb0 !important;
+    color: #ffffff !important;
+}
+
+.dash-btn-fijo.btn-verde {
+    background-color: #276749 !important;
+    border-color: #276749 !important;
+    color: #ffffff !important;
+}
+
+.dash-btn-fijo.btn-naranja {
+    background-color: #dd6b20 !important;
+    border-color: #dd6b20 !important;
+    color: #ffffff !important;
+}
+
+.dash-btn-fijo.btn-rojo {
+    background-color: #c53030 !important;
+    border-color: #c53030 !important;
+    color: #ffffff !important;
 }

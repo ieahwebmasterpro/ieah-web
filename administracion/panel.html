@@ -111,21 +111,37 @@
                     oficiales.
                 </p>
 
-                <!-- Botonera Fija Superior Docente (AHORA DENTRO DEL CONTENEDOR) -->
+                <!-- Botonera Fija Superior Docente -->
+                <!-- Botonera Fija Superior Docente -->
                 <div class="dash-botonera-bienvenida" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-matriz-docente', this)">
+
+                    <!-- 1. Azul -->
+                    <button class="dash-btn-fijo" type="button"
+                        style="background: #2b6cb0 !important; background-color: #2b6cb0 !important; border-color: #2b6cb0 !important; color: #ffffff !important;"
+                        onclick="navegarDocente('sec-matriz-docente', this)">
                         📋 Estado de Cuenta
                     </button>
-                    <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-mis-comprobantes', this)">
+
+                    <!-- 2. Verde -->
+                    <button class="dash-btn-fijo" type="button"
+                        style="background: #276749 !important; background-color: #276749 !important; border-color: #276749 !important; color: #ffffff !important;"
+                        onclick="navegarDocente('sec-mis-comprobantes', this)">
                         📊 Comprobantes de Pago
                     </button>
-                    <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-noticias', this)">
+
+                    <!-- 3. Naranja -->
+                    <button class="dash-btn-fijo" type="button"
+                        style="background: #dd6b20 !important; background-color: #dd6b20 !important; border-color: #dd6b20 !important; color: #ffffff !important;"
+                        onclick="navegarDocente('sec-noticias', this)">
                         📰 Noticias y Eventos
                     </button>
+
+                    <!-- 4. Rojo -->
                     <a href="formatos.html" class="dash-btn-fijo"
-                        style="text-decoration: none; color: aliceblue; display: inline-flex; align-items: center; justify-content: center;">
-                        📁 Formatos Institucionales
+                        style="background: #c53030 !important; background-color: #c53030 !important; border-color: #c53030 !important; text-decoration: none; color: #ffffff !important; display: inline-flex; align-items: center; justify-content: center;">📁
+                        Formatos Institucionales
                     </a>
+
                 </div>
             </div>
 
@@ -134,33 +150,7 @@
         </section>
 
         <!-- SECCIÓN: INICIO / BIENVENIDA DOCENTE -->
-        <section class="seccion-modulo activa" id="sec-docente-bienvenida">
-            <h3 class="seccion-titulo" id="mensajeBienvenidaDocente">
-                👋 Hola Profe, bienvenid@ a la Plataforma Institucional
-            </h3>
-            <p style="color: var(--texto-secundario); margin-bottom: 15px;">
-                Desde este panel podrás consultar tu estado de cuenta, tickets de pago y publicar noticias oficiales.
-            </p>
 
-            <!-- Botonera Fija Superior Docente -->
-            <div class="dash-botonera-bienvenida">
-                <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-matriz-docente', this)">
-                    📋 Estado de Cuenta
-                </button>
-                <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-mis-comprobantes', this)">
-                    📊 Comprobantes de Pago
-                </button>
-                <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-noticias', this)">
-                    📰 Noticias y Eventos
-                </button>
-                <button class="dash-btn-fijo" type="button" onclick="navegarDocente('sec-formatos', this)">
-                    📁 Formatos Institucionales
-                </button>
-            </div>
-
-            <!-- Contenedor dinámico despejado -->
-            <div class="contenedor-subvista" id="subvista-docente" style="margin-top: 15px;"></div>
-        </section>
 
         <!-- MÓDULO ESTADO DE CUENTA (MATRIZ INDIVIDUAL DOCENTE) CON ESTILOS IDÉNTICOS A SUPERADMIN -->
         <!-- MÓDULO ESTADO DE CUENTA (MATRIZ INDIVIDUAL DOCENTE) -->
@@ -242,6 +232,10 @@
                 <button class="dash-btn-fijo btn-morado solo-superadmin" type="button"
                     onclick="mostrarSeccion('usuarios', this)">
                     ⚙️ Usuarios
+                </button>
+                <button class="dash-btn-fijo btn-verde-claro solo-superadmin" id="btnNoticiasAdmin"
+                    onclick="mostrarSeccion('noticias', this)">
+                    📢 Noticias y Eventos
                 </button>
                 <button class="dash-btn-fijo btn-naranja solo-superadmin" type="button"
                     onclick="mostrarSeccion('mensajes', this)">
@@ -498,6 +492,27 @@
                 <form id="formNoticia">
                     <div class="form-grid">
                         <div class="grupo col-span-2">
+                            <label>Fecha y Hora Límite de Publicación (Opcional)</label>
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <!-- Selector con Calendario -->
+                                <input type="date" id="noticiaFechaExpiracion" style="flex: 1; min-width: 150px;">
+
+                                <!-- Desplegable de Horas -->
+                                <select id="noticiaHoraExpiracion" style="flex: 1; min-width: 130px;">
+                                    <option value="23:59">23:59 (Fin del día)</option>
+                                    <option value="08:00">08:00 AM</option>
+                                    <option value="12:00">12:00 PM (Mediodía)</option>
+                                    <option value="14:00">02:00 PM</option>
+                                    <option value="18:00">06:00 PM</option>
+                                    <option value="20:00">08:00 PM</option>
+                                </select>
+                            </div>
+                            <small style="color: #718096; display: block; margin-top: 4px;">
+                                Selecciona la fecha en el calendario y la hora en que la noticia se eliminará
+                                automáticamente.
+                            </small>
+                        </div>
+                        <div class="grupo col-span-2">
                             <label>Título de la Noticia / Evento</label>
                             <input type="text" id="noticiaTitulo" required
                                 placeholder="Ej: Celebración Día del Docente">
@@ -596,44 +611,44 @@
         </section>
 
         <!-- SECCIÓN: BUZÓN DE MENSAJES (SÓLO SUPERADMIN) -->
-       <!-- SECCIÓN: BUZÓN DE MENSAJES (SÓLO SUPERADMIN) -->
-<section class="seccion-modulo" id="sec-buzon" style="display: none;">
-    <h3 class="seccion-titulo">Buzón de Mensajes Recibidos</h3>
-    <div class="tabla-matriz-contenedor">
-        <table style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>Remitente</th>
-                    <th>Correo</th>
-                    <th>Mensaje / Consulta</th>
-                    <th class="col-accion" style="text-align: center;">Acción</th>
-                </tr>
-            </thead>
-            <tbody id="cuerpoTablaBuzon">
-                <!-- Se llena dinámicamente desde JS -->
-            </tbody>
-        </table>
-    </div>
-</section>
-<section class="seccion-modulo" id="sec-buzon" style="display: none;">
-    <h3 class="seccion-titulo">Buzón de Mensajes Recibidos</h3>
-    <div class="tabla-matriz-contenedor">
-        <table style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Remitente</th>
-                    <th>Correo</th>
-                    <th>Mensaje / Consulta</th>
-                    <th class="col-accion" style="text-align: center;">Acción</th>
-                </tr>
-            </thead>
-            <tbody id="cuerpoTablaBuzon">
-                <!-- panel.js generará las filas y el botón Eliminar -->
-            </tbody>
-        </table>
-    </div>
-</section>
+        <!-- SECCIÓN: BUZÓN DE MENSAJES (SÓLO SUPERADMIN) -->
+        <section class="seccion-modulo" id="sec-buzon" style="display: none;">
+            <h3 class="seccion-titulo">Buzón de Mensajes Recibidos</h3>
+            <div class="tabla-matriz-contenedor">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Remitente</th>
+                            <th>Correo</th>
+                            <th>Mensaje / Consulta</th>
+                            <th class="col-accion" style="text-align: center;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaBuzon">
+                        <!-- Se llena dinámicamente desde JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="seccion-modulo" id="sec-buzon" style="display: none;">
+            <h3 class="seccion-titulo">Buzón de Mensajes Recibidos</h3>
+            <div class="tabla-matriz-contenedor">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Remitente</th>
+                            <th>Correo</th>
+                            <th>Mensaje / Consulta</th>
+                            <th class="col-accion" style="text-align: center;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaBuzon">
+                        <!-- panel.js generará las filas y el botón Eliminar -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <!-- Módulo de Javascript Principal -->

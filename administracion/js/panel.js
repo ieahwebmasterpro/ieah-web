@@ -69,10 +69,10 @@ async function actualizarResumenFinanciero() {
 
         // 1. Total Ingresos = Suma de lo recaudado en cuotas de docentes
         const totalIngresos = pagosCache.reduce((sum, p) => sum + (Number(p.totalPagar) || 0), 0);
-        
+
         // 2. Total Egresos = Suma de los gastos registrados
         const totalEgresos = egresosCache.reduce((sum, e) => sum + (Number(e.valor) || 0), 0);
-        
+
         // 3. Saldo Actual = Ingresos menos Egresos
         const saldoActual = totalIngresos - totalEgresos;
 
@@ -156,7 +156,7 @@ window.mostrarSeccion = async function (seccion, elemento) {
             if ((seccion === 'pagos' || seccion === 'contabilidad') && typeof renderizarPagos === 'function') await renderizarPagos();
             if (seccion === 'egresos' && typeof renderizarEgresos === 'function') await renderizarEgresos();
             if (seccion === 'usuarios' && typeof renderizarUsuarios === 'function') await renderizarUsuarios();
-            
+
             // Cargar Noticias
             if (seccion === 'noticias' && typeof renderizarNoticias === 'function') await renderizarNoticias();
 
@@ -179,8 +179,8 @@ window.consultarReporteIndividualDocente = async function () {
         await window.obtenerPagos();
     }
 
-    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual) 
-        ? usuarioDocenteActual 
+    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual)
+        ? usuarioDocenteActual
         : (window.usuarioActual || JSON.parse(sessionStorage.getItem('usuario') || sessionStorage.getItem('user') || '{}'));
 
     const docID = String(usuarioSesion?.documento || usuarioSesion?.cedula || usuarioSesion?.id || usuarioSesion?.dni || "").trim();
@@ -229,7 +229,7 @@ window.consultarReporteIndividualDocente = async function () {
     let celdasMesesHTML = "";
 
     const MESES_LISTA = typeof MESES_ANIO !== 'undefined' ? MESES_ANIO : [
-        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
     ];
     const CUOTA = typeof VALOR_CUOTA_FIJA !== 'undefined' ? VALOR_CUOTA_FIJA : 35000;
@@ -258,8 +258,8 @@ window.consultarReporteIndividualDocente = async function () {
     const saldoPendienteAnio = (mesesPendientesFecha + mesesFaltantesAnio) * CUOTA;
     const estadoGeneral = mesesPendientesFecha === 0 ? "AL DIA" : "PENDIENTE";
 
-    const badgeEstado = estadoGeneral === 'AL DIA' 
-        ? `<span class="badge badge-exito" style="background-color: #2e7d32 !important; color: #ffffff !important; padding: 4px 8px; border-radius: 4px; font-weight: bold;">AL DIA</span>` 
+    const badgeEstado = estadoGeneral === 'AL DIA'
+        ? `<span class="badge badge-exito" style="background-color: #2e7d32 !important; color: #ffffff !important; padding: 4px 8px; border-radius: 4px; font-weight: bold;">AL DIA</span>`
         : `<span class="badge badge-alerta" style="background-color: #d32f2f !important; color: #ffffff !important; padding: 4px 8px; border-radius: 4px; font-weight: bold;">PENDIENTE</span>`;
 
     // 5. Inyectar HTML
@@ -293,8 +293,8 @@ window.consultarReporteIndividualDocente = async function () {
     }
 
     // 2. Obtener datos del docente en sesión
-    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual && usuarioDocenteActual.documento) 
-        ? usuarioDocenteActual 
+    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual && usuarioDocenteActual.documento)
+        ? usuarioDocenteActual
         : (window.usuarioActual || JSON.parse(sessionStorage.getItem('usuario') || sessionStorage.getItem('user') || '{}'));
 
     const docID = String(usuarioSesion?.documento || usuarioSesion?.cedula || usuarioSesion?.id || "").trim();
@@ -309,9 +309,9 @@ window.consultarReporteIndividualDocente = async function () {
         const pNom = limpiar(p.docente || p.nombre || p.nombreDocente);
         const pEmail = limpiar(p.correo || p.email);
 
-        return (docID !== "" && pDoc === docID) || 
-               (nomDocLimpio !== "" && (pNom.includes(nomDocLimpio) || nomDocLimpio.includes(pNom))) || 
-               (usuarioSesion?.email && pEmail === limpiar(usuarioSesion.email));
+        return (docID !== "" && pDoc === docID) ||
+            (nomDocLimpio !== "" && (pNom.includes(nomDocLimpio) || nomDocLimpio.includes(pNom))) ||
+            (usuarioSesion?.email && pEmail === limpiar(usuarioSesion.email));
     });
 
     let mesesPagados = [];
@@ -331,7 +331,7 @@ window.consultarReporteIndividualDocente = async function () {
     let celdasMesesHTML = "";
 
     const MESES_LISTA = typeof MESES_ANIO !== 'undefined' ? MESES_ANIO : [
-        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
     ];
     const CUOTA = typeof VALOR_CUOTA_FIJA !== 'undefined' ? VALOR_CUOTA_FIJA : 35000;
@@ -357,8 +357,8 @@ window.consultarReporteIndividualDocente = async function () {
     const saldoPendienteAnio = (mesesPendientesFecha + mesesFaltantesAnio) * CUOTA;
     const estadoGeneral = mesesPendientesFecha === 0 ? "AL DIA" : "PENDIENTE";
 
-    const badgeEstado = estadoGeneral === 'AL DIA' 
-        ? `<span class="badge" style="background-color: transparent!important; color: #fbf7f7 !important; padding: 5px 10px; border-radius: 4px; font-weight: bold;">AL DIA</span>` 
+    const badgeEstado = estadoGeneral === 'AL DIA'
+        ? `<span class="badge" style="background-color: transparent!important; color: #fbf7f7 !important; padding: 5px 10px; border-radius: 4px; font-weight: bold;">AL DIA</span>`
         : `<span class="badge" style="background-color: #dc3545 !important; color: #ffffff !important; padding: 5px 10px; border-radius: 4px; font-weight: bold;">PENDIENTE</span>`;
 
     const tbody = document.getElementById('cuerpoMatrizDocente');
@@ -418,14 +418,14 @@ onAuthStateChanged(auth, async (user) => {
 
     try {
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        
+
         // --- CAMBIO AQUÍ: Validación de usuario eliminado o inexistente ---
         const data = userDoc.exists() ? userDoc.data() : null;
-        const estaEliminado = !userDoc.exists() || 
-                              data.isDeleted === true || 
-                              data.eliminado === true || 
-                              data.activo === false || 
-                              data.estado === "inactivo";
+        const estaEliminado = !userDoc.exists() ||
+            data.isDeleted === true ||
+            data.eliminado === true ||
+            data.activo === false ||
+            data.estado === "inactivo";
 
         if (estaEliminado) {
             await signOut(auth);
@@ -441,7 +441,7 @@ onAuthStateChanged(auth, async (user) => {
         docentesCache = [];
         docentesSnap.forEach(d => docentesCache.push({ id: d.id, ...d.data() }));
 
-        const docenteMatch = docentesCache.find(d => 
+        const docenteMatch = docentesCache.find(d =>
             String(d.correo || '').toLowerCase().trim() === user.email.toLowerCase().trim() ||
             String(d.documento || '').trim() === String(usuarioDocenteActual.documento || '').trim() ||
             String(d.nombre || '').toLowerCase().trim() === String(usuarioDocenteActual.nombre || '').toLowerCase().trim()
@@ -454,7 +454,7 @@ onAuthStateChanged(auth, async (user) => {
 
         const lblNombre = document.getElementById('lblUsuarioNombre');
         if (lblNombre) lblNombre.innerText = usuarioDocenteActual.nombre || user.email;
-        
+
         const lblRol = document.getElementById('lblUsuarioRol');
         if (lblRol) lblRol.innerText = usuarioRolActual;
 
@@ -482,7 +482,7 @@ async function aplicarPermisosRol(rol) {
 
     const menuAdmin = document.getElementById('menuAdministrativo');
     const gridStats = document.getElementById('tarjetasEstadisticas');
-    
+
     // Referencia a la botonera global de administración
     const botoneraGlobal = document.querySelector('.dash-botonera-global');
 
@@ -492,7 +492,7 @@ async function aplicarPermisosRol(rol) {
     const secBienvenidaSuperadmin = document.getElementById('sec-superadmin-bienvenida');
 
     const btnInicioPanel = document.getElementById('inicio-panel');
-    
+
     // Control de visibilidad para elementos exclusivos de docente (.solo-docente)
     if (rolLimpio === "bienestar" || rolLimpio === "superadmin") {
         document.querySelectorAll('.solo-docente').forEach(el => el.style.setProperty('display', 'none', 'important'));
@@ -642,7 +642,7 @@ window.renderizarPagosDocente = async function () {
 
     tabla.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Cargando comprobantes...</td></tr>";
 
-try {
+    try {
         const querySnapshot = await getDocs(collection(db, "pagos"));
         pagosCache = [];
 
@@ -712,41 +712,58 @@ document.getElementById('formNoticia')?.addEventListener('submit', async (e) => 
     const descripcion = document.getElementById('noticiaDescripcion').value.trim();
     const contenidoCompleto = document.getElementById('noticiaContenidoCompleto')?.value.trim() || descripcion;
     const enlace = document.getElementById('noticiaEnlace')?.value.trim() || "";
+   // Captura segura de Fecha (Calendario) y Hora (Desplegable)
+        const elemFecha = document.getElementById('noticiaFechaExpiracion');
+        const elemHora = document.getElementById('noticiaHoraExpiracion');
 
-    try {
-        if (btnSubmit) btnSubmit.disabled = true;
+        const fechaInput = elemFecha ? elemFecha.value : "";
+        const horaInput = elemHora ? elemHora.value : "23:59";
 
-        let imagenDataUrl = "";
-        if (archivoImagen) {
-            imagenDataUrl = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-                reader.readAsDataURL(archivoImagen);
-            });
+        let fechaExpiracionFinal = null;
+        if (fechaInput) {
+            // Combina la fecha del calendario con la hora elegida
+            fechaExpiracionFinal = new Date(`${fechaInput}T${horaInput}`);
         }
 
-        const nuevaNoticia = {
-            titulo: titulo,
-            descripcion: descripcion,
-            contenidoCompleto: contenidoCompleto,
-            imagen: imagenDataUrl || "",
-            rutaLocal: archivoImagen ? "img/" + archivoImagen.name : "",
-            enlace: enlace,
-            fechaCreacion: Date.now()
-        };
+        try {
+            if (btnSubmit) btnSubmit.disabled = true;
 
-        await addDoc(collection(db, "noticias"), nuevaNoticia);
-        document.getElementById('formNoticia').reset();
-        await window.renderizarNoticias();
-        alert("¡Noticia o evento publicado exitosamente!");
+            let imagenDataUrl = "";
+            if (archivoImagen) {
+                imagenDataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                    reader.readAsDataURL(archivoImagen);
+                });
+            }
 
-    } catch (error) {
-        alert("Error al publicar la noticia: " + error.message);
-    } finally {
-        if (btnSubmit) btnSubmit.disabled = false;
-    }
-});
+            const nuevaNoticia = {
+                titulo: titulo,
+                descripcion: descripcion,
+                contenidoCompleto: contenidoCompleto,
+                imagen: imagenDataUrl || "",
+                rutaLocal: archivoImagen ? "img/" + archivoImagen.name : "",
+                enlace: enlace,
+                fechaCreacion: Date.now(),
+                fechaExpiracion: fechaExpiracionFinal
+            };
+
+            await addDoc(collection(db, "noticias"), nuevaNoticia);
+            document.getElementById('formNoticia').reset();
+            
+            if (typeof window.renderizarNoticias === 'function') {
+                await window.renderizarNoticias();
+            }
+            alert("¡Noticia o evento publicado exitosamente!");
+
+        } catch (error) {
+            console.error("Error al publicar la noticia:", error);
+            alert("Error al publicar la noticia: " + error.message);
+        } finally {
+            if (btnSubmit) btnSubmit.disabled = false;
+        }
+    });
 
 window.renderizarNoticias = async function () {
     const tabla = document.getElementById('cuerpoTablaNoticias');
@@ -756,25 +773,53 @@ window.renderizarNoticias = async function () {
         const querySnapshot = await getDocs(collection(db, "noticias"));
         tabla.innerHTML = "";
 
-        querySnapshot.forEach((docSnap) => {
+        const ahora = new Date();
+        let noticiasVisibles = 0;
+
+        for (const docSnap of querySnapshot.docs) {
             const n = docSnap.data();
+
+            // Convertir la fecha de expiración guardada en Firestore a objeto Date
+            let fechaExp = null;
+            if (n.fechaExpiracion) {
+                fechaExp = n.fechaExpiracion.toDate ? n.fechaExpiracion.toDate() : new Date(n.fechaExpiracion);
+            }
+
+            // EVALUACIÓN DE VENCIMIENTO: Si la fecha límite ya pasó, la eliminamos de Firestore
+            if (fechaExp && ahora >= fechaExp) {
+                try {
+                    await deleteDoc(doc(db, "noticias", docSnap.id));
+                    console.log(`Noticia expirada eliminada automáticamente: ${docSnap.id}`);
+                } catch (errBorro) {
+                    console.error("Error al autolimpiar noticia:", errBorro);
+                }
+                continue; // No renderizar esta fila en la tabla
+            }
+
+            // Si está vigente, sumamos al contador y creamos la fila HTML
+            noticiasVisibles++;
             const tr = document.createElement("tr");
 
             const btnAccion = (usuarioRolActual === 'superadmin')
-                ? `<button class="btn-del btn-eliminar-noticia" onclick="window.eliminarNoticia('${docSnap.id}')">Eliminar</button>`
+                ? `<button class="btn-del btn-eliminar-noticia" onclick="window.eliminarNoticia('${docSnap.id}')" style="background:#e53e3e; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Eliminar</button>`
                 : '<span style="color:#a0aec0;">Lectura</span>';
 
+            // Formatear fecha para mostrarla en la tabla si existe
+            const textoExpiracion = fechaExp
+                ? `<br><small style="color:#e53e3e;">Vence: ${fechaExp.toLocaleString()}</small>`
+                : '';
+
             tr.innerHTML = `
-                <td><strong>${n.titulo}</strong></td>
-                <td>${n.descripcion}</td>
+                <td><strong>${n.titulo || ''}</strong>${textoExpiracion}</td>
+                <td>${n.descripcion || ''}</td>
                 <td>${n.enlace ? `<a href="${n.enlace}" target="_blank">Ver enlace</a>` : 'Sin enlace'}</td>
                 <td class="col-accion" style="text-align:center;">${btnAccion}</td>
             `;
             tabla.appendChild(tr);
-        });
+        }
 
-        if (querySnapshot.empty) {
-            tabla.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay noticias publicadas.</td></tr>";
+        if (noticiasVisibles === 0) {
+            tabla.innerHTML = "<tr><td colspan='4' style='text-align:center; padding: 15px;'>No hay noticias vigentes publicadas.</td></tr>";
         }
     } catch (error) {
         console.error("Error al cargar noticias:", error);
@@ -994,7 +1039,7 @@ window.descargarEgresosPDF = async function () {
 // ----------------------------------------------------
 window.descargarTicketPDF = async function (id) {
     let pago = pagosCache.find(p => p.id === id);
-    
+
     if (!pago) {
         try {
             const docSnap = await getDoc(doc(db, "pagos", id));
@@ -1446,7 +1491,7 @@ window.eliminarPago = async function (idDoc) {
 window.renderizarMatrizPagos = async function () {
     const tbody = document.getElementById('cuerpoTablaMatriz');
     const thead = document.querySelector('#tablaMatriz thead') || document.querySelector('#sec-matriz table thead');
-    
+
     if (thead) {
         thead.innerHTML = `
             <tr style="background-color: #1b5e20 !important; color: #ffffff !important;">
@@ -1504,7 +1549,7 @@ window.renderizarMatrizPagos = async function () {
 
             MESES_ANIO.forEach((mesNombre, index) => {
                 const estaPagado = mesesPagados.some(m => String(m).toLowerCase().includes(mesNombre.toLowerCase()));
-                
+
                 if (estaPagado) {
                     totalPagadoDocente += VALOR_CUOTA_FIJA;
                     celdasMesesHTML += `<td class="celda-pagado" style="background-color: #2e7d32 !important; color: #ffffff !important; font-weight: bold; text-align: center; border: 0.1px solid #ffffff;">$${VALOR_CUOTA_FIJA.toLocaleString('es-CO')}</td>`;
@@ -1567,7 +1612,7 @@ window.descargarMatrizPDF = async function () {
                 [0, 1, 14, 15].forEach(index => {
                     if (celdas[index] && celdas[index].tagName === 'TD') {
                         celdas[index].setAttribute(
-                            'style', 
+                            'style',
                             'background-color: #1b5e20 !important; color: #ffffff !important; font-weight: bold !important; text-align: center; border: 0.1px solid #ffffff !important;'
                         );
                     }
@@ -1787,7 +1832,7 @@ document.getElementById('formPago')?.addEventListener('submit', async (e) => {
     } catch (error) {
         alert("Error al registrar el pago: " + error.message);
     }
-    
+
 });
 // Función global para mantener visibles los botones superiores tanto en PC como en móviles
 window.cargarSubContenido = async function (subseccion) {
@@ -1872,13 +1917,13 @@ window.navegarDocente = function (idSeccion, elementoBtn) {
 
     // 1. Ocultar todos los submódulos dinámicos del docente
     const modulosDocente = [
-        'sec-matriz-docente', 
-        'sec-mis-comprobantes', 
-        'sec-noticias', 
-        'sec-formatos', 
+        'sec-matriz-docente',
+        'sec-mis-comprobantes',
+        'sec-noticias',
+        'sec-formatos',
         'contenedorFormNoticia'
     ];
-    
+
     modulosDocente.forEach(id => {
         const mod = document.getElementById(id);
         if (mod) {
@@ -1938,8 +1983,8 @@ window.descargarEstadoCuentaDocentePDF = async function () {
     }
 
     // 2. Resolver datos del docente en sesión para el encabezado
-    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual && usuarioDocenteActual.documento) 
-        ? usuarioDocenteActual 
+    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual && usuarioDocenteActual.documento)
+        ? usuarioDocenteActual
         : (window.usuarioActual || JSON.parse(sessionStorage.getItem('usuario') || sessionStorage.getItem('user') || '{}'));
 
     const nomDoc = String(usuarioSesion?.nombre || usuarioSesion?.usuario || "DOCENTE").toUpperCase();
@@ -2040,14 +2085,14 @@ window.descargarEstadoCuentaDocentePDF = async function () {
             td.style.padding = "5px 3px";
 
             // Evaluamos si es Identificación (0), Nombre (1), Total Pagado (14) o Estado (15)
-            const esColumnaDorada = index === 0 || index === 1 || index === 14 || index === 15 || 
-                                    td.classList.contains('col-total') || td.classList.contains('col-estado');
+            const esColumnaDorada = index === 0 || index === 1 || index === 14 || index === 15 ||
+                td.classList.contains('col-total') || td.classList.contains('col-estado');
 
             if (esColumnaDorada) {
                 td.style.setProperty('color', '#d4af37', 'important');
                 const internosDorado = td.querySelectorAll('*');
                 internosDorado.forEach(el => el.style.setProperty('color', '#d4af37', 'important'));
-            } 
+            }
             else {
                 td.style.setProperty('color', '#ffffff', 'important');
                 const internosBlanco = td.querySelectorAll('*');
