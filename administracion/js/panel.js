@@ -418,21 +418,20 @@ onAuthStateChanged(auth, async (user) => {
 
     try {
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-
-        // --- CAMBIO AQUÍ: Validación de usuario eliminado o inexistente ---
         const data = userDoc.exists() ? userDoc.data() : null;
+
+        // Validación de usuario eliminado o inactivo
         const estaEliminado = !userDoc.exists() ||
-            data.isDeleted === true ||
-            data.eliminado === true ||
-            data.activo === false ||
-            data.estado === "inactivo";
+            data?.isDeleted === true ||
+            data?.eliminado === true ||
+            data?.activo === false ||
+            data?.estado === "inactivo";
 
         if (estaEliminado) {
             await signOut(auth);
             window.location.href = "login.html";
             return;
         }
-        // -----------------------------------------------------------------
 
         usuarioRolActual = (data.rol || "docente").toLowerCase().trim();
         usuarioDocenteActual = { uid: user.uid, email: user.email, ...data };
@@ -441,15 +440,42 @@ onAuthStateChanged(auth, async (user) => {
         docentesCache = [];
         docentesSnap.forEach(d => docentesCache.push({ id: d.id, ...d.data() }));
 
-        const docenteMatch = docentesCache.find(d =>
-            String(d.correo || '').toLowerCase().trim() === user.email.toLowerCase().trim() ||
-            String(d.documento || '').trim() === String(usuarioDocenteActual.documento || '').trim() ||
-            String(d.nombre || '').toLowerCase().trim() === String(usuarioDocenteActual.nombre || '').toLowerCase().trim()
-        );
+        // Función auxiliar para quitar tildes, símbolos y convertir a minúsculas
+        const limpiarTexto = (str) => String(str || '')
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+
+        // Extraer la cédula/documento aceptando 'documento' o 'clave'
+        const cedulaUsuario = String(usuarioDocenteActual.documento || usuarioDocenteActual.clave || '').trim();
+        const nombreUsuario = limpiarTexto(usuarioDocenteActual.nombre);
+        const correoUsuario = limpiarTexto(user.email);
+
+        // Búsqueda flexible e inteligente
+        const docenteMatch = docentesCache.find(d => {
+            const docDocente = String(d.documento || d.identificacion || d.telefono || '').trim();
+            const nombreDocente = limpiarTexto(d.nombre);
+            const correoDocente = limpiarTexto(d.correo || d.email);
+
+            // 1. Coincidencia directa por Cédula / Documento / Clave
+            if (cedulaUsuario && docDocente && cedulaUsuario === docDocente) return true;
+
+            // 2. Coincidencia por Correo
+            if (correoUsuario && correoDocente && correoUsuario === correoDocente) return true;
+
+            // 3. Coincidencia por Nombre (ignora tildes como María vs Maria)
+            if (nombreUsuario && nombreDocente && nombreUsuario === nombreDocente) return true;
+
+            return false;
+        });
 
         if (docenteMatch) {
-            usuarioDocenteActual.documento = docenteMatch.documento;
-            if (!usuarioDocenteActual.nombre) usuarioDocenteActual.nombre = docenteMatch.nombre;
+            usuarioDocenteActual.documento = docenteMatch.documento || docenteMatch.identificacion || cedulaUsuario;
+            usuarioDocenteActual.nombre = docenteMatch.nombre || usuarioDocenteActual.nombre;
+        } else {
+            // Asignación de respaldo si no encuentra coincidencia previa
+            if (!usuarioDocenteActual.documento) usuarioDocenteActual.documento = cedulaUsuario;
         }
 
         const lblNombre = document.getElementById('lblUsuarioNombre');
@@ -1976,19 +2002,21 @@ window.navegarDocente = function (idSeccion, elementoBtn) {
 
 window.descargarEstadoCuentaDocentePDF = async function () {
     // 1. Obtener la fila de datos calculada actualmente
-    const filaOriginal = document.getElementById('cuerpoMatrizDocente')?.innerHTML;
-    if (!filaOriginal) {
-        alert("No hay datos cargados para generar el PDF.");
+    const elemMatriz = document.getElementById('cuerpoMatrizDocente');
+    let filaOriginal = elemMatriz ? elemMatriz.innerHTML.trim() : "";
+
+    if (!filaOriginal || filaOriginal.includes("Cargando") || filaOriginal === "") {
+        alert("No hay datos cargados en la tabla para generar el PDF.");
         return;
     }
 
     // 2. Resolver datos del docente en sesión para el encabezado
-    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual && usuarioDocenteActual.documento)
+    const usuarioSesion = (typeof usuarioDocenteActual !== 'undefined' && usuarioDocenteActual && (usuarioDocenteActual.documento || usuarioDocenteActual.nombre))
         ? usuarioDocenteActual
         : (window.usuarioActual || JSON.parse(sessionStorage.getItem('usuario') || sessionStorage.getItem('user') || '{}'));
 
-    const nomDoc = String(usuarioSesion?.nombre || usuarioSesion?.usuario || "DOCENTE").toUpperCase();
-    const docID = String(usuarioSesion?.documento || usuarioSesion?.cedula || usuarioSesion?.id || "").trim();
+    const nomDoc = String(usuarioSesion?.nombre || usuarioSesion?.usuario || usuarioSesion?.email || "DOCENTE").toUpperCase();
+    const docID = String(usuarioSesion?.documento || usuarioSesion?.cedula || usuarioSesion?.clave || usuarioSesion?.id || "").trim();
     const fechaHoraStr = new Date().toLocaleDateString('es-CO') + " " + new Date().toLocaleTimeString('es-CO');
 
     // 3. Crear contenedor temporal exclusivo para el PDF
@@ -2011,13 +2039,13 @@ window.descargarEstadoCuentaDocentePDF = async function () {
                 <h3 style="margin: 0; font-size: 16px; font-weight: bold; color: #1b5e20;">INSTITUCION EDUCATIVA ALTO HORIZONTE</h3>
                 <h4 style="margin: 3px 0; font-size: 12px; font-weight: bold; color: #333333;">GRUPO BIENESTAR 2026 - Estado de Cuenta Individual</h4>
                 <!-- Contenedor Docente/Fecha TRANSPARENTE -->
-                <div style="background-color: transparent; border: none; padding: 6px; margin-top: 8px; font-weight: bold; font-size: 11px;">
+                <div style="background-color: transparent; border: none; padding: 6px; margin-top: 8px; font-weight: bold; font-size: 11px; color: #000000;">
                     DOCENTE: ${nomDoc} &nbsp;|&nbsp; FECHA/HORA: ${fechaHoraStr}
                 </div>
             </div>
 
             <!-- Bloque de Convenciones SIN BORDES -->
-            <div style="display: flex; justify-content: space-around; align-items: center; background-color: #ffffff; border: none; padding: 8px; margin-bottom: 15px; font-size: 10px; font-weight: bold;">
+            <div style="display: flex; justify-content: space-around; align-items: center; background-color: #ffffff; border: none; padding: 8px; margin-bottom: 15px; font-size: 10px; font-weight: bold; color: #000000;">
                 <div style="display: flex; align-items: center;">
                     <span style="width: 14px; height: 14px; background-color: #2e7d32; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> Meses Pagados
                 </div>
@@ -2074,7 +2102,7 @@ window.descargarEstadoCuentaDocentePDF = async function () {
         th.style.setProperty('vertical-align', 'middle', 'important');
     });
 
-    // 5. Mapeo de estilos para texto dorado y blanco
+    // 5. Corregir colores para que sean visibles sobre fondo blanco
     const filasPDF = contenedor.querySelectorAll('#cuerpoTablaPDF tr');
 
     filasPDF.forEach(fila => {
@@ -2084,19 +2112,22 @@ window.descargarEstadoCuentaDocentePDF = async function () {
             td.style.border = "0.2px solid #dcdcdc";
             td.style.padding = "5px 3px";
 
-            // Evaluamos si es Identificación (0), Nombre (1), Total Pagado (14) o Estado (15)
-            const esColumnaDorada = index === 0 || index === 1 || index === 14 || index === 15 ||
+            const esColumnaHighlight = index === 0 || index === 1 || index === 14 || index === 15 ||
                 td.classList.contains('col-total') || td.classList.contains('col-estado');
 
-            if (esColumnaDorada) {
-                td.style.setProperty('color', '#d4af37', 'important');
-                const internosDorado = td.querySelectorAll('*');
-                internosDorado.forEach(el => el.style.setProperty('color', '#d4af37', 'important'));
-            }
-            else {
-                td.style.setProperty('color', '#ffffff', 'important');
-                const internosBlanco = td.querySelectorAll('*');
-                internosBlanco.forEach(el => el.style.setProperty('color', '#ffffff', 'important'));
+            if (esColumnaHighlight) {
+                td.style.setProperty('color', '#b8860b', 'important'); // Dorado oscuro visible
+                const internos = td.querySelectorAll('*');
+                internos.forEach(el => el.style.setProperty('color', '#b8860b', 'important'));
+            } else {
+                // Si la celda NO tiene un color de fondo dinámico (como verde o rojo), usar texto negro
+                const tieneFondoPropio = td.style.backgroundColor && td.style.backgroundColor !== 'transparent' && td.style.backgroundColor !== 'rgb(255, 255, 255)';
+                
+                if (!tieneFondoPropio) {
+                    td.style.setProperty('color', '#000000', 'important');
+                    const internos = td.querySelectorAll('*');
+                    internos.forEach(el => el.style.setProperty('color', '#000000', 'important'));
+                }
             }
         });
     });
