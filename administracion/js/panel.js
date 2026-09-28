@@ -1159,8 +1159,8 @@ window.descargarTicketPDF = async function (id) {
                 <thead>
                     <tr style="background: transparent !important; color: #000000 !important; border-bottom: 1px dashed #000000 !important;">
                         <th style="text-align: center; width: 20%; font-weight: normal; padding: 5px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important;">Cant.</th>
-                        <th style="text-align: center; width: 50%; font-weight: normal; padding: 5px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important;">Precio</th>
-                        <th style="text-align: center; width: 30%; font-weight: normal; padding: 5px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important;">Total</th>
+                        <th style="text-align: center; width: 50%; font-weight: normal; padding: 5px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important;">Cuota</th>
+                        <th style="text-align: center; width: 30%; font-weight: normal; padding: 5px 0; background: transparent !important; color: #000000 !important; border: none !important; font-size: 12px !important; font-family: Arial, Helvetica, sans-serif !important;">Valor</th>
                     </tr>
                 </thead>
                 <tbody>
